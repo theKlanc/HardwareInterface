@@ -1,9 +1,13 @@
 #pragma once
-#include "core.h"
+#include <string>
 
 #define RGBA8(r, g, b, a) ((((a)&0xFF)<<24) | (((b)&0xFF)<<16) | (((g)&0xFF)<<8) | (((r)&0xFF)<<0))
 #define BIT(n) (1U<<(n))
 
+struct point2D {
+	int x = -1;
+	int y = -1;
+};
 
 namespace HardwareInterface {
 	typedef void* HITexture;
@@ -152,7 +156,7 @@ namespace HardwareInterface {
 	void setBackgroundColor(HIColor color);
 	HIFont loadFont(std::string path);
 	void freeFont(HIFont font);
-	void drawText(HIFont font, string text, int posX, int posY, int size, HIColor color);
+	void drawText(HIFont font, std::string text, int posX, int posY, int size, HIColor color);
 	HITexture loadPngFile(std::string path);
 	HITexture loadBmpFile(std::string path);
 	void drawTexture(HITexture texture, int posX, int posY);
@@ -191,10 +195,10 @@ namespace HardwareInterface {
 	void DSP_FlushDataCache(const void* address, unsigned int size);
 
 	//DEBUGGING
-	void debugPrint(string s);
+	void debugPrint(std::string s);
 	void debugPrint(int n);
 	void debugPrint(unsigned n);
-	void debugPrint(string s, int priority);
+	void debugPrint(std::string s, int priority);
 	void debugNewLine();
 
 	//GSP
@@ -219,5 +223,5 @@ namespace HI = HardwareInterface;
 
 struct textureName {
 	HI::HITexture texture = NULL;
-	string name = "";
+	std::string name = "";
 };
