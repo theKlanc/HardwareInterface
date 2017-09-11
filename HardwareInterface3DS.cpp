@@ -4,10 +4,10 @@
 #include <sf2d.h>
 #include <sftd.h>
 #include <sfil.h>
-#include "core.h"
 #include "HardwareInterface.h"
 #include <dirent.h>
 #include <functional>
+#include <fstream>
 
 #define DEBUG_PRIORITY 0
 
@@ -70,7 +70,7 @@ void HardwareInterface::freeFont(HIFont font)
 	sftd_free_font((sftd_font*)font);
 }
 
-void HardwareInterface::drawText(HIFont font, string text, int posX, int posY, int size, HIColor color)
+void HardwareInterface::drawText(HIFont font, std::string text, int posX, int posY, int size, HIColor color)
 {
 	if (((sftd_font*)font) != nullptr) sftd_draw_text((sftd_font*)font, posX, posY, color, size, text.c_str());
 }
@@ -238,12 +238,12 @@ void HI::DSP_FlushDataCache(const void* address, unsigned int size) {
 	::DSP_FlushDataCache(address, size);
 }
 
-void HardwareInterface::debugPrint(string s) {
-	cout << s;
+void HardwareInterface::debugPrint(std::string s) {
+	std::cout << s;
 }
 
-void HardwareInterface::debugPrint(string s, int priority) {
-	if (priority >= DEBUG_PRIORITY) cout << s;
+void HardwareInterface::debugPrint(std::string s, int priority) {
+	if (priority >= DEBUG_PRIORITY) std::cout << s;
 }
 
 void HI::gspWaitForEvent(HardwareInterface::GSPGPU_Event id, bool nextEvent) {
