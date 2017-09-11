@@ -165,6 +165,7 @@ namespace HardwareInterface {
 	void drawTextureRotate(HITexture texture, int posX, int posY, float angle);
 	void mergeTextures(HITexture originTexture, HITexture destinationTexture, short posX, short posY);
 	void drawRectangle(int posX, int posY, int width, int height, HIColor color);
+	void drawPixel(int posX, int posY, HIColor color) { HardwareInterface::drawRectangle(posX, posY, 1, 1, color); }
 	HITexture createTexture(int sizeX, int sizeY);
 	void freeTexture(HITexture texture);
 	void endFrame();
