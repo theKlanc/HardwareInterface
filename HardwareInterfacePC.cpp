@@ -1,7 +1,8 @@
 #include <future>
 #ifdef WIN32
+#include <string>
 #include <iostream>
-#include "core.h"
+#include <fstream>
 #include "HardwareInterface.h"	
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -59,7 +60,7 @@ void HardwareInterface::freeFont(HIFont font) {
 	delete (sf::Font*)font;
 }
 
-void HardwareInterface::drawText(HIFont font, string text, int posX, int posY, int size, HIColor color)
+void HardwareInterface::drawText(HIFont font, std::string text, int posX, int posY, int size, HIColor color)
 {
 	if (font != nullptr) {
 		sf::Text sftext;
@@ -73,7 +74,7 @@ void HardwareInterface::drawText(HIFont font, string text, int posX, int posY, i
 }
 
 inline bool exists_test(const std::string& name) {
-	ifstream f(name.c_str());
+	std::ifstream f(name.c_str());
 	return f.good();
 }
 HI::HITexture HI::loadPngFile(std::string path) {
@@ -270,19 +271,19 @@ void HI::dspChnWaveBufAdd(int id, HI::dspWaveBuf* buf) {
 void HI::DSP_FlushDataCache(const void* address, unsigned int size) {
 }
 
-void HardwareInterface::debugPrint(string s) {
+void HardwareInterface::debugPrint(std::string s) {
 	HardwareInterface::debugPrint(s, 1);
 }
 
-void HardwareInterface::debugPrint(string s, int priority) {
-	if (priority >= DEBUG_PRIORITY) cout << s;
+void HardwareInterface::debugPrint(std::string s, int priority) {
+	if (priority >= DEBUG_PRIORITY) std::cout << s;
 }
 
 void HI::gspWaitForEvent(HardwareInterface::GSPGPU_Event id, bool nextEvent) {
 }
 
 void HI::waitForVBlank() {
-	std::this_thread::sleep_for(16666ns);
+	//std::this_thread::sleep_for(16666ns); THIS IS BULLSHIT
 }
 
 bool HI::aptMainLoop() {
