@@ -1,6 +1,8 @@
-#include <future>
 #ifdef WIN32
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include <string>
+#include <future>
 #include <iostream>
 #include <fstream>
 #include "HardwareInterface.h"	
@@ -8,6 +10,7 @@
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
 #include <thread>
+
 #include <functional>
 
 #define DEBUG_PRIORITY 0
@@ -114,7 +117,7 @@ void HI::drawTextureRotate(HI::HITexture texture, int posX, int posY, float angl
 	if (texture != nullptr) {
 		sf::Sprite sprite;
 		sprite.setOrigin(8, 8);
-		sprite.setRotation(360 * angle / (2 * PI));
+		sprite.setRotation(360 * angle / (2 * M_PI));
 		sprite.setTexture(*(sf::Texture*)texture);
 		sprite.setPosition(posX, posY);
 		window->draw(sprite);
