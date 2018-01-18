@@ -144,7 +144,7 @@ void HI::drawRectangle(int posX, int posY, int width, int height, HI::HIColor co
 	window->draw(rectangle);
 }
 
-void drawPixel(int posX, int posY, HIColor color) {
+void drawPixel(int posX, int posY, HI::HIColor color) {
 	HardwareInterface::drawRectangle(posX, posY, 1, 1, color);
 }
 
