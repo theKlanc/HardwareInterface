@@ -14,11 +14,11 @@
 
 sf::RenderWindow* window;
 sf::Event* event;
+sf::Color backgroundColor;
 
 void HI::systemInit() {
 	event = new sf::Event;
 	window = new sf::RenderWindow(sf::VideoMode(1000, 1000), "Rogue3DS");
-	//HI::consoleInit();
 }
 
 void HI::systemFini() {
@@ -30,7 +30,7 @@ void HI::consoleInit() {
 void HI::consoleFini() {};
 
 void HI::startFrame(HI_SCREEN screen) {
-	window->clear();
+	window->clear(backgroundColor);
 }
 
 short HI::getRComponent(HIColor color) {
@@ -48,6 +48,7 @@ short HI::getAComponent(HIColor color) {
 }
 
 void HI::setBackgroundColor(HIColor color) {
+	backgroundColor = (sf::Color)color;
 }
 
 HardwareInterface::HIFont HardwareInterface::loadFont(std::string path) {
@@ -140,6 +141,10 @@ void HI::drawRectangle(int posX, int posY, int width, int height, HI::HIColor co
 	window->draw(rectangle);
 }
 
+void drawPixel(int posX, int posY, HIColor color) {
+	HardwareInterface::drawRectangle(posX, posY, 1, 1, color);
+}
+
 void HI::freeTexture(HITexture texture) {
 	texture = &sf::Texture();
 }
@@ -208,18 +213,19 @@ void HI::updateHID() {
 }
 
 int HI::getKeysUp() {
-	HI::HI_KEYS keys = HI::HI_KEY_B;
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) keys = (HI_KEYS)((int)keys | HI::HI_KEY_DOWN);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) keys = (HI_KEYS)((int)keys | HI::HI_KEY_A);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))keys = (HI_KEYS)((int)keys | HI::HI_KEY_LEFT);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))keys = (HI_KEYS)((int)keys | HI::HI_KEY_RIGHT);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))keys = (HI_KEYS)((int)keys | HI::HI_KEY_UP);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))keys = (HI_KEYS)((int)keys | HI::HI_KEY_START);
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Left))keys = (HI_KEYS)((int)keys | HI::HI_KEY_TOUCH);
+	HI::HI_KEYS keys = (HI_KEYS)0;
+	if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) keys = (HI_KEYS)((int)keys | HI::HI_KEY_DOWN);
+	if (!sf::Keyboard::isKeyPressed(sf::Keyboard::A)) keys = (HI_KEYS)((int)keys | HI::HI_KEY_A);
+	if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Left))keys = (HI_KEYS)((int)keys | HI::HI_KEY_LEFT);
+	if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Right))keys = (HI_KEYS)((int)keys | HI::HI_KEY_RIGHT);
+	if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Up))keys = (HI_KEYS)((int)keys | HI::HI_KEY_UP);
+	if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Space))keys = (HI_KEYS)((int)keys | HI::HI_KEY_START);
+	if (!sf::Keyboard::isKeyPressed(sf::Keyboard::B))keys = (HI_KEYS)((int)keys | HI::HI_KEY_B);
+	if (!sf::Mouse::isButtonPressed(sf::Mouse::Left))keys = (HI_KEYS)((int)keys | HI::HI_KEY_TOUCH);
 	return keys;
 }
 int HI::getKeysHeld() {
-	HI::HI_KEYS keys = HI::HI_KEY_B;
+	HI::HI_KEYS keys = (HI_KEYS)0;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) keys = (HI_KEYS)((int)keys | HI::HI_KEY_DOWN);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) keys = (HI_KEYS)((int)keys | HI::HI_KEY_A);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))keys = (HI_KEYS)((int)keys | HI::HI_KEY_LEFT);
@@ -230,7 +236,7 @@ int HI::getKeysHeld() {
 	return keys;
 }
 int HI::getKeysDown() {
-	HI::HI_KEYS keys = HI::HI_KEY_B;
+	HI::HI_KEYS keys = (HI_KEYS)0;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) keys = (HI_KEYS)((int)keys | HI::HI_KEY_DOWN);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) keys = (HI_KEYS)((int)keys | HI::HI_KEY_A);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))keys = (HI_KEYS)((int)keys | HI::HI_KEY_LEFT);
@@ -248,38 +254,12 @@ void HI::sleepThread(unsigned long ns) {	 //WIP
 	std::this_thread::sleep_for(std::chrono::nanoseconds(ns));
 }
 
-
-void* HI::linearAllocator(size_t size) {   //WIP
-	return ::malloc(size);
-}
-
-//Sound
-void HI::dspSetOutputMode(dspOutputMode mode) {
-}
-void HI::dspChnSetInterp(int id, HI::dspInterpType type) {
-}
-void HI::dspChnSetFormat(int id, unsigned short format) {
-}
-void HI::dspChnSetRate(int id, float rate) {
-}
-void HI::dspChnSetMix(int id, float mix[12]) {
-}
-void HI::dspChnWaveBufAdd(int id, HI::dspWaveBuf* buf) {
-}
-
-//??
-void HI::DSP_FlushDataCache(const void* address, unsigned int size) {
-}
-
 void HardwareInterface::debugPrint(std::string s) {
 	HardwareInterface::debugPrint(s, 1);
 }
 
 void HardwareInterface::debugPrint(std::string s, int priority) {
 	if (priority >= DEBUG_PRIORITY) std::cout << s;
-}
-
-void HI::gspWaitForEvent(HardwareInterface::GSPGPU_Event id, bool nextEvent) {
 }
 
 void HI::waitForVBlank() {

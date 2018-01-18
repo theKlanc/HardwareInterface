@@ -18,7 +18,6 @@ void HI::systemInit() {
 	ndspInit();
 	sf2d_init();
 	sftd_init();
-	//HI::consoleInit();
 }
 
 void HI::systemFini() {
@@ -31,7 +30,7 @@ void HI::systemFini() {
 }
 
 void HI::consoleInit() {
-	//::consoleInit(GFX_BOTTOM, nullptr);
+	::consoleInit(GFX_BOTTOM, nullptr);
 }
 
 void HI::consoleFini() {};
@@ -99,11 +98,14 @@ void HI::mergeTextures(HITexture origin, HITexture destination, short posX, shor
 	sf2d_texture *orig = (sf2d_texture*)origin;
 	sf2d_texture *dest = (sf2d_texture*)destination;
 	C3D_SafeTextureCopy((u32*)orig->tex.data, 16, (u32*)dest->tex.data, 16, orig->tex.size, 0);
-
 }
 
 void HI::drawRectangle(int posX, int posY, int width, int height, HI::HIColor color) {
 	sf2d_draw_rectangle(posX, posY, width, height, color);
+}
+
+void drawPixel(int posX, int posY, HIColor color) {
+	HardwareInterface::drawRectangle(posX, posY, 1, 1, color);
 }
 
 void HI::freeTexture(HITexture texture) {
@@ -208,36 +210,6 @@ void HI::sleepThread(unsigned long ns) {
 	svcSleepThread(ns);
 }
 
-
-void* HI::linearAllocator(size_t size) {
-	return linearAlloc(size);
-}
-
-//Sound
-void HI::dspSetOutputMode(dspOutputMode mode) {
-	ndspSetOutputMode((ndspOutputMode)mode);
-}
-void HI::dspChnSetInterp(int id, HI::dspInterpType type) {
-	ndspChnSetInterp(id, (ndspInterpType)type);
-}
-void HI::dspChnSetFormat(int id, unsigned short format) {
-	ndspChnSetFormat(id, format);
-}
-void HI::dspChnSetRate(int id, float rate) {
-	ndspChnSetRate(id, rate);
-}
-void HI::dspChnSetMix(int id, float mix[12]) {
-	ndspChnSetMix(id, mix);
-}
-void HI::dspChnWaveBufAdd(int id, HI::dspWaveBuf* buf) {
-	ndspChnWaveBufAdd(id, (ndspWaveBuf*)buf);
-}
-
-//??
-void HI::DSP_FlushDataCache(const void* address, unsigned int size) {
-	::DSP_FlushDataCache(address, size);
-}
-
 void HardwareInterface::debugPrint(std::string s) {
 	std::cout << s;
 }
@@ -246,12 +218,8 @@ void HardwareInterface::debugPrint(std::string s, int priority) {
 	if (priority >= DEBUG_PRIORITY) std::cout << s;
 }
 
-void HI::gspWaitForEvent(HardwareInterface::GSPGPU_Event id, bool nextEvent) {
-	::gspWaitForEvent((::GSPGPU_Event)id, nextEvent);
-}
-
 void HI::waitForVBlank() {
-	HI::gspWaitForEvent(GSPGPU_EVENT_VBlank0, true);
+	gspWaitForEvent(GSPGPU_EVENT_VBlank0, true);
 }
 
 bool HI::aptMainLoop() {

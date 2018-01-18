@@ -60,82 +60,13 @@ namespace HardwareInterface {
 								   HI_KEY_LEFT = HI_KEY_DLEFT | HI_KEY_CPAD_LEFT,  ///< D-Pad Left or Circle Pad Left
 								   HI_KEY_RIGHT = HI_KEY_DRIGHT | HI_KEY_CPAD_RIGHT ///< D-Pad Right or Circle Pad Right
 	};
-	struct  dspAdpcmData {
-		unsigned short index;    ///< Current predictor index
-		short history0; ///< Last outputted PCM16 sample.
-		short history1; ///< Second to last outputted PCM16 sample.
-	};
-	struct dspWaveBuf {
-		union {
-			char*         data_pcm8;  ///< Pointer to PCM8 sample data.
-			short*        data_pcm16; ///< Pointer to PCM16 sample data.
-			unsigned char*         data_adpcm; ///< Pointer to DSPADPCM sample data.
-			const void* data_vaddr; ///< Data virtual address.
-		};
-		unsigned int nsamples;              ///< Total number of samples (PCM8=bytes, PCM16=halfwords, DSPADPCM=nibbles without frame headers)
-		dspAdpcmData* adpcm_data; ///< ADPCM data.
 
-		unsigned int  offset;  ///< Buffer offset. Only used for capture.
-		bool looping; ///< Whether to loop the buffer.
-		unsigned char   status;  ///< Queuing/playback status.
-
-		unsigned short sequence_id;   ///< Sequence ID. Assigned automatically by ndspChnWaveBufAdd.
-		dspWaveBuf* next; ///< Next buffer to play. Used internally, do not modify.
-	};
-	enum dspClippingMode {
-		DSP_CLIP_NORMAL = 0, ///< "Normal" clipping mode (?)
-		DSP_CLIP_SOFT = 1, ///< "Soft" clipping mode (?)
-	};
-	enum dspOutputMode {
-		DSP_OUTPUT_MONO = 0, ///< Mono sound
-		DSP_OUTPUT_STEREO = 1, ///< Stereo sound
-		DSP_OUTPUT_SURROUND = 2, ///< 3D Surround sound
-	};
-	enum dspInterpType {
-		DSP_INTERP_POLYPHASE = 0, ///< Polyphase interpolation
-		DSP_INTERP_LINEAR = 1, ///< Linear interpolation
-		DSP_INTERP_NONE = 2, ///< No interpolation
-	};
-	enum {
-		DSP_WBUF_FREE = 0, ///< The wave buffer is not queued.
-		DSP_WBUF_QUEUED = 1, ///< The wave buffer is queued and has not been played yet.
-		DSP_WBUF_PLAYING = 2, ///< The wave buffer is playing right now.
-		DSP_WBUF_DONE = 3, ///< The wave buffer has finished being played.
-	};
-	enum {
-		DSP_ENCODING_PCM8 = 0, ///< PCM8
-		DSP_ENCODING_PCM16,    ///< PCM16
-		DSP_ENCODING_ADPCM,    ///< DSPADPCM (GameCube format)
-	};
-
-	/// Specifies the number of channels used in a sample.
-#define DSP_CHANNELS(n)  ((unsigned int)(n) & 3)
-	/// Specifies the encoding used in a sample.
-#define DSP_ENCODING(n) (((unsigned int)(n) & 3) << 2)
-
-	/// Channel format flags for use with ndspChnSetFormat.
-	enum {
-		DSP_FORMAT_MONO_PCM8 = DSP_CHANNELS(1) | DSP_ENCODING(DSP_ENCODING_PCM8),  ///< Buffer contains Mono   PCM8.
-		DSP_FORMAT_MONO_PCM16 = DSP_CHANNELS(1) | DSP_ENCODING(DSP_ENCODING_PCM16), ///< Buffer contains Mono   PCM16.
-		DSP_FORMAT_MONO_ADPCM = DSP_CHANNELS(1) | DSP_ENCODING(DSP_ENCODING_ADPCM), ///< Buffer contains Mono   ADPCM.
-		DSP_FORMAT_STEREO_PCM8 = DSP_CHANNELS(2) | DSP_ENCODING(DSP_ENCODING_PCM8),  ///< Buffer contains Stereo PCM8.
-		DSP_FORMAT_STEREO_PCM16 = DSP_CHANNELS(2) | DSP_ENCODING(DSP_ENCODING_PCM16), ///< Buffer contains Stereo PCM16.
-
-		DSP_FORMAT_PCM8 = DSP_FORMAT_MONO_PCM8,  ///< (Alias) Buffer contains Mono PCM8.
-		DSP_FORMAT_PCM16 = DSP_FORMAT_MONO_PCM16, ///< (Alias) Buffer contains Mono PCM16.
-		DSP_FORMAT_ADPCM = DSP_FORMAT_MONO_ADPCM, ///< (Alias) Buffer contains Mono ADPCM.
-
-													// Flags
-													DSP_FRONT_BYPASS = BIT(4), ///< Front bypass.
-													DSP_3D_SURROUND_PREPROCESSED = BIT(6), ///< (?) Unknown, under research
-	};
 	//System
 	void systemInit();
 	void systemFini();
 	void consoleInit();
 	void consoleFini();
 	void sleepThread(unsigned long ns);
-	void* linearAllocator(size_t size);
 	bool aptMainLoop();
 
 	//input
@@ -165,7 +96,7 @@ namespace HardwareInterface {
 	void drawTextureRotate(HITexture texture, int posX, int posY, float angle);
 	void mergeTextures(HITexture originTexture, HITexture destinationTexture, short posX, short posY);
 	void drawRectangle(int posX, int posY, int width, int height, HIColor color);
-	void drawPixel(int posX, int posY, HIColor color) { HardwareInterface::drawRectangle(posX, posY, 1, 1, color); }
+	void drawPixel(int posX, int posY, HIColor color);
 	HITexture createTexture(int sizeX, int sizeY);
 	void freeTexture(HITexture texture);
 	void endFrame();
@@ -184,17 +115,6 @@ namespace HardwareInterface {
 	int getScreenWidth();
 	HI_PLATFORM getPlatform();
 
-	//Sound
-	void dspSetOutputMode(dspOutputMode mode);
-	void dspChnSetInterp(int id, dspInterpType type);
-	void dspChnSetFormat(int id, unsigned short format);
-	void dspChnSetRate(int id, float rate);
-	void dspChnSetMix(int id, float mix[12]);
-	void dspChnWaveBufAdd(int id, dspWaveBuf* buf);
-
-	//??
-	void DSP_FlushDataCache(const void* address, unsigned int size);
-
 	//DEBUGGING
 	void debugPrint(std::string s);
 	void debugPrint(int n);
@@ -202,19 +122,6 @@ namespace HardwareInterface {
 	void debugPrint(std::string s, int priority);
 	void debugNewLine();
 
-	//GSP
-	enum  GSPGPU_Event {
-		GSPGPU_EVENT_PSC0 = 0, ///< Memory fill completed.
-		GSPGPU_EVENT_PSC1,     ///< TODO
-		GSPGPU_EVENT_VBlank0,  ///< TODO
-		GSPGPU_EVENT_VBlank1,  ///< TODO
-		GSPGPU_EVENT_PPF,      ///< Display transfer finished.
-		GSPGPU_EVENT_P3D,      ///< Command list processing finished.
-		GSPGPU_EVENT_DMA,      ///< TODO
-
-		GSPGPU_EVENT_MAX,      ///< Used to know how many events there are.
-	};
-	void gspWaitForEvent(HardwareInterface::GSPGPU_Event id, bool nextEvent);
 	void waitForVBlank();
 	//threads
 	void createThread(void* entrypoint, std::reference_wrapper<void(void*)> entrypoint2, void* arg, size_t stack_size, int prio, int affinity, bool detached, size_t arg_size);

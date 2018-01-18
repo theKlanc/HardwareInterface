@@ -91,6 +91,10 @@ void HI::drawRectangle(int posX, int posY, int width, int height, HI::HIColor co
 	vita2d_draw_rectangle(posX, posY, width, height, color);
 }
 
+void drawPixel(int posX, int posY, HIColor color) {
+	HardwareInterface::drawRectangle(posX, posY, 1, 1, color);
+}
+
 void HI::freeTexture(HITexture texture) {
 	vita2d_free_texture((vita2d_texture*)texture);
 }
@@ -189,7 +193,7 @@ int HI::getKeysHeld() {
 	sceCtrlPeekBufferPositive(0, &pad, 1);
 	SceTouchData touch2;
 	sceTouchPeek(SCE_TOUCH_PORT_FRONT, &touch2, 1);
-	HI::HI_KEYS keys = HI_KEY_B;
+	HI::HI_KEYS keys =(HI_KEYS)0;
 	if (pad.buttons & SCE_CTRL_DOWN) keys = (HI_KEYS)((int)keys | HI::HI_KEY_DOWN);
 	if (pad.buttons & SCE_CTRL_LEFT)keys = (HI_KEYS)((int)keys | HI::HI_KEY_LEFT);
 	if (pad.buttons & SCE_CTRL_RIGHT)keys = (HI_KEYS)((int)keys | HI::HI_KEY_RIGHT);
@@ -208,29 +212,6 @@ void HI::getCirclePadPos(point2D &circle, HI_CIRCLEPAD circlePadID) { 		  //BORK
 
 void HI::sleepThread(unsigned long ms) {		  //BORKEN
 	sceKernelDelayThread(ms * 1000);
-}
-
-
-void* HI::linearAllocator(size_t size) {		  //BORKEN
-	return new char[size];
-}
-
-//Sound
-void HI::dspSetOutputMode(dspOutputMode mode) {				  //BORKEN
-}
-void HI::dspChnSetInterp(int id, HI::dspInterpType type) {	  		  //BORKEN
-}
-void HI::dspChnSetFormat(int id, unsigned short format) {  		  //BORKEN
-}
-void HI::dspChnSetRate(int id, float rate) {	   		  //BORKEN
-}
-void HI::dspChnSetMix(int id, float mix[12]) {	   		  //BORKEN
-}
-void HI::dspChnWaveBufAdd(int id, HI::dspWaveBuf* buf) {	   		  //BORKEN
-}
-
-//??
-void HI::DSP_FlushDataCache(const void* address, unsigned int size) {			  //BORKEN
 }
 
 void HardwareInterface::debugPrint(string s) {
@@ -262,9 +243,6 @@ void HardwareInterface::debugPrint(string s, int p) {
 
 void HardwareInterface::debugNewLine() {
 	sceClibPrintf("\n");
-}
-
-void HI::gspWaitForEvent(HardwareInterface::GSPGPU_Event id, bool nextEvent) {	  		  //BORKEN
 }
 
 void HI::waitForVBlank() {
