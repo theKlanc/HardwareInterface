@@ -91,8 +91,8 @@ void HI::drawRectangle(int posX, int posY, int width, int height, HI::HIColor co
 	vita2d_draw_rectangle(posX, posY, width, height, color);
 }
 
-void drawPixel(int posX, int posY, HIColor color) {
-	HardwareInterface::drawRectangle(posX, posY, 1, 1, color);
+void HI::drawPixel(int posX, int posY, HIColor color) {
+	HI::drawRectangle(posX, posY, 1, 1, color);
 }
 
 void HI::freeTexture(HITexture texture) {
