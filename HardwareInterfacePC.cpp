@@ -1,11 +1,11 @@
-#ifdef WIN32
+#if defined __LINUX__ || defined WIN32
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <string>
 #include <future>
 #include <iostream>
 #include <fstream>
-#include "HardwareInterface.h"	
+#include "HardwareInterface.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
@@ -21,7 +21,8 @@ sf::Color backgroundColor;
 
 void HI::systemInit() {
 	event = new sf::Event;
-	window = new sf::RenderWindow(sf::VideoMode(1000, 1000), "Rogue3DS");
+	window = new sf::RenderWindow(sf::VideoMode(1280, 720), "TEST");
+	window->setFramerateLimit(60);
 }
 
 void HI::systemFini() {
@@ -77,10 +78,7 @@ void HardwareInterface::drawText(HIFont font, std::string text, int posX, int po
 	}
 }
 
-inline bool exists_test(const std::string& name) {
-	std::ifstream f(name.c_str());
-	return f.good();
-}
+
 HI::HITexture HI::loadPngFile(std::string path) {
 	return loadBmpFile(path);
 }
@@ -141,6 +139,7 @@ void HI::mergeTextures(HITexture origin, HITexture destination, short posX, shor
 void HI::drawRectangle(int posX, int posY, int width, int height, HI::HIColor color) {
 	sf::RectangleShape rectangle(sf::Vector2f(width, height));
 	rectangle.setFillColor(sf::Color(color));
+	rectangle.setPosition(posX/getScreenWidth(),posY/getScreenHeight());
 	window->draw(rectangle);
 }
 
@@ -149,7 +148,7 @@ void HI::drawPixel(int posX, int posY, HIColor color) {
 }
 
 void HI::freeTexture(HITexture texture) {
-	texture = &sf::Texture();
+	texture = (HI::HITexture)nullptr;
 }
 HI::HITexture HI::createTexture(int sizeX, int sizeY) {
 	sf::Texture* texture = new sf::Texture;
