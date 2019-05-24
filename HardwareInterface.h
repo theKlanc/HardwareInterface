@@ -43,10 +43,11 @@ namespace HI2 {
 		Font();
 		~Font();
 		Font(std::filesystem::path path, int size=12);
+		Font& operator=(Font other);
 		void* get();
 
 	  private:
-		void *_font;
+		void *_font=nullptr;
 		std::string _name;
 		std::filesystem::path _path;
 	};
@@ -55,9 +56,11 @@ namespace HI2 {
 		Texture();
 		~Texture();
 		Texture(std::filesystem::path path);
+		Texture& operator=(Texture other);
+		void* get();
 
 	  private:
-		void *_texture;
+		void *_texture = nullptr;
 		std::filesystem::path _path;
 	};
 
@@ -154,15 +157,14 @@ namespace HI2 {
 
 	void startFrame();
 	void setBackgroundColor(Color color);
-	void drawText(Font font, std::string text, point2D pos, int size, Color color);
-	void drawTexture(Texture texture, int posX, int posY);
+	void drawText(Font& font, std::string text, point2D pos, int size, Color color);
+	void drawTexture(Texture &texture, int posX, int posY);
 
-	void drawTexturePart(Texture texture, point2D texturePartStart, int sizeX, int sizeY, point2D displayPos);
-	Texture mergeTextures(Texture originTexture, Texture destinationTexture,  point2D position);
+	void drawTexturePart(Texture& texture, point2D texturePartStart, int sizeX, int sizeY, point2D displayPos);
+	Texture mergeTextures(Texture& originTexture, Texture& destinationTexture,  point2D position);
 	void drawRectangle(point2D pos, int width, int height, Color color);
 	void drawPixel(point2D pos, Color color);
 	void endFrame();
-	void swapBuffers();
 
 	
 } // namespace HI2
