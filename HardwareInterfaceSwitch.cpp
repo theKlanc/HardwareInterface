@@ -1,24 +1,14 @@
-#if defined __LINUX__ || defined WIN32
-#define _USE_MATH_DEFINES
-#include <chrono>
-#include <thread>
-#include <math.h>
-#include <string>
-#include <future>
-#include <iostream>
-#include <fstream>
+#ifdef __SWITCH__
 #include "HardwareInterface.h"
-#include <thread>
+#include <switch.h>
 #include <filesystem>
+#include <iostream>
+#include "HardwareInterface.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
 #include <fstream>
-#include <functional>
-
-#define DEBUG_PRIORITY 0
-
 #define rcast reinterpret_cast
 #define DEBUG_PRIORITY 0
 
@@ -69,10 +59,12 @@ void HI2::systemInit(){
 	//}
 	Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 4096);
+    romfsInit();
 }
 void HI2::systemFini(){
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
+	romfsExit();
 	Mix_CloseAudio();
 	Mix_Quit();
 	TTF_Quit();
@@ -196,125 +188,75 @@ void HI2::Texture::clean(){
 	}
 	_texture=nullptr;
 }
-
 // filesystem
 std::filesystem::path HI2::getDataPath(){
-	return std::filesystem::path();
+	return std::filesystem::path("data/");
 }
 
 std::filesystem::path HI2::getSavesPath(){
-	return std::filesystem::path();
+	return std::filesystem::path("saves/");
 }
 
 // HardwareInfo
 int HI2::getScreenHeight(){
-	int w,h;
-	SDL_GetWindowSize(window,&w,&h);
-	return h;
+	return ::appletGetOperationMode()==AppletOperationMode_Docked?1080:720;
 }
 int HI2::getScreenWidth(){
-	int w,h;
-	SDL_GetWindowSize(window,&w,&h);
-	return w;
+	return ::appletGetOperationMode()==AppletOperationMode_Docked?1920:1280;
 }
 
 HI2::PLATFORM HI2::getPlatform(){
 	return HI2::PLATFORM_SWITCH;
 }
 
-void HI2::consoleInit(){}
-void HI2::consoleInit(std::filesystem::path path){}
-void HI2::consoleFini(){}
-void HI2::consoleClear(){}
+
+void HI2::consoleInit(){
+	::consoleInit(nullptr);
+}
+void HI2::consoleInit(std::filesystem::path path){
+	::consoleInit(nullptr);
+}
+void HI2::consoleFini(){
+	::consoleExit(nullptr);
+}
+void HI2::consoleClear(){
+	::consoleClear();
+}
 void HI2::sleepThread(unsigned long ns){
-	std::this_thread::sleep_for(std::chrono::nanoseconds(ns));
+	::svcSleepThread(ns);
 }
-
-HI2::BUTTON translate(SDL_Keycode s){
-	switch(s){
-	case SDLK_BACKSPACE:
-		return HI2::BUTTON::KEY_PLUS;
-	case SDLK_DOWN:
-		return HI2::BUTTON::KEY_DOWN;
-	case SDLK_UP:
-		return HI2::BUTTON::KEY_UP;
-	case SDLK_LEFT:
-		return HI2::BUTTON::KEY_LEFT;
-	case SDLK_RIGHT:
-		return HI2::BUTTON::KEY_RIGHT;
-	case SDLK_SPACE:
-		return HI2::BUTTON::KEY_MINUS;
-	case SDLK_b:
-		return HI2::BUTTON::KEY_B;
-	case SDLK_a:
-		return HI2::BUTTON::KEY_A;
-	default:
-		return HI2::BUTTON::KEY_TOUCH;
-	}//TODO acabar aixo
-
-}
-
-unsigned long Down;
-unsigned long Held;
-unsigned long Up;
-
 bool HI2::aptMainLoop(){
-	SDL_Event event;
-	Down=0;
-	Up=0;
-	Held=0;
-	while(SDL_PollEvent(&event))
-	{
-		switch(event.type){
-		case SDL_QUIT:
-		{
-			return false;
-		}
-		case SDL_KEYDOWN:
-			Held|= translate(event.key.keysym.sym);
-			Down|= event.key.repeat?0:translate(event.key.keysym.sym);
-			break;
-
-		case SDL_KEYUP:
-			Up|= event.key.state==SDL_PRESSED?0:translate(event.key.keysym.sym);
-			break;
-		case SDL_WINDOWEVENT:
-			if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-				std::cout<<"MESSAGE:Resizing window...\n";
-			}
-			break;
-		}
-
-	}
-	return true;
+	::hidScanInput();
+	return ::appletMainLoop();
+	consoleUpdate(nullptr);
 }
 
 unsigned long HI2::getKeysDown(){
-	return Down;
+	return ::hidKeysDown(CONTROLLER_P1_AUTO);
 }
 unsigned long HI2::getKeysUp(){
-	return Up;
+	return ::hidKeysUp(CONTROLLER_P1_AUTO);
 }
 unsigned long HI2::getKeysHeld(){
-	return Held;
+	return ::hidKeysHeld(CONTROLLER_P1_AUTO);
 }
 point2D HI2::getJoystickPos(HI2::JOYSTICK joystick){
-	//::JoystickPosition temp;
-	//::hidJoystickRead(&temp,CONTROLLER_P1_AUTO,joystick==HI2::JOY_LEFT?::JOYSTICK_LEFT : (::JOYSTICK_RIGHT));
+	::JoystickPosition temp;
+	::hidJoystickRead(&temp,CONTROLLER_P1_AUTO,joystick==HI2::JOY_LEFT?::JOYSTICK_LEFT : (::JOYSTICK_RIGHT));
 	point2D res;
-	//res.x=temp.dx;
-	//res.y=temp.dy;
+	res.x=temp.dx;
+	res.y=temp.dy;
 	return res;
 }
 
 point2D HI2::getTouchPos(){
-	//touchPosition temp;
+	touchPosition temp;
 	point2D res;
-	//if(hidTouchCount()>0){
-	//	hidTouchRead(&temp,0);
-	//	res.x=temp.px;
-	//	res.y=temp.py;
-	//}
+	if(hidTouchCount()>0){
+		hidTouchRead(&temp,0);
+		res.x=temp.px;
+		res.y=temp.py;
+	}
 	return res;
 }
 
