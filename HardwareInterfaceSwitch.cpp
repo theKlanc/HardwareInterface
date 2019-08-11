@@ -175,11 +175,11 @@ HI2::Texture::Texture(std::filesystem::path path){
 		SDL_FreeSurface(temp);
 	}
 	else{
-		std::cout << "Otherwise"<<std::endl;
+		std::cout << "Non-BMP"<<std::endl;
 		_texture=IMG_LoadTexture(renderer,path.c_str());
 	}
 	if(_texture==nullptr){
-			std::cout << "Error al carregar bmp: "<<SDL_GetError()<<std::endl;
+			std::cout << "Error loading texture: "<<SDL_GetError()<<std::endl;
 	}
 }
 void HI2::Texture::clean(){

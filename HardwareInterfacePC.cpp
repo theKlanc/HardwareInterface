@@ -7,7 +7,7 @@
 #include <future>
 #include <iostream>
 #include <fstream>
-#include "HardwareInterface.h"
+#include "HardwareInterface.hpp"
 #include <thread>
 #include <filesystem>
 #include <SDL2/SDL.h>
@@ -76,6 +76,7 @@ void HI2::systemFini(){
 	Mix_CloseAudio();
 	Mix_Quit();
 	TTF_Quit();
+	IMG_Quit();
 	SDL_Quit();
 	_log.close();
 }
@@ -105,12 +106,14 @@ void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c)
 	SDL_FreeSurface(surface);
 
 }
-void HI2::drawTexture(Texture& texture, int posX, int posY){
+void HI2::drawTexture(Texture& texture, int posX, int posY, double scale){
 	SDL_Rect texture_rect;
 	texture_rect.x = posX;  //the x coordinate
 	texture_rect.y = posY; // the y coordinate
-	texture_rect.w = 1000; //the width of the texture
-	texture_rect.h = 500; //the height of the texture
+	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), NULL, NULL, &texture_rect.w, &texture_rect.h);
+	texture_rect.w*=scale;
+	texture_rect.h*=scale;
+
 
 	SDL_RenderCopy(renderer, rcast<SDL_Texture*>(texture._texture), NULL, &texture_rect);
 
@@ -183,11 +186,11 @@ HI2::Texture::Texture(std::filesystem::path path){
 		SDL_FreeSurface(temp);
 	}
 	else{
-		std::cout << "Otherwise"<<std::endl;
+		std::cout << "Non-BMP"<<std::endl;
 		_texture=IMG_LoadTexture(renderer,path.c_str());
 	}
 	if(_texture==nullptr){
-			std::cout << "Error al carregar bmp: "<<SDL_GetError()<<std::endl;
+			std::cout << "Error loading texture: "<<SDL_GetError()<<std::endl;
 	}
 }
 void HI2::Texture::clean(){
@@ -199,11 +202,11 @@ void HI2::Texture::clean(){
 
 // filesystem
 std::filesystem::path HI2::getDataPath(){
-	return std::filesystem::path();
+	return std::filesystem::path("data/");
 }
 
 std::filesystem::path HI2::getSavesPath(){
-	return std::filesystem::path();
+	return std::filesystem::path("saves/");
 }
 
 // HardwareInfo
@@ -219,7 +222,7 @@ int HI2::getScreenWidth(){
 }
 
 HI2::PLATFORM HI2::getPlatform(){
-	return HI2::PLATFORM_SWITCH;
+	return HI2::PLATFORM_PC;
 }
 
 void HI2::consoleInit(){}
