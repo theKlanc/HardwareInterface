@@ -92,7 +92,7 @@ namespace HI2 {
 		std::filesystem::path _path;
 
 		friend void drawTexture(Texture &texture, int posX, int posY,
-								double scale);
+								double scale, double rotation);
 		friend void drawTexturePart(Texture &texture, point2D texturePartStart,
 									int sizeX, int sizeY, point2D displayPos);
 		friend Texture mergeTextures(Texture &originTexture,
@@ -202,7 +202,7 @@ namespace HI2 {
 	void setBackgroundColor(Color color);
 	void drawText(Font &font, std::string text, point2D pos, int size,
 				  Color color);
-	void drawTexture(Texture &texture, int posX, int posY, double scale = 1);
+	void drawTexture(Texture &texture, int posX, int posY, double scale = 1, double radians = .0f);
 	void drawTexturePart(Texture &texture, point2D texturePartStart, int sizeX,
 						 int sizeY, point2D displayPos);
 	Texture mergeTextures(Texture &originTexture, Texture &destinationTexture,

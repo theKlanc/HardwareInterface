@@ -29,6 +29,8 @@ HI2::Color _bg;
 
 std::ofstream _log;
 
+int w, h;
+
 // System
 void HI2::systemInit(){
 	_log.open("/HI2.log");
@@ -44,11 +46,13 @@ void HI2::systemInit(){
 	// available switch SDL2 video modes :
 	// 1920 x 1080 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
 	// 1280 x 720 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
-	window = SDL_CreateWindow("sdl2_gles2", 0, 0, 1280,720, 0);
+	window = SDL_CreateWindow("sdl2_gles2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280,720, SDL_WINDOW_RESIZABLE);
 	if (!window) {
 		SDL_Log("SDL_CreateWindow: %s\n", SDL_GetError());
 		//SDL_Quit();
 	}
+	w = 1280;
+	h = 720;
 
 	// create a renderer (OpenGL ES2)
 	renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -106,7 +110,7 @@ void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c)
 	SDL_FreeSurface(surface);
 
 }
-void HI2::drawTexture(Texture& texture, int posX, int posY, double scale){
+void HI2::drawTexture(Texture& texture, int posX, int posY, double scale, double radians){
 	SDL_Rect texture_rect;
 	texture_rect.x = posX;  //the x coordinate
 	texture_rect.y = posY; // the y coordinate
@@ -114,8 +118,8 @@ void HI2::drawTexture(Texture& texture, int posX, int posY, double scale){
 	texture_rect.w*=scale;
 	texture_rect.h*=scale;
 
-
-	SDL_RenderCopy(renderer, rcast<SDL_Texture*>(texture._texture), NULL, &texture_rect);
+	// PI * rad = 180 * deg
+	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), NULL, &texture_rect,(radians * 180)/M_PI,nullptr,SDL_FLIP_NONE);
 
 }//TODO
 
@@ -147,7 +151,7 @@ HI2::Audio::Audio(std::filesystem::path path, bool loop, float volume){
 	_path=path;
 	_loop=loop;
 	_volume=volume;
-	_audio=Mix_LoadMUS(path.c_str());
+	_audio=Mix_LoadMUS(path.string().c_str());
 }
 void HI2::Audio::clean(){
 	if(_audio!=nullptr){
@@ -164,8 +168,8 @@ HI2::Font::Font(){
 
 HI2::Font::Font(std::filesystem::path path,int size){
 	_path=path;
-	_font=TTF_OpenFont(path.c_str(),size);
-	_name=path.filename().replace_extension("");
+	_font=TTF_OpenFont(path.string().c_str(),size);
+	_name=path.filename().replace_extension("").string();
 }
 void HI2::Font::clean(){
 	if(_font!=nullptr){
@@ -178,16 +182,16 @@ void HI2::Font::clean(){
 HI2::Texture::Texture(){}
 HI2::Texture::Texture(std::filesystem::path path){
 	_path=path;
-	std::cout << "Loading tex:"<<path.c_str()<<std::endl;
+	std::cout << "Loading tex:"<<path.string().c_str()<<std::endl;
 	if(path.extension()==".bmp"){
 		std::cout << "BMP"<<std::endl;
-		SDL_Surface* temp = SDL_LoadBMP(path.c_str());
+		SDL_Surface* temp = SDL_LoadBMP(path.string().c_str());
 		_texture=SDL_CreateTextureFromSurface(renderer,temp);
 		SDL_FreeSurface(temp);
 	}
 	else{
 		std::cout << "Non-BMP"<<std::endl;
-		_texture=IMG_LoadTexture(renderer,path.c_str());
+		_texture=IMG_LoadTexture(renderer,path.string().c_str());
 	}
 	if(_texture==nullptr){
 			std::cout << "Error loading texture: "<<SDL_GetError()<<std::endl;
@@ -211,13 +215,9 @@ std::filesystem::path HI2::getSavesPath(){
 
 // HardwareInfo
 int HI2::getScreenHeight(){
-	int w,h;
-	SDL_GetWindowSize(window,&w,&h);
 	return h;
 }
 int HI2::getScreenWidth(){
-	int w,h;
-	SDL_GetWindowSize(window,&w,&h);
 	return w;
 }
 
@@ -282,12 +282,11 @@ bool HI2::aptMainLoop(){
 			Up|= event.key.state==SDL_PRESSED?0:translate(event.key.keysym.sym);
 			break;
 		case SDL_WINDOWEVENT:
-			if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-				std::cout<<"MESSAGE:Resizing window...\n";
+			if (event.window.event == SDL_WINDOWEVENT_RESIZED || event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+				SDL_GetWindowSize(window, &w, &h);
 			}
 			break;
 		}
-
 	}
 	return true;
 }
