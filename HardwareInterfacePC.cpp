@@ -113,8 +113,11 @@ void HI2::drawTexture(Texture& texture, int posX, int posY, double scale, double
 	texture_rect.x = posX;  //the x coordinate
 	texture_rect.y = posY; // the y coordinate
 	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), NULL, NULL, &texture_rect.w, &texture_rect.h);
-	texture_rect.w *= scale+0.0001;
-	texture_rect.h *= scale+0.0001;
+	texture_rect.w *= scale;
+	texture_rect.h *= scale;
+	texture_rect.w += 1;
+	texture_rect.h += 1;
+
 
 	// PI * rad = 180 * deg
 	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), NULL, &texture_rect, (radians * 180) / M_PI, nullptr, SDL_FLIP_NONE);
@@ -129,7 +132,7 @@ HI2::Texture HI2::mergeTextures(Texture& originTexture, Texture& destinationText
 
 void HI2::drawRectangle(point2D pos, int width, int height, Color color) {
 	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-	SDL_Rect r = { pos.x, pos.y, width+0.0001, height+0.0001 };
+	SDL_Rect r = { pos.x, pos.y, width, height };
 	SDL_RenderFillRect(renderer, &r);
 }
 void HI2::drawPixel(point2D pos, Color color) {
@@ -204,11 +207,11 @@ void HI2::Texture::clean() {
 
 // filesystem
 std::filesystem::path HI2::getDataPath() {
-	return std::filesystem::path("data/");
+	return std::filesystem::path("data");
 }
 
 std::filesystem::path HI2::getSavesPath() {
-	return std::filesystem::path("saves/");
+	return std::filesystem::path("saves");
 }
 
 // HardwareInfo
@@ -235,20 +238,28 @@ HI2::BUTTON translate(SDL_Keycode s) {
 	switch (s) {
 	case SDLK_BACKSPACE:
 		return HI2::BUTTON::KEY_PLUS;
-	case SDLK_DOWN:
+	case SDLK_s:
 		return HI2::BUTTON::KEY_DOWN;
-	case SDLK_UP:
+	case SDLK_w:
 		return HI2::BUTTON::KEY_UP;
-	case SDLK_LEFT:
+	case SDLK_a:
 		return HI2::BUTTON::KEY_LEFT;
-	case SDLK_RIGHT:
+	case SDLK_d:
 		return HI2::BUTTON::KEY_RIGHT;
+	case SDLK_q:
+		return HI2::BUTTON::KEY_L;
+	case SDLK_e:
+		return HI2::BUTTON::KEY_R;
 	case SDLK_SPACE:
 		return HI2::BUTTON::KEY_MINUS;
-	case SDLK_b:
+	case SDLK_f:
 		return HI2::BUTTON::KEY_B;
-	case SDLK_a:
+	case SDLK_r:
 		return HI2::BUTTON::KEY_A;
+	case SDLK_PLUS:
+		return HI2::BUTTON::KEY_ZR;
+	case SDLK_MINUS:
+		return HI2::BUTTON::KEY_ZL;
 	default:
 		return HI2::BUTTON::KEY_TOUCH;
 	}//TODO acabar aixo
