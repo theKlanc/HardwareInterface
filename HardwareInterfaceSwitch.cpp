@@ -1,9 +1,10 @@
 #ifdef __SWITCH__
-#include "HardwareInterface.h"
+#define _USE_MATH_DEFINES
+#include "HardwareInterface.hpp"
 #include <switch.h>
 #include <filesystem>
 #include <iostream>
-#include "HardwareInterface.h"
+#include <math.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
@@ -19,16 +20,21 @@ HI2::Color _bg;
 
 std::ofstream _log;
 
+void HI2::logWrite(std::string s){
+	_log << s << std::endl;
+}
+
+int w, h;
+
 // System
 void HI2::systemInit(){
 	_log.open("/HI2.log");
-	_bg=RGBA8(255,0,0,255);
+	_bg = Color(255, 0, 0, 255);
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_AUDIO) < 0) {
 		_log << SDL_GetError()<<std::endl;
-		SDL_Log("SDL_Init: %s\n", SDL_GetError());
 	}
 	TTF_Init();
-	IMG_Init(IMG_INIT_PNG);
+	IMG_Init(IMG_INIT_PNG | IMG_INIT_WEBP);
 	// create an SDL window (OpenGL ES2 always enabled)
 	// when SDL_FULLSCREEN flag is not set, viewport is automatically handled by SDL (use SDL_SetWindowSize to "change resolution")
 	// available switch SDL2 video modes :
@@ -36,16 +42,16 @@ void HI2::systemInit(){
 	// 1280 x 720 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
 	window = SDL_CreateWindow("sdl2_gles2", 0, 0, 1280,720, 0);
 	if (!window) {
-		SDL_Log("SDL_CreateWindow: %s\n", SDL_GetError());
-		//SDL_Quit();
+		_log << SDL_GetError()<<std::endl;
 	}
-
+	w = 1280;
+	h = 720;
 	// create a renderer (OpenGL ES2)
 	renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (!renderer) {
-		SDL_Log("SDL_CreateRenderer: %s\n", SDL_GetError());
-		//SDL_Quit();
+		_log << SDL_GetError()<<std::endl;
 	}
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
 	// open CONTROLLER_PLAYER_1 and CONTROLLER_PLAYER_2
 	// when railed, both joycons are mapped to joystick #0,
@@ -59,26 +65,21 @@ void HI2::systemInit(){
 	//}
 	Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 4096);
-    romfsInit();
 }
 void HI2::systemFini(){
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
-	romfsExit();
 	Mix_CloseAudio();
 	Mix_Quit();
 	TTF_Quit();
+	IMG_Quit();
 	SDL_Quit();
 	_log.close();
 }
 
 void HI2::startFrame(){
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_SetRenderDrawColor(renderer, _bg.r, _bg.g, _bg.b, _bg.a);
 	SDL_RenderClear(renderer);
-
-	SDL_SetRenderDrawColor(renderer, HI2::getR(_bg), HI2::getG(_bg), HI2::getB(_bg), HI2::getA(_bg));
-	SDL_Rect f = {0, 0, getScreenWidth(), getScreenHeight()};
-	SDL_RenderFillRect(renderer, &f);
 }
 void HI2::setBackgroundColor(Color color){_bg=color;}
 
@@ -87,9 +88,9 @@ void HI2::playSound(HI2::Audio &audio,float volume){
 }
 
 void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c){
-	SDL_Color color = { static_cast<Uint8>(getR(c)),static_cast<Uint8>(getG(c)),static_cast<Uint8>(getB(c)) };
-	SDL_Surface * surface = TTF_RenderText_Solid(rcast<TTF_Font*>(font._font),text.c_str(), color);
-	SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer, surface);
+	SDL_Color color = { static_cast<Uint8>(c.r),static_cast<Uint8>(c.g),static_cast<Uint8>(c.b) };
+	SDL_Surface* surface = TTF_RenderText_Solid(rcast<TTF_Font*>(font._font), text.c_str(), color);
+	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
 
 	SDL_RenderCopy(renderer, texture, nullptr, nullptr);
 
@@ -97,14 +98,19 @@ void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c)
 	SDL_FreeSurface(surface);
 
 }
-void HI2::drawTexture(Texture& texture, int posX, int posY){
+void HI2::drawTexture(Texture& texture, int posX, int posY, double scale, double radians) {
 	SDL_Rect texture_rect;
 	texture_rect.x = posX;  //the x coordinate
 	texture_rect.y = posY; // the y coordinate
-	texture_rect.w = 1000; //the width of the texture
-	texture_rect.h = 500; //the height of the texture
+	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), NULL, NULL, &texture_rect.w, &texture_rect.h);
+	texture_rect.w *= scale;
+	texture_rect.h *= scale;
+	texture_rect.w += 1;
+	texture_rect.h += 1;
 
-	SDL_RenderCopy(renderer, rcast<SDL_Texture*>(texture._texture), NULL, &texture_rect);
+
+	// PI * rad = 180 * deg
+	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), NULL, &texture_rect, (radians * 180) / 3.1415926535f, nullptr, SDL_FLIP_NONE);
 
 }//TODO
 
@@ -115,8 +121,8 @@ HI2::Texture HI2::mergeTextures(Texture& originTexture, Texture& destinationText
 }
 
 void HI2::drawRectangle(point2D pos, int width, int height, Color color){
-	SDL_SetRenderDrawColor(renderer, getR(color), getG(color),getB(color),getA(color));
-	SDL_Rect r = {pos.x, pos.y, width, height};
+	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+	SDL_Rect r = { pos.x, pos.y, width, height };
 	SDL_RenderFillRect(renderer, &r);
 }
 void HI2::drawPixel(point2D pos, Color color){
@@ -167,19 +173,19 @@ void HI2::Font::clean(){
 HI2::Texture::Texture(){}
 HI2::Texture::Texture(std::filesystem::path path){
 	_path=path;
-	std::cout << "Loading tex:"<<path.c_str()<<std::endl;
+	_log << "Loading tex:"<<path.c_str()<<std::endl;
 	if(path.extension()==".bmp"){
-		std::cout << "BMP"<<std::endl;
+		_log << "BMP"<<std::endl;
 		SDL_Surface* temp = SDL_LoadBMP(path.c_str());
 		_texture=SDL_CreateTextureFromSurface(renderer,temp);
 		SDL_FreeSurface(temp);
 	}
 	else{
-		std::cout << "Non-BMP"<<std::endl;
+		_log << "Non-BMP"<<std::endl;
 		_texture=IMG_LoadTexture(renderer,path.c_str());
 	}
 	if(_texture==nullptr){
-			std::cout << "Error loading texture: "<<SDL_GetError()<<std::endl;
+			_log << "Error loading texture: "<<SDL_GetError()<<std::endl;
 	}
 }
 void HI2::Texture::clean(){
@@ -259,10 +265,5 @@ point2D HI2::getTouchPos(){
 	}
 	return res;
 }
-
-short HI2::getR(Color color){ return (short)color; }
-short HI2::getG(Color color){ return (short)color >> 8; }
-short HI2::getB(Color color){ return (short)color >> 16; }
-short HI2::getA(Color color){ return (short)color >> 24; }
 
 #endif

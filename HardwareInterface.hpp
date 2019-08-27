@@ -169,6 +169,9 @@ namespace HI2 {
 		JOY_RIGHT,
 	};
 
+	// logger
+	void logWrite(std::string s);
+
 	// filesystem
 	std::filesystem::path getDataPath();
 	std::filesystem::path getSavesPath();

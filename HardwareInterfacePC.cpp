@@ -40,7 +40,7 @@ void HI2::systemInit() {
 		SDL_Log("SDL_Init: %s\n", SDL_GetError());
 	}
 	TTF_Init();
-	IMG_Init(IMG_INIT_PNG);
+	IMG_Init(IMG_INIT_PNG | IMG_INIT_WEBP);
 	// create an SDL window (OpenGL ES2 always enabled)
 	// when SDL_FULLSCREEN flag is not set, viewport is automatically handled by SDL (use SDL_SetWindowSize to "change resolution")
 	// available switch SDL2 video modes :
@@ -88,7 +88,6 @@ void HI2::systemFini() {
 
 void HI2::startFrame() {
 	SDL_SetRenderDrawColor(renderer, _bg.r, _bg.g, _bg.b, _bg.a);
-	//SDL_SetRenderDrawColor(renderer, HI2::getR(_bg), HI2::getG(_bg), HI2::getB(_bg), HI2::getA(_bg));
 	SDL_RenderClear(renderer);
 }
 void HI2::setBackgroundColor(Color color) { _bg = color; }
