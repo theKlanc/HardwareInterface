@@ -260,6 +260,14 @@ HI2::BUTTON translate(SDL_Keycode s) {
 		return HI2::BUTTON::KEY_ZR;
 	case SDLK_MINUS:
 		return HI2::BUTTON::KEY_ZL;
+		case SDLK_DOWN:
+		return HI2::BUTTON::KEY_DOWN;
+	case SDLK_UP:
+		return HI2::BUTTON::KEY_UP;
+	case SDLK_LEFT:
+		return HI2::BUTTON::KEY_LEFT;
+	case SDLK_RIGHT:
+		return HI2::BUTTON::KEY_RIGHT;
 	default:
 		return HI2::BUTTON::KEY_TOUCH;
 	}//TODO acabar aixo
