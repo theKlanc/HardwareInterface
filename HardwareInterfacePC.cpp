@@ -31,6 +31,10 @@ std::ofstream _log;
 
 int w, h;
 
+void HI2::logWrite(std::string s) {
+	_log << s << std::endl;
+}
+
 // System
 void HI2::systemInit() {
 	_log.open("/HI2.log");
