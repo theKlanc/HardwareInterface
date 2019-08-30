@@ -1,4 +1,4 @@
-#if defined __LINUX__ || defined WIN32
+#if defined __LINUX__ || defined WIN32 || defined WIN64
 #define _USE_MATH_DEFINES
 #include <chrono>
 #include <thread>
