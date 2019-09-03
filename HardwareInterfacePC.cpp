@@ -242,13 +242,13 @@ HI2::BUTTON translate(SDL_Keycode s) {
 	case SDLK_BACKSPACE:
 		return HI2::BUTTON::KEY_PLUS;
 	case SDLK_s:
-		return HI2::BUTTON::KEY_DOWN;
+		return HI2::BUTTON::KEY_LSTICK_DOWN;
 	case SDLK_w:
-		return HI2::BUTTON::KEY_UP;
+		return HI2::BUTTON::KEY_LSTICK_UP;
 	case SDLK_a:
-		return HI2::BUTTON::KEY_LEFT;
+		return HI2::BUTTON::KEY_LSTICK_LEFT;
 	case SDLK_d:
-		return HI2::BUTTON::KEY_RIGHT;
+		return HI2::BUTTON::KEY_LSTICK_RIGHT;
 	case SDLK_q:
 		return HI2::BUTTON::KEY_L;
 	case SDLK_e:
@@ -263,14 +263,18 @@ HI2::BUTTON translate(SDL_Keycode s) {
 		return HI2::BUTTON::KEY_ZR;
 	case SDLK_MINUS:
 		return HI2::BUTTON::KEY_ZL;
-		case SDLK_DOWN:
-		return HI2::BUTTON::KEY_DOWN;
+	case SDLK_DOWN:
+		return HI2::BUTTON::KEY_DDOWN;
 	case SDLK_UP:
-		return HI2::BUTTON::KEY_UP;
+		return HI2::BUTTON::KEY_DUP;
 	case SDLK_LEFT:
-		return HI2::BUTTON::KEY_LEFT;
+		return HI2::BUTTON::KEY_DLEFT;
 	case SDLK_RIGHT:
-		return HI2::BUTTON::KEY_RIGHT;
+		return HI2::BUTTON::KEY_DRIGHT;
+	case SDLK_INSERT:
+		return HI2::BUTTON::KEY_X;
+	case SDLK_DELETE:
+		return HI2::BUTTON::KEY_Y;
 	default:
 		return HI2::BUTTON::KEY_TOUCH;
 	}//TODO acabar aixo
