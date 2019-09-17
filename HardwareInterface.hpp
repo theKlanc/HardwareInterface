@@ -104,6 +104,7 @@ namespace HI2 {
 		friend Texture mergeTextures(Texture &originTexture,
 									 Texture &destinationTexture,
 									 point2D position);
+		friend void setTextureColorMod(Texture &texture, Color color);
 	};
 
 	enum PLATFORM {
@@ -207,6 +208,7 @@ namespace HI2 {
 	void setBackgroundColor(Color color);
 	void drawText(Font &font, std::string text, point2D pos, int size,
 				  Color color);
+	void setTextureColorMod(Texture &texture, Color color);
 	void drawTexture(Texture &texture, int posX, int posY, double scale = 1, double radians = .0f);
 	void drawTexturePart(Texture &texture, point2D texturePartStart, int sizeX,
 						 int sizeY, point2D displayPos);

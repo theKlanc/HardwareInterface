@@ -111,6 +111,12 @@ void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c)
 	SDL_FreeSurface(surface);
 
 }
+
+void HI2::setTextureColorMod(Texture& texture, Color color)
+{
+	SDL_SetTextureColorMod(rcast<SDL_Texture*>(texture._texture), color.r, color.g, color.b);
+}
+
 void HI2::drawTexture(Texture& texture, int posX, int posY, double scale, double radians) {
 	SDL_Rect texture_rect;
 	texture_rect.x = posX;  //the x coordinate
