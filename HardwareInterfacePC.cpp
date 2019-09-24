@@ -22,6 +22,12 @@
 #define rcast reinterpret_cast
 #define DEBUG_PRIORITY 0
 
+HI2::Color HI2::Color::Black{0,0,0,255};
+HI2::Color HI2::Color::White{255,255,255,255};
+HI2::Color HI2::Color::Red  {255,0,0,255};
+HI2::Color HI2::Color::Green{0,255,0,255};
+HI2::Color HI2::Color::Blue {0,0,255,255};
+
 SDL_Window * window;
 SDL_Renderer* renderer;
 
@@ -105,7 +111,12 @@ void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c)
 	SDL_Surface* surface = TTF_RenderText_Solid(rcast<TTF_Font*>(font._font), text.c_str(), color);
 	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
 
-	SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+	int texW = 0;
+	int texH = 0;
+	SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
+	SDL_Rect dstrect = { 0, 0, texW, texH };
+	
+	SDL_RenderCopy(renderer, texture, nullptr, &dstrect);
 
 	SDL_DestroyTexture(texture);
 	SDL_FreeSurface(surface);

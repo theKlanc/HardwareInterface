@@ -55,7 +55,15 @@ namespace HI2 {
 		unsigned short r=0, g=0, b=0, a=0;
 		Color(){}
 		Color(unsigned short r,unsigned short g,unsigned short b,unsigned short a):r(r),g(g),b(b),a(a){}
+
+		static Color Black;
+		static Color White;
+		static Color Red  ;
+		static Color Green;
+		static Color Blue ;
+		
 	};
+	
 
 	class Audio {
 	  public:
