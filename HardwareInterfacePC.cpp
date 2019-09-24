@@ -22,13 +22,13 @@
 #define rcast reinterpret_cast
 #define DEBUG_PRIORITY 0
 
-HI2::Color HI2::Color::Black{0,0,0,255};
-HI2::Color HI2::Color::White{255,255,255,255};
-HI2::Color HI2::Color::Red  {255,0,0,255};
-HI2::Color HI2::Color::Green{0,255,0,255};
-HI2::Color HI2::Color::Blue {0,0,255,255};
+HI2::Color HI2::Color::Black{ 0,0,0,255 };
+HI2::Color HI2::Color::White{ 255,255,255,255 };
+HI2::Color HI2::Color::Red{ 255,0,0,255 };
+HI2::Color HI2::Color::Green{ 0,255,0,255 };
+HI2::Color HI2::Color::Blue{ 0,0,255,255 };
 
-SDL_Window * window;
+SDL_Window* window;
 SDL_Renderer* renderer;
 
 HI2::Color _bg;
@@ -114,8 +114,8 @@ void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c)
 	int texW = 0;
 	int texH = 0;
 	SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
-	SDL_Rect dstrect = { 0, 0, texW, texH };
-	
+	SDL_Rect dstrect = { 0, 0, (double)texW / 10.0f * size, (double)texH / 10.0f * size };
+
 	SDL_RenderCopy(renderer, texture, nullptr, &dstrect);
 
 	SDL_DestroyTexture(texture);
@@ -187,9 +187,9 @@ HI2::Font::Font() {
 	_path = std::filesystem::path();
 }
 
-HI2::Font::Font(std::filesystem::path path, int size) {
+HI2::Font::Font(std::filesystem::path path) {
 	_path = path;
-	_font = TTF_OpenFont(path.string().c_str(), size);
+	_font = TTF_OpenFont(path.string().c_str(), 10);
 	_name = path.filename().replace_extension("").string();
 }
 void HI2::Font::clean() {

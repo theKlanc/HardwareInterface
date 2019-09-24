@@ -30,11 +30,11 @@ struct point3Di {
 	int y = 0;
 	int z = 0;
 
-	bool operator==(const point3Di &right) const {
+	bool operator==(const point3Di& right) const {
 		return x == right.x && y == right.y && z == right.z;
 	}
-	bool operator!=(const point3Di &right) const {
-		return !(*this==right);
+	bool operator!=(const point3Di& right) const {
+		return !(*this == right);
 	}
 };
 struct point3Dl {
@@ -52,67 +52,67 @@ namespace HI2 {
 	// New and more polished version of HI, breaks compat
 	struct Color
 	{
-		unsigned short r=0, g=0, b=0, a=0;
-		Color(){}
-		Color(unsigned short r,unsigned short g,unsigned short b,unsigned short a):r(r),g(g),b(b),a(a){}
+		unsigned short r = 0, g = 0, b = 0, a = 0;
+		Color() {}
+		Color(unsigned short r, unsigned short g, unsigned short b, unsigned short a) :r(r), g(g), b(b), a(a) {}
 
 		static Color Black;
 		static Color White;
-		static Color Red  ;
+		static Color Red;
 		static Color Green;
-		static Color Blue ;
-		
+		static Color Blue;
+
 	};
-	
+
 
 	class Audio {
-	  public:
+	public:
 		Audio();
 		Audio(std::filesystem::path path, bool loop = false, float volume = 1);
 		void clean();
 
-	  private:
-		void *_audio = nullptr;
+	private:
+		void* _audio = nullptr;
 		bool _loop = false;
 		float _volume = 1;
 		std::filesystem::path _path;
 
-		friend void playSound(Audio &audio, float volume);
+		friend void playSound(Audio& audio, float volume);
 	};
 
 	class Font {
-	  public:
+	public:
 		Font();
-		Font(std::filesystem::path path, int size = 12);
+		Font(std::filesystem::path path);
 		void clean();
 
-	  private:
-		void *_font = nullptr;
+	private:
+		void* _font = nullptr;
 		std::string _name;
 		std::filesystem::path _path;
 
-		friend void drawText(Font &font, std::string text, point2D pos,
-							 int size, Color color);
+		friend void drawText(Font& font, std::string text, point2D pos,
+			int size, Color color);
 	};
 
 	class Texture {
-	  public:
+	public:
 		Texture();
 		Texture(std::filesystem::path path);
 		void clean();
 
-	  private:
-		void *_texture = nullptr;
+	private:
+		void* _texture = nullptr;
 		std::filesystem::path _path;
 
-		friend void drawTexture(Texture &texture, int posX, int posY,
-								double scale, double rotation);
-		friend void drawTexturePart(Texture &texture, point2D texturePartStart,
-									int sizeX, int sizeY, point2D displayPos);
-		friend Texture mergeTextures(Texture &originTexture,
-									 Texture &destinationTexture,
-									 point2D position);
-		friend void setTextureColorMod(Texture &texture, Color color);
+		friend void drawTexture(Texture& texture, int posX, int posY,
+			double scale, double rotation);
+		friend void drawTexturePart(Texture& texture, point2D texturePartStart,
+			int sizeX, int sizeY, point2D displayPos);
+		friend Texture mergeTextures(Texture& originTexture,
+			Texture& destinationTexture,
+			point2D position);
+		friend void setTextureColorMod(Texture& texture, Color color);
 	};
 
 	enum PLATFORM {
@@ -163,13 +163,13 @@ namespace HI2 {
 
 		// Generic catch-all directions, also works for single Joy-Con
 		KEY_UP =
-			KEY_DUP | KEY_LSTICK_UP | KEY_RSTICK_UP, ///< D-Pad Up or Sticks Up
+		KEY_DUP | KEY_LSTICK_UP | KEY_RSTICK_UP, ///< D-Pad Up or Sticks Up
 		KEY_DOWN = KEY_DDOWN | KEY_LSTICK_DOWN |
-				   KEY_RSTICK_DOWN, ///< D-Pad Down or Sticks Down
+		KEY_RSTICK_DOWN, ///< D-Pad Down or Sticks Down
 		KEY_LEFT = KEY_DLEFT | KEY_LSTICK_LEFT |
-				   KEY_RSTICK_LEFT, ///< D-Pad Left or Sticks Left
+		KEY_RSTICK_LEFT, ///< D-Pad Left or Sticks Left
 		KEY_RIGHT = KEY_DRIGHT | KEY_LSTICK_RIGHT |
-					KEY_RSTICK_RIGHT,		 ///< D-Pad Right or Sticks Right
+		KEY_RSTICK_RIGHT,		 ///< D-Pad Right or Sticks Right
 		KEY_SL = KEY_SL_LEFT | KEY_SL_RIGHT, ///< SL on Left or Right Joy-Con
 		KEY_SR = KEY_SR_LEFT | KEY_SR_RIGHT, ///< SR on Left or Right Joy-Con
 	};
@@ -208,20 +208,20 @@ namespace HI2 {
 	point2D getTouchPos();
 
 	// sound
-	void playSound(Audio &audio, float volume = -1);
+	void playSound(Audio& audio, float volume = -1);
 
 	// graphics
 
 	void startFrame();
 	void setBackgroundColor(Color color);
-	void drawText(Font &font, std::string text, point2D pos, int size,
-				  Color color);
-	void setTextureColorMod(Texture &texture, Color color);
-	void drawTexture(Texture &texture, int posX, int posY, double scale = 1, double radians = .0f);
-	void drawTexturePart(Texture &texture, point2D texturePartStart, int sizeX,
-						 int sizeY, point2D displayPos);
-	Texture mergeTextures(Texture &originTexture, Texture &destinationTexture,
-						  point2D position);
+	void drawText(Font& font, std::string text, point2D pos, int size,
+		Color color);
+	void setTextureColorMod(Texture& texture, Color color);
+	void drawTexture(Texture& texture, int posX, int posY, double scale = 1, double radians = .0f);
+	void drawTexturePart(Texture& texture, point2D texturePartStart, int sizeX,
+		int sizeY, point2D displayPos);
+	Texture mergeTextures(Texture& originTexture, Texture& destinationTexture,
+		point2D position);
 	void drawRectangle(point2D pos, int width, int height, Color color);
 	void drawPixel(point2D pos, Color color);
 	void endFrame();
