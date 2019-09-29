@@ -56,7 +56,7 @@ void HI2::systemInit() {
 	// available switch SDL2 video modes :
 	// 1920 x 1080 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
 	// 1280 x 720 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
-	
+
 	w = 1280;
 	h = 720;
 	window = SDL_CreateWindow("sdl2_gles2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_RESIZABLE);
@@ -219,6 +219,47 @@ HI2::Texture::Texture(std::filesystem::path path) {
 		std::cout << "Error loading texture: " << SDL_GetError() << std::endl;
 	}
 }
+
+HI2::Texture::Texture(std::vector<std::filesystem::path> paths, double step)
+{
+	_path = paths[0];
+	_msPerFrame = step;
+	_currentFrame = 0;
+	for (auto path : paths)
+	{
+		std::cout << "Loading tex:" << path.string().c_str() << std::endl;
+		if (path.extension() == ".bmp") {
+			std::cout << "BMP" << std::endl;
+			SDL_Surface* temp = SDL_LoadBMP(path.string().c_str());
+			_texture = SDL_CreateTextureFromSurface(renderer, temp);
+			SDL_FreeSurface(temp);
+		}
+		else {
+			std::cout << "Non-BMP" << std::endl;
+			_texture = IMG_LoadTexture(renderer, path.string().c_str());
+		}
+		_animationTextures.push_back(_texture);
+	}
+	_texture = _animationTextures[0];
+}
+
+void HI2::Texture::step(double ms)
+{
+	if (!_animationTextures.empty()) {
+		_currentMs += ms;
+		while (_currentMs > _msPerFrame)
+		{
+			_currentMs -= _msPerFrame;
+			_currentFrame++;
+			if (_currentFrame >= _animationTextures.size())
+			{
+				_currentFrame = 0;
+			}
+		}
+		_texture = _animationTextures[_currentFrame];
+	}
+}
+
 void HI2::Texture::clean() {
 	if (_texture != nullptr) {
 		SDL_DestroyTexture(rcast<SDL_Texture*>(_texture));

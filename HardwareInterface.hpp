@@ -99,9 +99,16 @@ namespace HI2 {
 	public:
 		Texture();
 		Texture(std::filesystem::path path);
+		Texture(std::vector<std::filesystem::path> paths, double step = 200);
+		void step(double ms);
 		void clean();
 
 	private:
+		std::vector<void*> _animationTextures;
+		double _currentMs = 0;
+		double _msPerFrame = 200;
+		unsigned short _currentFrame = 0;
+
 		void* _texture = nullptr;
 		std::filesystem::path _path;
 
