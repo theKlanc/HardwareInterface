@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
-
+#define M_PI 3.14159265358979323846
 #define BIT(n) (1U << (n))
 
 struct point2D {
