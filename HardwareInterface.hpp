@@ -68,14 +68,14 @@ namespace HI2 {
 	class Audio {
 	public:
 		Audio();
-		Audio(std::filesystem::path path, bool loop = false, float volume = 1);
+		Audio(std::string path, bool loop = false, float volume = 1);
 		void clean();
 
 	private:
 		void* _audio = nullptr;
 		bool _loop = false;
 		float _volume = 1;
-		std::filesystem::path _path;
+		std::string _path;
 
 		friend void playSound(Audio& audio, float volume);
 	};
@@ -83,13 +83,13 @@ namespace HI2 {
 	class Font {
 	public:
 		Font();
-		Font(std::filesystem::path path);
+		Font(std::string path);
 		void clean();
 
 	private:
 		void* _font = nullptr;
 		std::string _name;
-		std::filesystem::path _path;
+		std::string _path;
 
 		friend void drawText(Font& font, std::string text, point2D pos,
 			int size, Color color);
@@ -98,8 +98,8 @@ namespace HI2 {
 	class Texture {
 	public:
 		Texture();
-		Texture(std::filesystem::path path);
-		Texture(std::vector<std::filesystem::path> paths, double step = 200);
+		Texture(std::string path);
+		Texture(std::vector<std::string> paths, double step = 200);
 		void step(double ms);
 		void clean();
 
@@ -110,7 +110,7 @@ namespace HI2 {
 		unsigned short _currentFrame = 0;
 
 		void* _texture = nullptr;
-		std::filesystem::path _path;
+		std::string _path;
 
 		friend void drawTexture(Texture& texture, int posX, int posY,
 			double scale, double rotation);
@@ -189,8 +189,8 @@ namespace HI2 {
 	void logWrite(std::string s);
 
 	// filesystem
-	std::filesystem::path getDataPath();
-	std::filesystem::path getSavesPath();
+	std::string getDataPath();
+	std::string getSavesPath();
 
 	// HardwareInfo
 	int getScreenHeight();
@@ -201,7 +201,7 @@ namespace HI2 {
 	void systemInit();
 	void systemFini();
 	void consoleInit();
-	void consoleInit(std::filesystem::path path);
+	void consoleInit(std::string path);
 	void consoleFini();
 	void consoleClear();
 	void sleepThread(unsigned long ns);

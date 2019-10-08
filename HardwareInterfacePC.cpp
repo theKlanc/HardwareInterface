@@ -169,11 +169,11 @@ void HI2::endFrame() {
 
 //SOUND
 HI2::Audio::Audio() {}
-HI2::Audio::Audio(std::filesystem::path path, bool loop, float volume) {
+HI2::Audio::Audio(std::string path, bool loop, float volume) {
 	_path = path;
 	_loop = loop;
 	_volume = volume;
-	_audio = Mix_LoadMUS(path.string().c_str());
+	_audio = Mix_LoadMUS(path.c_str());
 }
 void HI2::Audio::clean() {
 	if (_audio != nullptr) {
@@ -185,13 +185,13 @@ void HI2::Audio::clean() {
 //FONT
 HI2::Font::Font() {
 	_font = nullptr;
-	_path = std::filesystem::path();
+	_path = "";
 }
 
-HI2::Font::Font(std::filesystem::path path) {
+HI2::Font::Font(std::string path) {
 	_path = path;
-	_font = TTF_OpenFont(path.string().c_str(), 10);
-	_name = path.filename().replace_extension("").string();
+	_font = TTF_OpenFont(path.c_str(), 10);
+	_name = std::filesystem::path(path).filename().replace_extension("").string();
 }
 void HI2::Font::clean() {
 	if (_font != nullptr) {
@@ -202,41 +202,41 @@ void HI2::Font::clean() {
 
 //TEXTURE
 HI2::Texture::Texture() {}
-HI2::Texture::Texture(std::filesystem::path path) {
+HI2::Texture::Texture(std::string path) {
 	_path = path;
-	std::cout << "Loading tex:" << path.string().c_str() << std::endl;
-	if (path.extension() == ".bmp") {
+	std::cout << "Loading tex:" << path << std::endl;
+	if (path.substr(path.length() - 5, 4) == ".bmp") {
 		std::cout << "BMP" << std::endl;
-		SDL_Surface* temp = SDL_LoadBMP(path.string().c_str());
+		SDL_Surface* temp = SDL_LoadBMP(path.c_str());
 		_texture = SDL_CreateTextureFromSurface(renderer, temp);
 		SDL_FreeSurface(temp);
 	}
 	else {
 		std::cout << "Non-BMP" << std::endl;
-		_texture = IMG_LoadTexture(renderer, path.string().c_str());
+		_texture = IMG_LoadTexture(renderer, path.c_str());
 	}
 	if (_texture == nullptr) {
 		std::cout << "Error loading texture: " << SDL_GetError() << std::endl;
 	}
 }
 
-HI2::Texture::Texture(std::vector<std::filesystem::path> paths, double step)
+HI2::Texture::Texture(std::vector<std::string> paths, double step)
 {
 	_path = paths[0];
 	_msPerFrame = step;
 	_currentFrame = 0;
 	for (auto path : paths)
 	{
-		std::cout << "Loading tex:" << path.string().c_str() << std::endl;
-		if (path.extension() == ".bmp") {
+		std::cout << "Loading tex:" << path.c_str() << std::endl;
+		if (path.substr(path.length() - 5, 4) == ".bmp") {
 			std::cout << "BMP" << std::endl;
-			SDL_Surface* temp = SDL_LoadBMP(path.string().c_str());
+			SDL_Surface* temp = SDL_LoadBMP(path.c_str());
 			_texture = SDL_CreateTextureFromSurface(renderer, temp);
 			SDL_FreeSurface(temp);
 		}
 		else {
 			std::cout << "Non-BMP" << std::endl;
-			_texture = IMG_LoadTexture(renderer, path.string().c_str());
+			_texture = IMG_LoadTexture(renderer, path.c_str());
 		}
 		_animationTextures.push_back(_texture);
 	}
@@ -268,12 +268,12 @@ void HI2::Texture::clean() {
 }
 
 // filesystem
-std::filesystem::path HI2::getDataPath() {
-	return std::filesystem::path("data");
+std::string HI2::getDataPath() {
+	return "data";
 }
 
-std::filesystem::path HI2::getSavesPath() {
-	return std::filesystem::path("saves");
+std::string HI2::getSavesPath() {
+	return "saves";
 }
 
 // HardwareInfo
@@ -289,7 +289,7 @@ HI2::PLATFORM HI2::getPlatform() {
 }
 
 void HI2::consoleInit() {}
-void HI2::consoleInit(std::filesystem::path path) {}
+void HI2::consoleInit(std::string path) {}
 void HI2::consoleFini() {}
 void HI2::consoleClear() {}
 void HI2::sleepThread(unsigned long ns) {
