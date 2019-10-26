@@ -3,7 +3,7 @@
 #include <fstream>
 #include <string>
 #define M_PI 3.14159265358979323846
-#define BIT(n) (1U << (n))
+#define BIT(n) (1ULL << (n))
 
 struct point2D {
 	int x = 0;
@@ -128,45 +128,67 @@ namespace HI2 {
 		PLATFORM_PC,
 		PLATFORM_SWITCH,
 	};
-	enum BUTTON {
-		KEY_A = BIT(0),				///< A
-		KEY_B = BIT(1),				///< B
-		KEY_X = BIT(2),				///< X
-		KEY_Y = BIT(3),				///< Y
-		KEY_LSTICK = BIT(4),		///< Left Stick Button
-		KEY_RSTICK = BIT(5),		///< Right Stick Button
-		KEY_L = BIT(6),				///< L
-		KEY_R = BIT(7),				///< R
-		KEY_ZL = BIT(8),			///< ZL
-		KEY_ZR = BIT(9),			///< ZR
-		KEY_PLUS = BIT(10),			///< Plus
-		KEY_MINUS = BIT(11),		///< Minus
-		KEY_DLEFT = BIT(12),		///< D-Pad Left
-		KEY_DUP = BIT(13),			///< D-Pad Up
-		KEY_DRIGHT = BIT(14),		///< D-Pad Right
-		KEY_DDOWN = BIT(15),		///< D-Pad Down
-		KEY_LSTICK_LEFT = BIT(16),  ///< Left Stick Left
-		KEY_LSTICK_UP = BIT(17),	///< Left Stick Up
-		KEY_LSTICK_RIGHT = BIT(18), ///< Left Stick Right
-		KEY_LSTICK_DOWN = BIT(19),  ///< Left Stick Down
-		KEY_RSTICK_LEFT = BIT(20),  ///< Right Stick Left
-		KEY_RSTICK_UP = BIT(21),	///< Right Stick Up
-		KEY_RSTICK_RIGHT = BIT(22), ///< Right Stick Right
-		KEY_RSTICK_DOWN = BIT(23),  ///< Right Stick Down
-		KEY_SL_LEFT = BIT(24),		///< SL on Left Joy-Con
-		KEY_SR_LEFT = BIT(25),		///< SR on Left Joy-Con
-		KEY_SL_RIGHT = BIT(26),		///< SL on Right Joy-Con
-		KEY_SR_RIGHT = BIT(27),		///< SR on Right Joy-Con
+	enum BUTTON : unsigned long long{
+		KEY_A = BIT(0ULL),				///< A
+		KEY_B = BIT(1ULL),				///< B
+		KEY_X = BIT(2ULL),				///< X
+		KEY_Y = BIT(3ULL),				///< Y
+		KEY_LSTICK = BIT(4ULL),		///< Left Stick Button
+		KEY_RSTICK = BIT(5ULL),		///< Right Stick Button
+		KEY_L = BIT(6ULL),				///< L
+		KEY_R = BIT(7ULL),				///< R
+		KEY_ZL = BIT(8ULL),			///< ZL
+		KEY_ZR = BIT(9ULL),			///< ZR
+		KEY_PLUS = BIT(10ULL),			///< Plus
+		KEY_MINUS = BIT(11ULL),		///< Minus
+		KEY_DLEFT = BIT(12ULL),		///< D-Pad Left
+		KEY_DUP = BIT(13ULL),			///< D-Pad Up
+		KEY_DRIGHT = BIT(14ULL),		///< D-Pad Right
+		KEY_DDOWN = BIT(15ULL),		///< D-Pad Down
+		KEY_LSTICK_LEFT = BIT(16ULL),  ///< Left Stick Left
+		KEY_LSTICK_UP = BIT(17ULL),	///< Left Stick Up
+		KEY_LSTICK_RIGHT = BIT(18ULL), ///< Left Stick Right
+		KEY_LSTICK_DOWN = BIT(19ULL),  ///< Left Stick Down
+		KEY_RSTICK_LEFT = BIT(20ULL),  ///< Right Stick Left
+		KEY_RSTICK_UP = BIT(21ULL),	///< Right Stick Up
+		KEY_RSTICK_RIGHT = BIT(22ULL), ///< Right Stick Right
+		KEY_RSTICK_DOWN = BIT(23ULL),  ///< Right Stick Down
+		KEY_SL_LEFT = BIT(24ULL),		///< SL on Left Joy-Con
+		KEY_SR_LEFT = BIT(25ULL),		///< SR on Left Joy-Con
+		KEY_SL_RIGHT = BIT(26ULL),		///< SL on Right Joy-Con
+		KEY_SR_RIGHT = BIT(27ULL),		///< SR on Right Joy-Con
 
 		// Pseudo-key for at least one finger on the touch screen
-		KEY_TOUCH = BIT(28),
+		KEY_TOUCH = BIT(28ULL),
+
+		//PC extra keys
+		KEY_Q = BIT(29ULL),
+		KEY_W = BIT(30ULL),
+		KEY_E = BIT(31ULL),
+		KEY_T = BIT(32ULL),
+		KEY_U = BIT(33ULL),
+		KEY_I = BIT(34ULL),
+		KEY_O = BIT(35ULL),
+		KEY_P = BIT(36ULL),
+		KEY_S = BIT(37ULL),
+		KEY_D = BIT(38ULL),
+		KEY_F = BIT(39ULL),
+		KEY_G = BIT(40ULL),
+		KEY_H = BIT(41ULL),
+		KEY_J = BIT(42ULL),
+		KEY_K = BIT(43ULL),
+		KEY_Z = BIT(44ULL),
+		KEY_C = BIT(45ULL),
+		KEY_V = BIT(46ULL),
+		KEY_N = BIT(47ULL),
+		KEY_M = BIT(48ULL),
 
 		// Buttons by orientation (for single Joy-Con), also works with
 		// Joy-Con pairs, Pro Controller
-		KEY_JOYCON_RIGHT = BIT(0),
-		KEY_JOYCON_DOWN = BIT(1),
-		KEY_JOYCON_UP = BIT(2),
-		KEY_JOYCON_LEFT = BIT(3),
+		KEY_JOYCON_RIGHT = BIT(0ULL),
+		KEY_JOYCON_DOWN = BIT(1ULL),
+		KEY_JOYCON_UP = BIT(2ULL),
+		KEY_JOYCON_LEFT = BIT(3ULL),
 
 		// Generic catch-all directions, also works for single Joy-Con
 		KEY_UP =
@@ -208,9 +230,9 @@ namespace HI2 {
 	bool aptMainLoop();
 
 	// input
-	unsigned long getKeysDown();
-	unsigned long getKeysUp();
-	unsigned long getKeysHeld();
+	unsigned long long getKeysDown();
+	unsigned long long getKeysUp();
+	unsigned long long getKeysHeld();
 	point2D getJoystickPos(JOYSTICK joystick);
 	point2D getTouchPos();
 

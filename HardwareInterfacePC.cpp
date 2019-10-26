@@ -204,15 +204,12 @@ void HI2::Font::clean() {
 HI2::Texture::Texture() {}
 HI2::Texture::Texture(std::filesystem::path path) {
 	_path = path;
-	std::cout << "Loading tex:" << path.string().c_str() << std::endl;
 	if (path.extension() == ".bmp") {
-		std::cout << "BMP" << std::endl;
 		SDL_Surface* temp = SDL_LoadBMP(path.string().c_str());
 		_texture = SDL_CreateTextureFromSurface(renderer, temp);
 		SDL_FreeSurface(temp);
 	}
 	else {
-		std::cout << "Non-BMP" << std::endl;
 		_texture = IMG_LoadTexture(renderer, path.string().c_str());
 	}
 	if (_texture == nullptr) {
@@ -227,15 +224,12 @@ HI2::Texture::Texture(std::vector<std::filesystem::path> paths, double step)
 	_currentFrame = 0;
 	for (auto path : paths)
 	{
-		std::cout << "Loading tex:" << path.string().c_str() << std::endl;
 		if (path.extension() == ".bmp") {
-			std::cout << "BMP" << std::endl;
 			SDL_Surface* temp = SDL_LoadBMP(path.string().c_str());
 			_texture = SDL_CreateTextureFromSurface(renderer, temp);
 			SDL_FreeSurface(temp);
 		}
 		else {
-			std::cout << "Non-BMP" << std::endl;
 			_texture = IMG_LoadTexture(renderer, path.string().c_str());
 		}
 		_animationTextures.push_back(_texture);
@@ -300,24 +294,8 @@ HI2::BUTTON translate(SDL_Keycode s) {
 	switch (s) {
 	case SDLK_BACKSPACE:
 		return HI2::BUTTON::KEY_PLUS;
-	case SDLK_s:
-		return HI2::BUTTON::KEY_LSTICK_DOWN;
-	case SDLK_w:
-		return HI2::BUTTON::KEY_LSTICK_UP;
-	case SDLK_a:
-		return HI2::BUTTON::KEY_LSTICK_LEFT;
-	case SDLK_d:
-		return HI2::BUTTON::KEY_LSTICK_RIGHT;
-	case SDLK_q:
-		return HI2::BUTTON::KEY_L;
-	case SDLK_e:
-		return HI2::BUTTON::KEY_R;
 	case SDLK_SPACE:
 		return HI2::BUTTON::KEY_MINUS;
-	case SDLK_f:
-		return HI2::BUTTON::KEY_B;
-	case SDLK_r:
-		return HI2::BUTTON::KEY_A;
 	case SDLK_PLUS:
 		return HI2::BUTTON::KEY_ZR;
 	case SDLK_MINUS:
@@ -334,15 +312,67 @@ HI2::BUTTON translate(SDL_Keycode s) {
 		return HI2::BUTTON::KEY_X;
 	case SDLK_DELETE:
 		return HI2::BUTTON::KEY_Y;
+	case SDLK_a:
+		return HI2::BUTTON::KEY_A;
+	case SDLK_b:
+		return HI2::BUTTON::KEY_B;
+	case SDLK_c:
+		return HI2::BUTTON::KEY_C;
+	case SDLK_d:
+		return HI2::BUTTON::KEY_D;
+	case SDLK_e:
+		return HI2::BUTTON::KEY_E;
+	case SDLK_f:
+		return HI2::BUTTON::KEY_F;
+	case SDLK_g:
+		return HI2::BUTTON::KEY_G;
+	case SDLK_h:
+		return HI2::BUTTON::KEY_H;
+	case SDLK_i:
+		return HI2::BUTTON::KEY_I;
+	case SDLK_j:
+		return HI2::BUTTON::KEY_J;
+	case SDLK_k:
+		return HI2::BUTTON::KEY_K;
+	case SDLK_l:
+		return HI2::BUTTON::KEY_L;
+	case SDLK_m:
+		return HI2::BUTTON::KEY_M;
+	case SDLK_n:
+		return HI2::BUTTON::KEY_N;
+	case SDLK_o:
+		return HI2::BUTTON::KEY_O;
+	case SDLK_p:
+		return HI2::BUTTON::KEY_P;
+	case SDLK_q:
+		return HI2::BUTTON::KEY_Q;
+	case SDLK_r:
+		return HI2::BUTTON::KEY_R;
+	case SDLK_s:
+		return HI2::BUTTON::KEY_S;
+	case SDLK_t:
+		return HI2::BUTTON::KEY_T;
+	case SDLK_u:
+		return HI2::BUTTON::KEY_U;
+	case SDLK_v:
+		return HI2::BUTTON::KEY_V;
+	case SDLK_w:
+		return HI2::BUTTON::KEY_W;
+	case SDLK_x:
+		return HI2::BUTTON::KEY_X;
+	case SDLK_y:
+		return HI2::BUTTON::KEY_Y;
+	case SDLK_z:
+		return HI2::BUTTON::KEY_Z;
 	default:
 		return HI2::BUTTON::KEY_TOUCH;
 	}//TODO acabar aixo
 
 }
 
-unsigned long Down = 0;
-unsigned long Held = 0;
-unsigned long Up = 0;
+unsigned long long Down = 0;
+unsigned long long Held = 0;
+unsigned long long Up = 0;
 
 bool HI2::aptMainLoop() {
 	SDL_Event event;
@@ -376,13 +406,13 @@ bool HI2::aptMainLoop() {
 	return true;
 }
 
-unsigned long HI2::getKeysDown() {
+unsigned long long HI2::getKeysDown() {
 	return Down;
 }
-unsigned long HI2::getKeysUp() {
+unsigned long long HI2::getKeysUp() {
 	return Up;
 }
-unsigned long HI2::getKeysHeld() {
+unsigned long long HI2::getKeysHeld() {
 	return Held;
 }
 point2D HI2::getJoystickPos(HI2::JOYSTICK joystick) {
