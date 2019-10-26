@@ -340,15 +340,14 @@ HI2::BUTTON translate(SDL_Keycode s) {
 
 }
 
-unsigned long Down;
-unsigned long Held;
-unsigned long Up;
+unsigned long Down = 0;
+unsigned long Held = 0;
+unsigned long Up = 0;
 
 bool HI2::aptMainLoop() {
 	SDL_Event event;
 	Down = 0;
 	Up = 0;
-	Held = 0;
 	while (SDL_PollEvent(&event))
 	{
 		switch (event.type) {
@@ -363,12 +362,15 @@ bool HI2::aptMainLoop() {
 
 		case SDL_KEYUP:
 			Up |= event.key.state == SDL_PRESSED ? 0 : translate(event.key.keysym.sym);
+			Held &= ~(translate(event.key.keysym.sym));
 			break;
 		case SDL_WINDOWEVENT:
 			if (event.window.event == SDL_WINDOWEVENT_RESIZED || event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
 				SDL_GetWindowSize(window, &w, &h);
 			}
 			break;
+		default:
+			;
 		}
 	}
 	return true;
