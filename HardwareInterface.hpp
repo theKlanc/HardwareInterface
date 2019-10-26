@@ -182,6 +182,7 @@ namespace HI2 {
 		KEY_V = BIT(46ULL),
 		KEY_N = BIT(47ULL),
 		KEY_M = BIT(48ULL),
+		KEY_F11 = BIT(49ULL),
 
 		// Buttons by orientation (for single Joy-Con), also works with
 		// Joy-Con pairs, Pro Controller
@@ -242,6 +243,7 @@ namespace HI2 {
 	// graphics
 
 	void startFrame();
+	void toggleFullscreen();
 	void setBackgroundColor(Color color);
 	void drawText(Font& font, std::string text, point2D pos, int size,
 		Color color);

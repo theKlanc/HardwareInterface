@@ -35,7 +35,10 @@ HI2::Color _bg;
 
 std::ofstream _log;
 
+bool fullscreen;
+
 int w, h;
+int oldW, oldH;
 
 void HI2::logWrite(std::string s) {
 	_log << s << std::endl;
@@ -43,6 +46,7 @@ void HI2::logWrite(std::string s) {
 
 // System
 void HI2::systemInit() {
+	fullscreen = false;
 	_log.open("/HI2.log");
 	_bg = Color(255, 0, 0, 255);
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_AUDIO) < 0) {
@@ -101,6 +105,30 @@ void HI2::startFrame() {
 	SDL_SetRenderDrawColor(renderer, _bg.r, _bg.g, _bg.b, _bg.a);
 	SDL_RenderClear(renderer);
 }
+
+void HI2::toggleFullscreen()
+{
+	fullscreen = !fullscreen;
+	if(fullscreen)
+	{
+		SDL_Rect rect;
+		oldW=w;
+		oldH=h;
+		int displayIndex = SDL_GetWindowDisplayIndex(window);
+		SDL_GetDisplayBounds(displayIndex, &rect);
+		w=rect.w;
+		h=rect.h;
+	}
+	else
+	{
+		w=oldW;
+		h=oldH;
+	}
+	
+	SDL_SetWindowSize(window,w,h);
+	SDL_SetWindowFullscreen(window, fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
+}
+
 void HI2::setBackgroundColor(Color color) { _bg = color; }
 
 void HI2::playSound(HI2::Audio& audio, float volume) {
@@ -364,6 +392,8 @@ HI2::BUTTON translate(SDL_Keycode s) {
 		return HI2::BUTTON::KEY_Y;
 	case SDLK_z:
 		return HI2::BUTTON::KEY_Z;
+	case SDLK_F11:
+		return HI2::BUTTON::KEY_F11;
 	default:
 		return HI2::BUTTON::KEY_TOUCH;
 	}//TODO acabar aixo
