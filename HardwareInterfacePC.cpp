@@ -27,6 +27,9 @@ HI2::Color HI2::Color::White{ 255,255,255,255 };
 HI2::Color HI2::Color::Red{ 255,0,0,255 };
 HI2::Color HI2::Color::Green{ 0,255,0,255 };
 HI2::Color HI2::Color::Blue{ 0,0,255,255 };
+HI2::Color HI2::Color::Yellow{ 255,255,0,255 };
+HI2::Color HI2::Color::Orange{ 255,127,0,255 };
+HI2::Color HI2::Color::Pink{ 255,0,255,255 };
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -143,7 +146,7 @@ void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c)
 	int texW = 0;
 	int texH = 0;
 	SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
-	SDL_Rect dstrect = { 0, 0, (double)texW / 10.0f * size, (double)texH / 10.0f * size };
+	SDL_Rect dstrect = { pos.x, pos.y, (double)texW / 10.0f * size, (double)texH / 10.0f * size };
 
 	SDL_RenderCopy(renderer, texture, nullptr, &dstrect);
 
