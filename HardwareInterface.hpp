@@ -9,6 +9,13 @@
 struct point2D {
 	int x = 0;
 	int y = 0;
+
+	point2D operator+(const point2D& right)const{
+		return {x+right.x,y+right.y};
+	}
+	point2D operator-(const point2D& right)const{
+		return {x-right.x,y-right.y};
+	}
 };
 struct point2Dd {
 	double x = 0;
@@ -65,6 +72,7 @@ namespace HI2 {
 		static Color Yellow;
 		static Color Orange;
 		static Color Pink;
+		static Color Grey;
 
 	};
 
@@ -133,79 +141,91 @@ namespace HI2 {
 		PLATFORM_SWITCH,
 	};
 	enum BUTTON : unsigned long long{
-		KEY_A = BIT(0ULL),				///< A
-		KEY_B = BIT(1ULL),				///< B
-		KEY_X = BIT(2ULL),				///< X
-		KEY_Y = BIT(3ULL),				///< Y
-		KEY_LSTICK = BIT(4ULL),		///< Left Stick Button
-		KEY_RSTICK = BIT(5ULL),		///< Right Stick Button
-		KEY_L = BIT(6ULL),				///< L
-		KEY_R = BIT(7ULL),				///< R
-		KEY_ZL = BIT(8ULL),			///< ZL
-		KEY_ZR = BIT(9ULL),			///< ZR
-		KEY_PLUS = BIT(10ULL),			///< Plus
-		KEY_MINUS = BIT(11ULL),		///< Minus
-		KEY_DLEFT = BIT(12ULL),		///< D-Pad Left
-		KEY_DUP = BIT(13ULL),			///< D-Pad Up
-		KEY_DRIGHT = BIT(14ULL),		///< D-Pad Right
-		KEY_DDOWN = BIT(15ULL),		///< D-Pad Down
-		KEY_LSTICK_LEFT = BIT(16ULL),  ///< Left Stick Left
-		KEY_LSTICK_UP = BIT(17ULL),	///< Left Stick Up
-		KEY_LSTICK_RIGHT = BIT(18ULL), ///< Left Stick Right
-		KEY_LSTICK_DOWN = BIT(19ULL),  ///< Left Stick Down
-		KEY_RSTICK_LEFT = BIT(20ULL),  ///< Right Stick Left
-		KEY_RSTICK_UP = BIT(21ULL),	///< Right Stick Up
-		KEY_RSTICK_RIGHT = BIT(22ULL), ///< Right Stick Right
-		KEY_RSTICK_DOWN = BIT(23ULL),  ///< Right Stick Down
-		KEY_SL_LEFT = BIT(24ULL),		///< SL on Left Joy-Con
-		KEY_SR_LEFT = BIT(25ULL),		///< SR on Left Joy-Con
-		KEY_SL_RIGHT = BIT(26ULL),		///< SL on Right Joy-Con
-		KEY_SR_RIGHT = BIT(27ULL),		///< SR on Right Joy-Con
+		BUTTON_A = BIT(0ULL),				///< A
+		BUTTON_B = BIT(1ULL),				///< B
+		BUTTON_X = BIT(2ULL),				///< X
+		BUTTON_Y = BIT(3ULL),				///< Y
+		BUTTON_LSTICK = BIT(4ULL),		///< Left Stick Button
+		BUTTON_RSTICK = BIT(5ULL),		///< Right Stick Button
+		BUTTON_L = BIT(6ULL),				///< L
+		BUTTON_R = BIT(7ULL),				///< R
+		BUTTON_ZL = BIT(8ULL),			///< ZL
+		BUTTON_ZR = BIT(9ULL),			///< ZR
+		BUTTON_PLUS = BIT(10ULL),			///< Plus
+		BUTTON_MINUS = BIT(11ULL),		///< Minus
+		BUTTON_DLEFT = BIT(12ULL),		///< D-Pad Left
+		BUTTON_DUP = BIT(13ULL),			///< D-Pad Up
+		BUTTON_DRIGHT = BIT(14ULL),		///< D-Pad Right
+		BUTTON_DDOWN = BIT(15ULL),		///< D-Pad Down
+		BUTTON_LSTICK_LEFT = BIT(16ULL),  ///< Left Stick Left
+		BUTTON_LSTICK_UP = BIT(17ULL),	///< Left Stick Up
+		BUTTON_LSTICK_RIGHT = BIT(18ULL), ///< Left Stick Right
+		BUTTON_LSTICK_DOWN = BIT(19ULL),  ///< Left Stick Down
+		BUTTON_RSTICK_LEFT = BIT(20ULL),  ///< Right Stick Left
+		BUTTON_RSTICK_UP = BIT(21ULL),	///< Right Stick Up
+		BUTTON_RSTICK_RIGHT = BIT(22ULL), ///< Right Stick Right
+		BUTTON_RSTICK_DOWN = BIT(23ULL),  ///< Right Stick Down
+		BUTTON_SL_LEFT = BIT(24ULL),		///< SL on Left Joy-Con
+		BUTTON_SR_LEFT = BIT(25ULL),		///< SR on Left Joy-Con
+		BUTTON_SL_RIGHT = BIT(26ULL),		///< SL on Right Joy-Con
+		BUTTON_SR_RIGHT = BIT(27ULL),		///< SR on Right Joy-Con
 
 		// Pseudo-key for at least one finger on the touch screen
-		KEY_TOUCH = BIT(28ULL),
+		TOUCH = BIT(28ULL),
 
 		//PC extra keys
 		KEY_Q = BIT(29ULL),
 		KEY_W = BIT(30ULL),
 		KEY_E = BIT(31ULL),
-		KEY_T = BIT(32ULL),
-		KEY_U = BIT(33ULL),
-		KEY_I = BIT(34ULL),
-		KEY_O = BIT(35ULL),
-		KEY_P = BIT(36ULL),
-		KEY_S = BIT(37ULL),
-		KEY_D = BIT(38ULL),
-		KEY_F = BIT(39ULL),
-		KEY_G = BIT(40ULL),
-		KEY_H = BIT(41ULL),
-		KEY_J = BIT(42ULL),
-		KEY_K = BIT(43ULL),
-		KEY_Z = BIT(44ULL),
-		KEY_C = BIT(45ULL),
-		KEY_V = BIT(46ULL),
-		KEY_N = BIT(47ULL),
-		KEY_M = BIT(48ULL),
-		KEY_F11 = BIT(49ULL),
+		KEY_R = BIT(32ULL),
+		KEY_T = BIT(33ULL),
+		KEY_Y = BIT(34ULL),
+		KEY_U = BIT(35ULL),
+		KEY_I = BIT(36ULL),
+		KEY_O = BIT(37ULL),
+		KEY_P = BIT(38ULL),
+		KEY_A = BIT(39ULL),
+		KEY_S = BIT(40ULL),
+		KEY_D = BIT(41ULL),
+		KEY_F = BIT(42ULL),
+		KEY_G = BIT(43ULL),
+		KEY_H = BIT(44ULL),
+		KEY_J = BIT(45ULL),
+		KEY_K = BIT(46ULL),
+		KEY_L = BIT(47ULL),
+		KEY_Z = BIT(48ULL),
+		KEY_X = BIT(49ULL),
+		KEY_C = BIT(50ULL),
+		KEY_V = BIT(51ULL),
+		KEY_B = BIT(52ULL),
+		KEY_N = BIT(53ULL),
+		KEY_M = BIT(54ULL),
+
+		KEY_F11 = BIT(55ULL),
+		KEY_ESCAPE = BIT(56ULL),
+		KEY_BACKSPACE = BIT(57ULL),
 
 		// Buttons by orientation (for single Joy-Con), also works with
 		// Joy-Con pairs, Pro Controller
-		KEY_JOYCON_RIGHT = BIT(0ULL),
-		KEY_JOYCON_DOWN = BIT(1ULL),
-		KEY_JOYCON_UP = BIT(2ULL),
-		KEY_JOYCON_LEFT = BIT(3ULL),
+		BUTTON_JOYCON_RIGHT = BIT(0ULL),
+		BUTTON_JOYCON_DOWN = BIT(1ULL),
+		BUTTON_JOYCON_UP = BIT(2ULL),
+		BUTTON_JOYCON_LEFT = BIT(3ULL),
 
 		// Generic catch-all directions, also works for single Joy-Con
-		KEY_UP =
-		KEY_DUP | KEY_LSTICK_UP | KEY_RSTICK_UP, ///< D-Pad Up or Sticks Up
-		KEY_DOWN = KEY_DDOWN | KEY_LSTICK_DOWN |
-		KEY_RSTICK_DOWN, ///< D-Pad Down or Sticks Down
-		KEY_LEFT = KEY_DLEFT | KEY_LSTICK_LEFT |
-		KEY_RSTICK_LEFT, ///< D-Pad Left or Sticks Left
-		KEY_RIGHT = KEY_DRIGHT | KEY_LSTICK_RIGHT |
-		KEY_RSTICK_RIGHT,		 ///< D-Pad Right or Sticks Right
-		KEY_SL = KEY_SL_LEFT | KEY_SL_RIGHT, ///< SL on Left or Right Joy-Con
-		KEY_SR = KEY_SR_LEFT | KEY_SR_RIGHT, ///< SR on Left or Right Joy-Con
+		BUTTON_UP =
+		BUTTON_DUP | BUTTON_LSTICK_UP | BUTTON_RSTICK_UP, ///< D-Pad Up or Sticks Up
+		BUTTON_DOWN = BUTTON_DDOWN | BUTTON_LSTICK_DOWN |
+		BUTTON_RSTICK_DOWN, ///< D-Pad Down or Sticks Down
+		BUTTON_LEFT = BUTTON_DLEFT | BUTTON_LSTICK_LEFT |
+		BUTTON_RSTICK_LEFT, ///< D-Pad Left or Sticks Left
+		BUTTON_RIGHT = BUTTON_DRIGHT | BUTTON_LSTICK_RIGHT |
+		BUTTON_RSTICK_RIGHT,		 ///< D-Pad Right or Sticks Right
+		BUTTON_SL = BUTTON_SL_LEFT | BUTTON_SL_RIGHT, ///< SL on Left or Right Joy-Con
+		BUTTON_SR = BUTTON_SR_LEFT | BUTTON_SR_RIGHT, ///< SR on Left or Right Joy-Con
+
+		KEY_ACCEPT = BUTTON_A,
+		KEY_CANCEL = BUTTON_B,
 	};
 	enum JOYSTICK {
 		JOY_LEFT,

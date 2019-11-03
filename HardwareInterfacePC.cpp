@@ -30,6 +30,7 @@ HI2::Color HI2::Color::Blue{ 0,0,255,255 };
 HI2::Color HI2::Color::Yellow{ 255,255,0,255 };
 HI2::Color HI2::Color::Orange{ 255,127,0,255 };
 HI2::Color HI2::Color::Pink{ 255,0,255,255 };
+HI2::Color HI2::Color::Grey{200,200,200,255};
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -42,6 +43,8 @@ bool fullscreen;
 
 int w, h;
 int oldW, oldH;
+point2D mousePosition;
+
 
 void HI2::logWrite(std::string s) {
 	_log << s << std::endl;
@@ -323,26 +326,26 @@ void HI2::sleepThread(unsigned long ns) {
 
 HI2::BUTTON translate(SDL_Keycode s) {
 	switch (s) {
-	case SDLK_BACKSPACE:
-		return HI2::BUTTON::KEY_PLUS;
+	case SDLK_END:
+		return HI2::BUTTON::BUTTON_PLUS;
 	case SDLK_SPACE:
-		return HI2::BUTTON::KEY_MINUS;
+		return HI2::BUTTON::BUTTON_MINUS;
 	case SDLK_PLUS:
-		return HI2::BUTTON::KEY_ZR;
+		return HI2::BUTTON::BUTTON_ZR;
 	case SDLK_MINUS:
-		return HI2::BUTTON::KEY_ZL;
+		return HI2::BUTTON::BUTTON_ZL;
 	case SDLK_DOWN:
-		return HI2::BUTTON::KEY_DDOWN;
+		return HI2::BUTTON::BUTTON_DDOWN;
 	case SDLK_UP:
-		return HI2::BUTTON::KEY_DUP;
+		return HI2::BUTTON::BUTTON_DUP;
 	case SDLK_LEFT:
-		return HI2::BUTTON::KEY_DLEFT;
+		return HI2::BUTTON::BUTTON_DLEFT;
 	case SDLK_RIGHT:
-		return HI2::BUTTON::KEY_DRIGHT;
+		return HI2::BUTTON::BUTTON_DRIGHT;
 	case SDLK_INSERT:
-		return HI2::BUTTON::KEY_X;
+		return HI2::BUTTON::BUTTON_X;
 	case SDLK_DELETE:
-		return HI2::BUTTON::KEY_Y;
+		return HI2::BUTTON::BUTTON_Y;
 	case SDLK_a:
 		return HI2::BUTTON::KEY_A;
 	case SDLK_b:
@@ -397,8 +400,16 @@ HI2::BUTTON translate(SDL_Keycode s) {
 		return HI2::BUTTON::KEY_Z;
 	case SDLK_F11:
 		return HI2::BUTTON::KEY_F11;
+	case SDL_BUTTON_LEFT:
+		return HI2::BUTTON::TOUCH;
+	case SDLK_RETURN:
+		return HI2::BUTTON::KEY_ACCEPT;
+	case SDLK_ESCAPE:
+		return HI2::BUTTON::KEY_ESCAPE;
+	case SDLK_BACKSPACE:
+		return HI2::BUTTON::KEY_BACKSPACE;
 	default:
-		return HI2::BUTTON::KEY_TOUCH;
+		return (HI2::BUTTON)0;
 	}//TODO acabar aixo
 
 }
@@ -432,6 +443,18 @@ bool HI2::aptMainLoop() {
 				SDL_GetWindowSize(window, &w, &h);
 			}
 			break;
+		case SDL_MOUSEBUTTONDOWN:
+			Held |= translate(event.button.button);
+			Down |= translate(event.button.button);
+			break;
+		case SDL_MOUSEBUTTONUP:
+			Up |= translate(event.button.button);
+			Held &= ~(translate(event.button.button));
+			break;
+		case SDL_MOUSEMOTION:
+			mousePosition.x = event.motion.x;
+			mousePosition.y = event.motion.y;
+			break;
 		default:
 			;
 		}
@@ -449,23 +472,12 @@ unsigned long long HI2::getKeysHeld() {
 	return Held;
 }
 point2D HI2::getJoystickPos(HI2::JOYSTICK joystick) {
-	//::JoystickPosition temp;
-	//::hidJoystickRead(&temp,CONTROLLER_P1_AUTO,joystick==HI2::JOY_LEFT?::JOYSTICK_LEFT : (::JOYSTICK_RIGHT));
 	point2D res;
-	//res.x=temp.dx;
-	//res.y=temp.dy;
 	return res;
 }
 
 point2D HI2::getTouchPos() {
-	//touchPosition temp;
-	point2D res;
-	//if(hidTouchCount()>0){
-	//	hidTouchRead(&temp,0);
-	//	res.x=temp.px;
-	//	res.y=temp.py;
-	//}
-	return res;
+	return mousePosition;
 }
 
 #endif
