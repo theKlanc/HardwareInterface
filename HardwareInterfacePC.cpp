@@ -342,8 +342,6 @@ HI2::BUTTON translate(SDL_Keycode s) {
 	switch (s) {
 	case SDLK_END:
 		return HI2::BUTTON::BUTTON_PLUS;
-	case SDLK_SPACE:
-		return HI2::BUTTON::BUTTON_MINUS;
 	case SDLK_PLUS:
 		return HI2::BUTTON::BUTTON_ZR;
 	case SDLK_MINUS:
@@ -422,6 +420,8 @@ HI2::BUTTON translate(SDL_Keycode s) {
 		return HI2::BUTTON::KEY_ESCAPE;
 	case SDLK_BACKSPACE:
 		return HI2::BUTTON::KEY_BACKSPACE;
+	case SDLK_SPACE:
+		return HI2::BUTTON::KEY_SPACE;
 	default:
 		return (HI2::BUTTON)0;
 	}//TODO acabar aixo
