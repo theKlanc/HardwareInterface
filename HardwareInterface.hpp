@@ -277,7 +277,8 @@ namespace HI2 {
 		int sizeY, point2D displayPos);
 	Texture mergeTextures(Texture& originTexture, Texture& destinationTexture,
 		point2D position);
-	void drawRectangle(point2D pos, int width, int height, Color color);
+	void drawRectangle(point2D pos, int width, int height, Color color); // draw a filled rectangle
+	void drawEmptyRectangle(point2D pos, int width, int height, Color color);
 	void drawPixel(point2D pos, Color color);
 	void endFrame();
 
