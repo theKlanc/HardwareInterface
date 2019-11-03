@@ -60,9 +60,9 @@ namespace HI2 {
 	// New and more polished version of HI, breaks compat
 	struct Color
 	{
-		unsigned short r = 0, g = 0, b = 0, a = 0;
+		unsigned char r = 0, g = 0, b = 0, a = 0;
 		Color() {}
-		Color(unsigned short r, unsigned short g, unsigned short b, unsigned short a) :r(r), g(g), b(b), a(a) {}
+		Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a) :r(r), g(g), b(b), a(a) {}
 
 		static Color Black;
 		static Color White;
