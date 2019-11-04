@@ -268,7 +268,7 @@ HI2::Texture::Texture(std::filesystem::path path) {
 HI2::Texture::Texture(std::vector<std::filesystem::path> paths, double step)
 {
 	_path = paths[0];
-	_msPerFrame = step;
+	_sPerFrame = step;
 	_currentFrame = 0;
 	for (auto path : paths)
 	{
@@ -285,13 +285,13 @@ HI2::Texture::Texture(std::vector<std::filesystem::path> paths, double step)
 	_texture = _animationTextures[0];
 }
 
-void HI2::Texture::step(double ms)
+void HI2::Texture::step(double s)
 {
 	if (!_animationTextures.empty()) {
-		_currentMs += ms;
-		while (_currentMs > _msPerFrame)
+		_currentS += s;
+		while (_currentS > _sPerFrame)
 		{
-			_currentMs -= _msPerFrame;
+			_currentS -= _sPerFrame;
 			_currentFrame++;
 			if (_currentFrame >= _animationTextures.size())
 			{
