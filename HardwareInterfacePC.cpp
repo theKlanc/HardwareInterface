@@ -422,6 +422,9 @@ HI2::BUTTON translate(SDL_Keycode s) {
 		return HI2::BUTTON::KEY_BACKSPACE;
 	case SDLK_SPACE:
 		return HI2::BUTTON::KEY_SPACE;
+	case SDLK_LSHIFT:
+	case SDLK_RSHIFT:
+		return HI2::BUTTON::KEY_SHIFT;
 	default:
 		return (HI2::BUTTON)0;
 	}//TODO acabar aixo
@@ -472,6 +475,11 @@ bool HI2::aptMainLoop() {
 		default:
 			;
 		}
+	}
+	// Fullscreen
+	if (Down & HI2::BUTTON::KEY_F11)
+	{
+		HI2::toggleFullscreen();
 	}
 	return true;
 }

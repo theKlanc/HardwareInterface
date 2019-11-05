@@ -205,6 +205,7 @@ namespace HI2 {
 		KEY_ESCAPE = BIT(56ULL),
 		KEY_BACKSPACE = BIT(57ULL),
 		KEY_SPACE = BIT(58ULL),
+		KEY_SHIFT = BIT(59ULL),
 
 		// Buttons by orientation (for single Joy-Con), also works with
 		// Joy-Con pairs, Pro Controller
