@@ -31,7 +31,11 @@ HI2::Color HI2::Color::Blue{ 0,0,255,255 };
 HI2::Color HI2::Color::Yellow{ 255,255,0,255 };
 HI2::Color HI2::Color::Orange{ 255,127,0,255 };
 HI2::Color HI2::Color::Pink{ 255,0,255,255 };
-HI2::Color HI2::Color::Grey{200,200,200,255};
+HI2::Color HI2::Color::DarkestGrey{60,60,60,255};
+HI2::Color HI2::Color::DarkGrey{100,100,100,255};
+HI2::Color HI2::Color::Grey{150,150,150,255};
+HI2::Color HI2::Color::LightGrey{200,200,200,255};
+HI2::Color HI2::Color::LightestGrey{220,220,220,255};
 
 SDL_Window* window;
 SDL_Renderer* renderer;

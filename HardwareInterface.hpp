@@ -72,7 +72,11 @@ namespace HI2 {
 		static Color Yellow;
 		static Color Orange;
 		static Color Pink;
+		static Color LightestGrey;
+		static Color LightGrey;
 		static Color Grey;
+		static Color DarkGrey;
+		static Color DarkestGrey;
 
 	};
 
