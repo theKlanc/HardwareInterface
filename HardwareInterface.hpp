@@ -3,8 +3,9 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <bitset>
 #define M_PI 3.14159265358979323846
-#define BIT(n) (1ULL << (n))
+
 
 struct point2D {
 	int x = 0;
@@ -157,91 +158,88 @@ namespace HI2 {
 		PLATFORM_PC,
 		PLATFORM_SWITCH,
 	};
-	enum BUTTON : unsigned long long{
-		BUTTON_A = BIT(0ULL),				///< A
-		BUTTON_B = BIT(1ULL),				///< B
-		BUTTON_X = BIT(2ULL),				///< X
-		BUTTON_Y = BIT(3ULL),				///< Y
-		BUTTON_LSTICK = BIT(4ULL),		///< Left Stick Button
-		BUTTON_RSTICK = BIT(5ULL),		///< Right Stick Button
-		BUTTON_L = BIT(6ULL),				///< L
-		BUTTON_R = BIT(7ULL),				///< R
-		BUTTON_ZL = BIT(8ULL),			///< ZL
-		BUTTON_ZR = BIT(9ULL),			///< ZR
-		BUTTON_PLUS = BIT(10ULL),			///< Plus
-		BUTTON_MINUS = BIT(11ULL),		///< Minus
-		BUTTON_DLEFT = BIT(12ULL),		///< D-Pad Left
-		BUTTON_DUP = BIT(13ULL),			///< D-Pad Up
-		BUTTON_DRIGHT = BIT(14ULL),		///< D-Pad Right
-		BUTTON_DDOWN = BIT(15ULL),		///< D-Pad Down
-		BUTTON_LSTICK_LEFT = BIT(16ULL),  ///< Left Stick Left
-		BUTTON_LSTICK_UP = BIT(17ULL),	///< Left Stick Up
-		BUTTON_LSTICK_RIGHT = BIT(18ULL), ///< Left Stick Right
-		BUTTON_LSTICK_DOWN = BIT(19ULL),  ///< Left Stick Down
-		BUTTON_RSTICK_LEFT = BIT(20ULL),  ///< Right Stick Left
-		BUTTON_RSTICK_UP = BIT(21ULL),	///< Right Stick Up
-		BUTTON_RSTICK_RIGHT = BIT(22ULL), ///< Right Stick Right
-		BUTTON_RSTICK_DOWN = BIT(23ULL),  ///< Right Stick Down
-		BUTTON_SL_LEFT = BIT(24ULL),		///< SL on Left Joy-Con
-		BUTTON_SR_LEFT = BIT(25ULL),		///< SR on Left Joy-Con
-		BUTTON_SL_RIGHT = BIT(26ULL),		///< SL on Right Joy-Con
-		BUTTON_SR_RIGHT = BIT(27ULL),		///< SR on Right Joy-Con
+	constexpr int BUTTON_SIZE = 128;
+	enum BUTTON {
+		BUTTON_A = 0,				///< A
+		BUTTON_B = 1,				///< B
+		BUTTON_X = 2,				///< X
+		BUTTON_Y = 3,				///< Y
+		BUTTON_LSTICK = 4,		///< Left Stick Button
+		BUTTON_RSTICK = 5,		///< Right Stick Button
+		BUTTON_L = 6,				///< L
+		BUTTON_R = 7,				///< R
+		BUTTON_ZL = 8,			///< ZL
+		BUTTON_ZR = 9,			///< ZR
+		BUTTON_PLUS = 10,			///< Plus
+		BUTTON_MINUS = 11,		///< Minus
+		BUTTON_DLEFT = 12,		///< D-Pad Left
+		BUTTON_DUP = 13,			///< D-Pad Up
+		BUTTON_DRIGHT = 14,		///< D-Pad Right
+		BUTTON_DDOWN = 15,		///< D-Pad Down
+		BUTTON_LSTICK_LEFT = 16,  ///< Left Stick Left
+		BUTTON_LSTICK_UP = 17,	///< Left Stick Up
+		BUTTON_LSTICK_RIGHT = 18, ///< Left Stick Right
+		BUTTON_LSTICK_DOWN = 19,  ///< Left Stick Down
+		BUTTON_RSTICK_LEFT = 20,  ///< Right Stick Left
+		BUTTON_RSTICK_UP = 21,	///< Right Stick Up
+		BUTTON_RSTICK_RIGHT = 22, ///< Right Stick Right
+		BUTTON_RSTICK_DOWN = 23,  ///< Right Stick Down
+		BUTTON_SL_LEFT = 24,		///< SL on Left Joy-Con
+		BUTTON_SR_LEFT = 25,		///< SR on Left Joy-Con
+		BUTTON_SL_RIGHT = 26,		///< SL on Right Joy-Con
+		BUTTON_SR_RIGHT = 27,		///< SR on Right Joy-Con
 
 		// Pseudo-key for at least one finger on the touch screen
-		TOUCH = BIT(28ULL),
+		TOUCH = 28,
 
 		//PC extra keys
-		KEY_Q = BIT(29ULL),
-		KEY_W = BIT(30ULL),
-		KEY_E = BIT(31ULL),
-		KEY_R = BIT(32ULL),
-		KEY_T = BIT(33ULL),
-		KEY_Y = BIT(34ULL),
-		KEY_U = BIT(35ULL),
-		KEY_I = BIT(36ULL),
-		KEY_O = BIT(37ULL),
-		KEY_P = BIT(38ULL),
-		KEY_A = BIT(39ULL),
-		KEY_S = BIT(40ULL),
-		KEY_D = BIT(41ULL),
-		KEY_F = BIT(42ULL),
-		KEY_G = BIT(43ULL),
-		KEY_H = BIT(44ULL),
-		KEY_J = BIT(45ULL),
-		KEY_K = BIT(46ULL),
-		KEY_L = BIT(47ULL),
-		KEY_Z = BIT(48ULL),
-		KEY_X = BIT(49ULL),
-		KEY_C = BIT(50ULL),
-		KEY_V = BIT(51ULL),
-		KEY_B = BIT(52ULL),
-		KEY_N = BIT(53ULL),
-		KEY_M = BIT(54ULL),
+		KEY_Q = 29,
+		KEY_W = 30,
+		KEY_E = 31,
+		KEY_R = 32,
+		KEY_T = 33,
+		KEY_Y = 34,
+		KEY_U = 35,
+		KEY_I = 36,
+		KEY_O = 37,
+		KEY_P = 38,
+		KEY_A = 39,
+		KEY_S = 40,
+		KEY_D = 41,
+		KEY_F = 42,
+		KEY_G = 43,
+		KEY_H = 44,
+		KEY_J = 45,
+		KEY_K = 46,
+		KEY_L = 47,
+		KEY_Z = 48,
+		KEY_X = 49,
+		KEY_C = 50,
+		KEY_V = 51,
+		KEY_B = 52,
+		KEY_N = 53,
+		KEY_M = 54,
 
-		KEY_F11 = BIT(55ULL),
-		KEY_ESCAPE = BIT(56ULL),
-		KEY_BACKSPACE = BIT(57ULL),
-		KEY_SPACE = BIT(58ULL),
-		KEY_SHIFT = BIT(59ULL),
+		KEY_F11 = 55,
+		KEY_ESCAPE = 56,
+		KEY_BACKSPACE = 57,
+		KEY_SPACE = 58,
+		KEY_SHIFT = 59,
 
 		// Buttons by orientation (for single Joy-Con), also works with
 		// Joy-Con pairs, Pro Controller
-		BUTTON_JOYCON_RIGHT = BIT(0ULL),
-		BUTTON_JOYCON_DOWN = BIT(1ULL),
-		BUTTON_JOYCON_UP = BIT(2ULL),
-		BUTTON_JOYCON_LEFT = BIT(3ULL),
+		BUTTON_JOYCON_RIGHT = 0,
+		BUTTON_JOYCON_DOWN = 1,
+		BUTTON_JOYCON_UP = 2,
+		BUTTON_JOYCON_LEFT = 3,
 
 		// Generic catch-all directions, also works for single Joy-Con
-		BUTTON_UP =
-		BUTTON_DUP | BUTTON_LSTICK_UP | BUTTON_RSTICK_UP, ///< D-Pad Up or Sticks Up
-		BUTTON_DOWN = BUTTON_DDOWN | BUTTON_LSTICK_DOWN |
-		BUTTON_RSTICK_DOWN, ///< D-Pad Down or Sticks Down
-		BUTTON_LEFT = BUTTON_DLEFT | BUTTON_LSTICK_LEFT |
-		BUTTON_RSTICK_LEFT, ///< D-Pad Left or Sticks Left
-		BUTTON_RIGHT = BUTTON_DRIGHT | BUTTON_LSTICK_RIGHT |
-		BUTTON_RSTICK_RIGHT,		 ///< D-Pad Right or Sticks Right
-		BUTTON_SL = BUTTON_SL_LEFT | BUTTON_SL_RIGHT, ///< SL on Left or Right Joy-Con
-		BUTTON_SR = BUTTON_SR_LEFT | BUTTON_SR_RIGHT, ///< SR on Left or Right Joy-Con
+		BUTTON_UP = BUTTON_DUP, // | BUTTON_LSTICK_UP | BUTTON_RSTICK_UP, ///< D-Pad Up or Sticks Up
+		BUTTON_DOWN = BUTTON_DDOWN,//| BUTTON_LSTICK_DOWN | BUTTON_RSTICK_DOWN, ///< D-Pad Down or Sticks Down
+		BUTTON_LEFT = BUTTON_DLEFT,//| BUTTON_LSTICK_LEFT | BUTTON_RSTICK_LEFT, ///< D-Pad Left or Sticks Left
+		BUTTON_RIGHT = BUTTON_DRIGHT, // | BUTTON_LSTICK_RIGHT | BUTTON_RSTICK_RIGHT,		 ///< D-Pad Right or Sticks Right
+		BUTTON_SL = BUTTON_SL_LEFT, // | BUTTON_SL_RIGHT, ///< SL on Left or Right Joy-Con
+		BUTTON_SR = BUTTON_SR_LEFT, // | BUTTON_SR_RIGHT, ///< SR on Left or Right Joy-Con
 
 		KEY_ACCEPT = BUTTON_A,
 		KEY_CANCEL = BUTTON_B,
@@ -274,9 +272,9 @@ namespace HI2 {
 	bool aptMainLoop();
 
 	// input
-	unsigned long long getKeysDown();
-	unsigned long long getKeysUp();
-	unsigned long long getKeysHeld();
+	const std::bitset<BUTTON_SIZE>& getKeysDown();
+	const std::bitset<BUTTON_SIZE>& getKeysUp();
+	const std::bitset<BUTTON_SIZE>& getKeysHeld();
 	point2D getJoystickPos(JOYSTICK joystick);
 	point2D getTouchPos();
 

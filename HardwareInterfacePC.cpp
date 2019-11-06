@@ -436,19 +436,19 @@ HI2::BUTTON translate(SDL_Keycode s) {
 	case SDLK_RSHIFT:
 		return HI2::BUTTON::KEY_SHIFT;
 	default:
-		return (HI2::BUTTON)0;
+		return (HI2::BUTTON)(HI2::BUTTON_SIZE-1);
 	}//TODO acabar aixo
 
 }
 
-unsigned long long Down = 0;
-unsigned long long Held = 0;
-unsigned long long Up = 0;
+std::bitset<HI2::BUTTON_SIZE> Down = 0;
+std::bitset<HI2::BUTTON_SIZE> Held = 0;
+std::bitset<HI2::BUTTON_SIZE> Up = 0;
 
 bool HI2::aptMainLoop() {
 	SDL_Event event;
-	Down = 0;
-	Up = 0;
+	Down.reset();
+	Up.reset();
 	while (SDL_PollEvent(&event))
 	{
 		switch (event.type) {
@@ -457,13 +457,14 @@ bool HI2::aptMainLoop() {
 			return false;
 		}
 		case SDL_KEYDOWN:
-			Held |= translate(event.key.keysym.sym);
-			Down |= event.key.repeat ? 0 : translate(event.key.keysym.sym);
+			Held[translate(event.key.keysym.sym)] = true;
+			Down[translate(event.key.keysym.sym)]=true;
 			break;
 
 		case SDL_KEYUP:
-			Up |= event.key.state == SDL_PRESSED ? 0 : translate(event.key.keysym.sym);
-			Held &= ~(translate(event.key.keysym.sym));
+			if(event.key.state != SDL_PRESSED)
+				Up[translate(event.key.keysym.sym)] = true;
+			Held[translate(event.key.keysym.sym)] = false;
 			break;
 		case SDL_WINDOWEVENT:
 			if (event.window.event == SDL_WINDOWEVENT_RESIZED || event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
@@ -471,12 +472,12 @@ bool HI2::aptMainLoop() {
 			}
 			break;
 		case SDL_MOUSEBUTTONDOWN:
-			Held |= translate(event.button.button);
-			Down |= translate(event.button.button);
+			Held[translate(event.button.button)]=true;
+			Down[translate(event.button.button)]=true;
 			break;
 		case SDL_MOUSEBUTTONUP:
-			Up |= translate(event.button.button);
-			Held &= ~(translate(event.button.button));
+			Up[translate(event.button.button)] = true;
+			Held[translate(event.button.button)] = false;
 			break;
 		case SDL_MOUSEMOTION:
 			mousePosition.x = event.motion.x;
@@ -487,20 +488,20 @@ bool HI2::aptMainLoop() {
 		}
 	}
 	// Fullscreen
-	if (Down & HI2::BUTTON::KEY_F11)
+	if (Down[HI2::BUTTON::KEY_F11])
 	{
 		HI2::toggleFullscreen();
 	}
 	return true;
 }
 
-unsigned long long HI2::getKeysDown() {
+const std::bitset<HI2::BUTTON_SIZE>& HI2::getKeysDown() {
 	return Down;
 }
-unsigned long long HI2::getKeysUp() {
+const std::bitset<HI2::BUTTON_SIZE>& HI2::getKeysUp() {
 	return Up;
 }
-unsigned long long HI2::getKeysHeld() {
+const std::bitset<HI2::BUTTON_SIZE>& HI2::getKeysHeld() {
 	return Held;
 }
 point2D HI2::getJoystickPos(HI2::JOYSTICK joystick) {
