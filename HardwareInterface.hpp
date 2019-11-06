@@ -16,6 +16,18 @@ struct point2D {
 	point2D operator-(const point2D& right)const{
 		return {x-right.x,y-right.y};
 	}
+	point2D operator*(const point2D& right)const{
+		return {x*right.x,y*right.y};
+	}
+	point2D operator/(const point2D& right)const{
+		return {x/right.x,y/right.y};
+	}
+	point2D operator*(const int& right)const{
+		return {x*right,y*right};
+	}
+	point2D operator/(const int& right)const{
+		return {x/right,y/right};
+	}
 };
 struct point2Dd {
 	double x = 0;
@@ -77,6 +89,7 @@ namespace HI2 {
 		static Color Grey;
 		static Color DarkGrey;
 		static Color DarkestGrey;
+		static Color Transparent;
 
 	};
 
@@ -287,5 +300,7 @@ namespace HI2 {
 	void drawEmptyRectangle(point2D pos, int width, int height, Color color);
 	void drawPixel(point2D pos, Color color);
 	void endFrame();
+
+	void setCursorPos(point2D pos);
 
 } // namespace HI2

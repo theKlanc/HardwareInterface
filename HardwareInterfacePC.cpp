@@ -36,6 +36,7 @@ HI2::Color HI2::Color::DarkGrey{100,100,100,255};
 HI2::Color HI2::Color::Grey{150,150,150,255};
 HI2::Color HI2::Color::LightGrey{200,200,200,255};
 HI2::Color HI2::Color::LightestGrey{220,220,220,255};
+HI2::Color HI2::Color::Transparent{255,255,255,0};
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -214,6 +215,11 @@ void HI2::endFrame() {
 		SDL_DestroyTexture(textTextures.top());
 		textTextures.pop();
 	}
+}
+
+void HI2::setCursorPos(point2D pos)
+{
+	SDL_WarpMouseInWindow( window,pos.x,pos.y);
 }
 
 
