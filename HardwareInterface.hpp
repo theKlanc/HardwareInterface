@@ -160,78 +160,92 @@ namespace HI2 {
 	};
 	constexpr int BUTTON_SIZE = 128;
 	enum BUTTON {
-		BUTTON_A = 0,				///< A
-		BUTTON_B = 1,				///< B
-		BUTTON_X = 2,				///< X
-		BUTTON_Y = 3,				///< Y
-		BUTTON_LSTICK = 4,		///< Left Stick Button
-		BUTTON_RSTICK = 5,		///< Right Stick Button
-		BUTTON_L = 6,				///< L
-		BUTTON_R = 7,				///< R
-		BUTTON_ZL = 8,			///< ZL
-		BUTTON_ZR = 9,			///< ZR
-		BUTTON_PLUS = 10,			///< Plus
-		BUTTON_MINUS = 11,		///< Minus
-		BUTTON_DLEFT = 12,		///< D-Pad Left
-		BUTTON_DUP = 13,			///< D-Pad Up
-		BUTTON_DRIGHT = 14,		///< D-Pad Right
-		BUTTON_DDOWN = 15,		///< D-Pad Down
-		BUTTON_LSTICK_LEFT = 16,  ///< Left Stick Left
-		BUTTON_LSTICK_UP = 17,	///< Left Stick Up
-		BUTTON_LSTICK_RIGHT = 18, ///< Left Stick Right
-		BUTTON_LSTICK_DOWN = 19,  ///< Left Stick Down
-		BUTTON_RSTICK_LEFT = 20,  ///< Right Stick Left
-		BUTTON_RSTICK_UP = 21,	///< Right Stick Up
-		BUTTON_RSTICK_RIGHT = 22, ///< Right Stick Right
-		BUTTON_RSTICK_DOWN = 23,  ///< Right Stick Down
-		BUTTON_SL_LEFT = 24,		///< SL on Left Joy-Con
-		BUTTON_SR_LEFT = 25,		///< SR on Left Joy-Con
-		BUTTON_SL_RIGHT = 26,		///< SL on Right Joy-Con
-		BUTTON_SR_RIGHT = 27,		///< SR on Right Joy-Con
+		BUTTON_A,				///< A
+		BUTTON_B,				///< B
+		BUTTON_X,				///< X
+		BUTTON_Y,				///< Y
+		BUTTON_LSTICK,		///< Left Stick Button
+		BUTTON_RSTICK,		///< Right Stick Button
+		BUTTON_L,				///< L
+		BUTTON_R,				///< R
+		BUTTON_ZL,			///< ZL
+		BUTTON_ZR,			///< ZR
+		BUTTON_PLUS,			///< Plus
+		BUTTON_MINUS,		///< Minus
+		BUTTON_DLEFT,		///< D-Pad Left
+		BUTTON_DUP,			///< D-Pad Up
+		BUTTON_DRIGHT,		///< D-Pad Right
+		BUTTON_DDOWN,		///< D-Pad Down
+		BUTTON_LSTICK_LEFT,  ///< Left Stick Left
+		BUTTON_LSTICK_UP,	///< Left Stick Up
+		BUTTON_LSTICK_RIGHT, ///< Left Stick Right
+		BUTTON_LSTICK_DOWN,  ///< Left Stick Down
+		BUTTON_RSTICK_LEFT,  ///< Right Stick Left
+		BUTTON_RSTICK_UP,	///< Right Stick Up
+		BUTTON_RSTICK_RIGHT, ///< Right Stick Right
+		BUTTON_RSTICK_DOWN,  ///< Right Stick Down
+		BUTTON_SL_LEFT,		///< SL on Left Joy-Con
+		BUTTON_SR_LEFT,		///< SR on Left Joy-Con
+		BUTTON_SL_RIGHT,		///< SL on Right Joy-Con
+		BUTTON_SR_RIGHT,		///< SR on Right Joy-Con
 
 		// Pseudo-key for at least one finger on the touch screen
-		TOUCH = 28,
+		TOUCH,
 
 		//PC extra keys
-		KEY_Q = 29,
-		KEY_W = 30,
-		KEY_E = 31,
-		KEY_R = 32,
-		KEY_T = 33,
-		KEY_Y = 34,
-		KEY_U = 35,
-		KEY_I = 36,
-		KEY_O = 37,
-		KEY_P = 38,
-		KEY_A = 39,
-		KEY_S = 40,
-		KEY_D = 41,
-		KEY_F = 42,
-		KEY_G = 43,
-		KEY_H = 44,
-		KEY_J = 45,
-		KEY_K = 46,
-		KEY_L = 47,
-		KEY_Z = 48,
-		KEY_X = 49,
-		KEY_C = 50,
-		KEY_V = 51,
-		KEY_B = 52,
-		KEY_N = 53,
-		KEY_M = 54,
+		KEY_Q,
+		KEY_W,
+		KEY_E,
+		KEY_R,
+		KEY_T,
+		KEY_Y,
+		KEY_U,
+		KEY_I,
+		KEY_O,
+		KEY_P,
+		KEY_A,
+		KEY_S,
+		KEY_D,
+		KEY_F,
+		KEY_G,
+		KEY_H,
+		KEY_J,
+		KEY_K,
+		KEY_L,
+		KEY_Z,
+		KEY_X,
+		KEY_C,
+		KEY_V,
+		KEY_B,
+		KEY_N,
+		KEY_M,
 
-		KEY_F11 = 55,
-		KEY_ESCAPE = 56,
-		KEY_BACKSPACE = 57,
-		KEY_SPACE = 58,
-		KEY_SHIFT = 59,
+		KEY_F11,
+		KEY_ESCAPE,
+		KEY_BACKSPACE,
+		KEY_SPACE,
+		KEY_SHIFT,
+
+		KEY_0,
+		KEY_1,
+		KEY_2,
+		KEY_3,
+		KEY_4,
+		KEY_5,
+		KEY_6,
+		KEY_7,
+		KEY_8,
+		KEY_9,
+
+		KEY_DASH,
+
 
 		// Buttons by orientation (for single Joy-Con), also works with
 		// Joy-Con pairs, Pro Controller
-		BUTTON_JOYCON_RIGHT = 0,
-		BUTTON_JOYCON_DOWN = 1,
-		BUTTON_JOYCON_UP = 2,
-		BUTTON_JOYCON_LEFT = 3,
+		BUTTON_JOYCON_RIGHT = BUTTON_A,
+		BUTTON_JOYCON_DOWN = BUTTON_B,
+		BUTTON_JOYCON_UP = BUTTON_X,
+		BUTTON_JOYCON_LEFT = BUTTON_Y,
 
 		// Generic catch-all directions, also works for single Joy-Con
 		BUTTON_UP = BUTTON_DUP, // | BUTTON_LSTICK_UP | BUTTON_RSTICK_UP, ///< D-Pad Up or Sticks Up

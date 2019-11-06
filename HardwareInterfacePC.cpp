@@ -355,7 +355,7 @@ HI2::BUTTON translate(SDL_Keycode s) {
 	case SDLK_PLUS:
 		return HI2::BUTTON::BUTTON_ZR;
 	case SDLK_MINUS:
-		return HI2::BUTTON::BUTTON_ZL;
+		return HI2::BUTTON::KEY_DASH;
 	case SDLK_DOWN:
 		return HI2::BUTTON::BUTTON_DDOWN;
 	case SDLK_UP:
@@ -435,6 +435,27 @@ HI2::BUTTON translate(SDL_Keycode s) {
 	case SDLK_LSHIFT:
 	case SDLK_RSHIFT:
 		return HI2::BUTTON::KEY_SHIFT;
+	case SDLK_0:
+		return HI2::BUTTON::KEY_0;
+	case SDLK_1:
+		return HI2::BUTTON::KEY_1;
+	case SDLK_2:
+		return HI2::BUTTON::KEY_2;
+	case SDLK_3:
+		return HI2::BUTTON::KEY_3;
+	case SDLK_4:
+		return HI2::BUTTON::KEY_4;
+	case SDLK_5:
+		return HI2::BUTTON::KEY_5;
+	case SDLK_6:
+		return HI2::BUTTON::KEY_6;
+	case SDLK_7:
+		return HI2::BUTTON::KEY_7;
+	case SDLK_8:
+		return HI2::BUTTON::KEY_8;
+	case SDLK_9:
+		return HI2::BUTTON::KEY_9;
+
 	default:
 		return (HI2::BUTTON)(HI2::BUTTON_SIZE-1);
 	}//TODO acabar aixo
