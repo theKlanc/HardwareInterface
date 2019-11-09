@@ -479,7 +479,7 @@ bool HI2::aptMainLoop() {
 		}
 		case SDL_KEYDOWN:
 			Held[translate(event.key.keysym.sym)] = true;
-			Down[translate(event.key.keysym.sym)]=true;
+			Down[translate(event.key.keysym.sym)]=!event.key.repeat;
 			break;
 
 		case SDL_KEYUP:
