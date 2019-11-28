@@ -57,6 +57,12 @@ struct point3Di {
 	bool operator!=(const point3Di& right) const {
 		return !(*this == right);
 	}
+	point3Di operator*(const int& i) const{
+		return {x*i,y*i,z*i};
+	}
+	point3Di operator/(const int& i) const{
+		return {x/i,y/i,z/i};
+	}
 };
 struct point3Dl {
 	long x = 0;
@@ -67,6 +73,15 @@ struct point3Dd {
 	double x = 0.0;
 	double y = 0.0;
 	double z = 0.0;
+	point3Dd(double x, double y, double z):x(x),y(y),z(z){}
+	point3Dd(const point3Di& p){
+		x=p.x;
+		y=p.y;
+		z=p.z;
+	}
+	operator point3Di() const{
+		return {(int)x,(int)y,(int)z};
+	}
 };
 
 namespace HI2 {
@@ -238,6 +253,9 @@ namespace HI2 {
 		KEY_9,
 
 		KEY_DASH,
+
+		KEY_MOUSEWHEEL_UP,
+		KEY_MOUSEWHEEL_DOWN,
 
 
 		// Buttons by orientation (for single Joy-Con), also works with

@@ -504,8 +504,11 @@ bool HI2::aptMainLoop() {
 			mousePosition.x = event.motion.x;
 			mousePosition.y = event.motion.y;
 			break;
+		case SDL_MOUSEWHEEL:
+			Down[event.wheel.y>0?HI2::BUTTON::KEY_MOUSEWHEEL_UP:HI2::BUTTON::KEY_MOUSEWHEEL_DOWN] = true;
+			break;
 		default:
-			;
+			break;
 		}
 	}
 	// Fullscreen
