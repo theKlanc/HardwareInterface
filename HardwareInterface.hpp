@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include <filesystem>
 #include <vector>
 #include <fstream>
@@ -79,8 +80,14 @@ struct point3Dd {
 		y=p.y;
 		z=p.z;
 	}
+	point3Dd operator*(const double& i) const{
+		return {x*i,y*i,z*i};
+	}
+	point3Dd operator/(const double& i) const{
+		return {x/i,y/i,z/i};
+	}
 	operator point3Di() const{
-		return {(int)x,(int)y,(int)z};
+		return {(int)floor(x),(int)floor(y),(int)floor(z)};
 	}
 };
 
