@@ -155,7 +155,7 @@ void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c)
 
 	int texW = 0;
 	int texH = 0;
-	SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
+	SDL_QueryTexture(texture, nullptr, nullptr, &texW, &texH);
 	SDL_Rect dstrect = { pos.x, pos.y, (double)texW / 10.0f * size, (double)texH / 10.0f * size };
 
 	SDL_RenderCopyEx(renderer, texture, nullptr, &dstrect,0,nullptr,SDL_FLIP_NONE);
@@ -176,7 +176,7 @@ void HI2::drawTexture(Texture& texture, int posX, int posY, double scale, double
 	SDL_Rect texture_rect;
 	texture_rect.x = posX;  //the x coordinate
 	texture_rect.y = posY; // the y coordinate
-	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), NULL, NULL, &texture_rect.w, &texture_rect.h);
+	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), nullptr, nullptr, &texture_rect.w, &texture_rect.h);
 	texture_rect.w *= scale;
 	texture_rect.h *= scale;
 	texture_rect.w += 1;
@@ -184,7 +184,7 @@ void HI2::drawTexture(Texture& texture, int posX, int posY, double scale, double
 
 
 	// PI * rad = 180 * deg
-	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), NULL, &texture_rect, (radians * 180) / M_PI, nullptr, SDL_FLIP_NONE);
+	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), nullptr, &texture_rect, (radians * 180) / M_PI, nullptr, SDL_FLIP_NONE);
 
 }//TODO
 
