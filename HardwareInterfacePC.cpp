@@ -83,7 +83,7 @@ void HI2::systemInit() {
 	}
 
 	// create a renderer (OpenGL ES2)
-	renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+	renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
 	if (!renderer) {
 		SDL_Log("SDL_CreateRenderer: %s\n", SDL_GetError());
 		//SDL_Quit();
