@@ -167,6 +167,8 @@ namespace HI2 {
 
 		friend void drawTexture(Texture& texture, int posX, int posY,
 			double scale, double rotation);
+		friend void drawTextureOverlap(Texture& texture, int posX, int posY,
+			double scale, double rotation);
 		friend void drawTexturePart(Texture& texture, point2D texturePartStart,
 			int sizeX, int sizeY, point2D displayPos);
 		friend Texture mergeTextures(Texture& originTexture,
@@ -331,6 +333,7 @@ namespace HI2 {
 		Color color);
 	void setTextureColorMod(Texture& texture, Color color);
 	void drawTexture(Texture& texture, int posX, int posY, double scale = 1, double radians = 0);
+	void drawTextureOverlap(Texture& texture, int posX, int posY, double scale = 1, double radians = 0);
 	void drawTexturePart(Texture& texture, point2D texturePartStart, int sizeX,
 		int sizeY, point2D displayPos);
 	Texture mergeTextures(Texture& originTexture, Texture& destinationTexture,

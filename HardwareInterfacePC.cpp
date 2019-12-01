@@ -186,6 +186,22 @@ void HI2::drawTexture(Texture& texture, int posX, int posY, double scale, double
 
 }//TODO
 
+void HI2::drawTextureOverlap(Texture& texture, int posX, int posY, double scale, double radians) {
+	SDL_Rect texture_rect;
+	texture_rect.x = posX;  //the x coordinate
+	texture_rect.y = posY; // the y coordinate
+	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), nullptr, nullptr, &texture_rect.w, &texture_rect.h);
+	texture_rect.w *= scale;
+	texture_rect.h *= scale;
+	texture_rect.w += 1;
+	texture_rect.h += 1;
+
+
+	// PI * rad = 180 * deg
+	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), nullptr, &texture_rect, (radians * 180) / M_PI, nullptr, SDL_FLIP_NONE);
+
+}//TODO
+
 void HI2::drawTexturePart(Texture& texture, point2D texturePartStart, int sizeX, int sizeY, point2D displayPos) {}//TODO
 
 HI2::Texture HI2::mergeTextures(Texture& originTexture, Texture& destinationTexture, point2D position) {
