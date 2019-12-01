@@ -152,6 +152,7 @@ namespace HI2 {
 		Texture();
 		Texture(std::filesystem::path path);
 		Texture(std::vector<std::filesystem::path> paths, double step = 0.2);
+		Texture(point2D size);
 		void step(double s);
 		void clean();
 
@@ -172,6 +173,7 @@ namespace HI2 {
 			Texture& destinationTexture,
 			point2D position);
 		friend void setTextureColorMod(Texture& texture, Color color);
+		friend void setRenderTarget(Texture* t, bool b);
 	};
 
 	enum PLATFORM {
@@ -328,7 +330,7 @@ namespace HI2 {
 	void drawText(Font& font, std::string text, point2D pos, int size,
 		Color color);
 	void setTextureColorMod(Texture& texture, Color color);
-	void drawTexture(Texture& texture, int posX, int posY, double scale = 1, double radians = .0f);
+	void drawTexture(Texture& texture, int posX, int posY, double scale = 1, double radians = 0);
 	void drawTexturePart(Texture& texture, point2D texturePartStart, int sizeX,
 		int sizeY, point2D displayPos);
 	Texture mergeTextures(Texture& originTexture, Texture& destinationTexture,
@@ -336,6 +338,7 @@ namespace HI2 {
 	void drawRectangle(point2D pos, int width, int height, Color color); // draw a filled rectangle
 	void drawEmptyRectangle(point2D pos, int width, int height, Color color);
 	void drawPixel(point2D pos, Color color);
+	void setRenderTarget(Texture* t = nullptr, bool clear = false);
 	void endFrame();
 
 	void setCursorPos(point2D pos);

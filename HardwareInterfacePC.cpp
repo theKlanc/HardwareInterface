@@ -83,7 +83,7 @@ void HI2::systemInit() {
 	}
 
 	// create a renderer (OpenGL ES2)
-	renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 	if (!renderer) {
 		SDL_Log("SDL_CreateRenderer: %s\n", SDL_GetError());
 		//SDL_Quit();
@@ -179,8 +179,6 @@ void HI2::drawTexture(Texture& texture, int posX, int posY, double scale, double
 	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), nullptr, nullptr, &texture_rect.w, &texture_rect.h);
 	texture_rect.w *= scale;
 	texture_rect.h *= scale;
-	texture_rect.w += 1;
-	texture_rect.h += 1;
 
 
 	// PI * rad = 180 * deg
@@ -293,6 +291,12 @@ HI2::Texture::Texture(std::vector<std::filesystem::path> paths, double step)
 		_animationTextures.push_back(_texture);
 	}
 	_texture = _animationTextures[0];
+}
+
+HI2::Texture::Texture(point2D size)
+{
+	_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,size.x,size.y);
+	SDL_SetTextureBlendMode(rcast<SDL_Texture*>(_texture), SDL_BLENDMODE_BLEND);
 }
 
 void HI2::Texture::step(double s)
@@ -535,6 +539,21 @@ point2D HI2::getJoystickPos(HI2::JOYSTICK joystick) {
 
 point2D HI2::getTouchPos() {
 	return mousePosition;
+}
+
+void HI2::setRenderTarget(HI2::Texture* t, bool clear){
+	if(t == nullptr){
+		SDL_SetRenderTarget(renderer, nullptr);
+		SDL_SetRenderDrawColor(renderer,_bg.r,_bg.g,_bg.b,_bg.a);
+	}
+	else{
+		SDL_SetRenderTarget(renderer,rcast<SDL_Texture*>(t->_texture));
+		SDL_SetRenderDrawColor(renderer,0,0,0,0);
+	}
+
+	if(clear){
+		SDL_RenderClear(renderer);
+	}
 }
 
 #endif
