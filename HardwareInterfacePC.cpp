@@ -21,7 +21,6 @@
 #define DEBUG_PRIORITY 0
 
 #define rcast reinterpret_cast
-#define DEBUG_PRIORITY 0
 
 HI2::Color HI2::Color::Black{ 0,0,0,255 };
 HI2::Color HI2::Color::White{ 255,255,255,255 };
@@ -160,11 +159,8 @@ void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c)
 
 	SDL_RenderCopyEx(renderer, texture, nullptr, &dstrect,0,nullptr,SDL_FLIP_NONE);
 
-	
-	
 	textTextures.push(texture);
 	SDL_FreeSurface(surface);
-
 }
 
 void HI2::setTextureColorMod(Texture& texture, Color color)

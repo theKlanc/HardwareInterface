@@ -2,6 +2,7 @@
 #define _USE_MATH_DEFINES
 #include "HardwareInterface.hpp"
 #include <switch.h>
+#include <stack>
 #include <filesystem>
 #include <iostream>
 #include <math.h>
@@ -10,11 +11,29 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
 #include <fstream>
-#define rcast reinterpret_cast
+
 #define DEBUG_PRIORITY 0
 
-SDL_Window *window;
-SDL_Renderer *renderer;
+#define rcast reinterpret_cast
+
+
+HI2::Color HI2::Color::Black{ 0,0,0,255 };
+HI2::Color HI2::Color::White{ 255,255,255,255 };
+HI2::Color HI2::Color::Red{ 255,0,0,255 };
+HI2::Color HI2::Color::Green{ 0,255,0,255 };
+HI2::Color HI2::Color::Blue{ 0,0,255,255 };
+HI2::Color HI2::Color::Yellow{ 255,255,0,255 };
+HI2::Color HI2::Color::Orange{ 255,127,0,255 };
+HI2::Color HI2::Color::Pink{ 255,0,255,255 };
+HI2::Color HI2::Color::DarkestGrey{60,60,60,255};
+HI2::Color HI2::Color::DarkGrey{100,100,100,255};
+HI2::Color HI2::Color::Grey{150,150,150,255};
+HI2::Color HI2::Color::LightGrey{200,200,200,255};
+HI2::Color HI2::Color::LightestGrey{220,220,220,255};
+HI2::Color HI2::Color::Transparent{255,255,255,0};
+
+SDL_Window* window;
+SDL_Renderer* renderer;
 
 HI2::Color _bg;
 
@@ -24,10 +43,16 @@ void HI2::logWrite(std::string s){
 	_log << s << std::endl;
 }
 
+point2D mousePosition;
+point2D joystickPosition;
+
+std::stack<SDL_Texture*> textTextures;
+
 int w, h;
 
 // System
 void HI2::systemInit(){
+	socketInitializeDefault();
 	_log.open("/HI2.log");
 	_bg = Color(255, 0, 0, 255);
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_AUDIO) < 0) {
@@ -47,7 +72,7 @@ void HI2::systemInit(){
 	w = 1280;
 	h = 720;
 	// create a renderer (OpenGL ES2)
-	renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 	if (!renderer) {
 		_log << SDL_GetError()<<std::endl;
 	}
@@ -75,34 +100,62 @@ void HI2::systemFini(){
 	IMG_Quit();
 	SDL_Quit();
 	_log.close();
+	socketExit();
 }
 
 void HI2::startFrame(){
 	SDL_SetRenderDrawColor(renderer, _bg.r, _bg.g, _bg.b, _bg.a);
 	SDL_RenderClear(renderer);
 }
+
+void HI2::toggleFullscreen(){}
+
 void HI2::setBackgroundColor(Color color){_bg=color;}
 
 void HI2::playSound(HI2::Audio &audio,float volume){
 	Mix_PlayMusic(rcast<Mix_Music*>(audio._audio),audio._loop?-1:0);
 }
 
-void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c){
+void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c) {
 	SDL_Color color = { static_cast<Uint8>(c.r),static_cast<Uint8>(c.g),static_cast<Uint8>(c.b) };
 	SDL_Surface* surface = TTF_RenderText_Solid(rcast<TTF_Font*>(font._font), text.c_str(), color);
 	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
 
-	SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+	int texW = 0;
+	int texH = 0;
+	SDL_QueryTexture(texture, nullptr, nullptr, &texW, &texH);
+	SDL_Rect dstrect = { pos.x, pos.y, (double)texW / 10.0f * size, (double)texH / 10.0f * size };
 
-	SDL_DestroyTexture(texture);
+	SDL_RenderCopyEx(renderer, texture, nullptr, &dstrect,0,nullptr,SDL_FLIP_NONE);
+
+	textTextures.push(texture);
 	SDL_FreeSurface(surface);
-
 }
+
+void HI2::setTextureColorMod(Texture& texture, Color color)
+{
+	SDL_SetTextureColorMod(rcast<SDL_Texture*>(texture._texture), color.r, color.g, color.b);
+}
+
 void HI2::drawTexture(Texture& texture, int posX, int posY, double scale, double radians) {
 	SDL_Rect texture_rect;
 	texture_rect.x = posX;  //the x coordinate
 	texture_rect.y = posY; // the y coordinate
-	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), NULL, NULL, &texture_rect.w, &texture_rect.h);
+	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), nullptr, nullptr, &texture_rect.w, &texture_rect.h);
+	texture_rect.w *= scale;
+	texture_rect.h *= scale;
+
+
+	// PI * rad = 180 * deg
+	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), nullptr, &texture_rect, (radians * 180) / M_PI, nullptr, SDL_FLIP_NONE);
+
+}//TODO
+
+void HI2::drawTextureOverlap(Texture& texture, int posX, int posY, double scale, double radians) {
+	SDL_Rect texture_rect;
+	texture_rect.x = posX;  //the x coordinate
+	texture_rect.y = posY; // the y coordinate
+	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), nullptr, nullptr, &texture_rect.w, &texture_rect.h);
 	texture_rect.w *= scale;
 	texture_rect.h *= scale;
 	texture_rect.w += 1;
@@ -110,7 +163,7 @@ void HI2::drawTexture(Texture& texture, int posX, int posY, double scale, double
 
 
 	// PI * rad = 180 * deg
-	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), NULL, &texture_rect, (radians * 180) / 3.1415926535f, nullptr, SDL_FLIP_NONE);
+	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), nullptr, &texture_rect, (radians * 180) / M_PI, nullptr, SDL_FLIP_NONE);
 
 }//TODO
 
@@ -138,8 +191,17 @@ void HI2::drawPixel(point2D pos, Color color){
 
 void HI2::endFrame(){
 	SDL_RenderPresent(renderer);
+	while(!textTextures.empty())
+	{
+		SDL_DestroyTexture(textTextures.top());
+		textTextures.pop();
+	}
 }
 
+void HI2::setCursorPos(point2D pos)
+{
+	SDL_WarpMouseInWindow( window,pos.x,pos.y);
+}
 
 //~~CLASSES~~
 
@@ -149,7 +211,7 @@ HI2::Audio::Audio(std::filesystem::path path, bool loop, float volume){
 	_path=path;
 	_loop=loop;
 	_volume=volume;
-	_audio=Mix_LoadMUS(path.c_str());
+	_audio=Mix_LoadMUS(path.string().c_str());
 }
 void HI2::Audio::clean(){
 	if(_audio!=nullptr){
@@ -164,9 +226,9 @@ HI2::Font::Font(){
 	_path=std::filesystem::path();
 }
 
-HI2::Font::Font(std::filesystem::path path,int size){
+HI2::Font::Font(std::filesystem::path path){
 	_path=path;
-	_font=TTF_OpenFont(path.c_str(),size);
+	_font=TTF_OpenFont(path.c_str(), 10);
 	_name=path.filename().replace_extension("");
 }
 void HI2::Font::clean(){
@@ -177,30 +239,72 @@ void HI2::Font::clean(){
 }
 
 //TEXTURE
-HI2::Texture::Texture(){}
-HI2::Texture::Texture(std::filesystem::path path){
-	_path=path;
-	_log << "Loading tex:"<<path.c_str()<<std::endl;
-	if(path.extension()==".bmp"){
-		_log << "BMP"<<std::endl;
-		SDL_Surface* temp = SDL_LoadBMP(path.c_str());
-		_texture=SDL_CreateTextureFromSurface(renderer,temp);
+HI2::Texture::Texture() {}
+HI2::Texture::Texture(std::filesystem::path path) {
+	_path = path;
+	if (path.extension() == ".bmp") {
+		SDL_Surface* temp = SDL_LoadBMP(path.string().c_str());
+		_texture = SDL_CreateTextureFromSurface(renderer, temp);
 		SDL_FreeSurface(temp);
 	}
-	else{
-		_log << "Non-BMP"<<std::endl;
-		_texture=IMG_LoadTexture(renderer,path.c_str());
+	else {
+		_texture = IMG_LoadTexture(renderer, path.string().c_str());
 	}
-	if(_texture==nullptr){
-			_log << "Error loading texture: "<<SDL_GetError()<<std::endl;
+	if (_texture == nullptr) {
+		std::cout << "Error loading texture: " << SDL_GetError() << std::endl;
 	}
 }
-void HI2::Texture::clean(){
-	if(_texture!=nullptr){
+
+HI2::Texture::Texture(std::vector<std::filesystem::path> paths, double step)
+{
+	_path = paths[0];
+	_sPerFrame = step;
+	_currentFrame = 0;
+	for (auto path : paths)
+	{
+		if (path.extension() == ".bmp") {
+			SDL_Surface* temp = SDL_LoadBMP(path.string().c_str());
+			_texture = SDL_CreateTextureFromSurface(renderer, temp);
+			SDL_FreeSurface(temp);
+		}
+		else {
+			_texture = IMG_LoadTexture(renderer, path.string().c_str());
+		}
+		_animationTextures.push_back(_texture);
+	}
+	_texture = _animationTextures[0];
+}
+
+HI2::Texture::Texture(point2D size)
+{
+	_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,size.x,size.y);
+	SDL_SetTextureBlendMode(rcast<SDL_Texture*>(_texture), SDL_BLENDMODE_BLEND);
+}
+
+void HI2::Texture::step(double s)
+{
+	if (!_animationTextures.empty()) {
+		_currentS += s;
+		while (_currentS > _sPerFrame)
+		{
+			_currentS -= _sPerFrame;
+			_currentFrame++;
+			if (_currentFrame >= _animationTextures.size())
+			{
+				_currentFrame = 0;
+			}
+		}
+		_texture = _animationTextures[_currentFrame];
+	}
+}
+
+void HI2::Texture::clean() {
+	if (_texture != nullptr) {
 		SDL_DestroyTexture(rcast<SDL_Texture*>(_texture));
 	}
-	_texture=nullptr;
+	_texture = nullptr;
 }
+
 // filesystem
 std::filesystem::path HI2::getDataPath(){
 	return std::filesystem::path("data/");
@@ -238,39 +342,49 @@ void HI2::consoleClear(){
 void HI2::sleepThread(unsigned long ns){
 	::svcSleepThread(ns);
 }
+
+std::bitset<HI2::BUTTON_SIZE> Down = 0;
+std::bitset<HI2::BUTTON_SIZE> Held = 0;
+std::bitset<HI2::BUTTON_SIZE> Up = 0;
+
 bool HI2::aptMainLoop(){
 	::hidScanInput();
-	return ::appletMainLoop();
+	//READ BUTTONS
 	consoleUpdate(nullptr);
+	return ::appletMainLoop();
 }
 
-unsigned long HI2::getKeysDown(){
-	return ::hidKeysDown(CONTROLLER_P1_AUTO);
+const std::bitset<HI2::BUTTON_SIZE>& HI2::getKeysDown() {
+	return Down;
 }
-unsigned long HI2::getKeysUp(){
-	return ::hidKeysUp(CONTROLLER_P1_AUTO);
+const std::bitset<HI2::BUTTON_SIZE>& HI2::getKeysUp() {
+	return Up;
 }
-unsigned long HI2::getKeysHeld(){
-	return ::hidKeysHeld(CONTROLLER_P1_AUTO);
+const std::bitset<HI2::BUTTON_SIZE>& HI2::getKeysHeld() {
+	return Held;
 }
+
 point2D HI2::getJoystickPos(HI2::JOYSTICK joystick){
-	::JoystickPosition temp;
-	::hidJoystickRead(&temp,CONTROLLER_P1_AUTO,joystick==HI2::JOY_LEFT?::JOYSTICK_LEFT : (::JOYSTICK_RIGHT));
-	point2D res;
-	res.x=temp.dx;
-	res.y=temp.dy;
-	return res;
+	return joystickPosition;
 }
 
-point2D HI2::getTouchPos(){
-	touchPosition temp;
-	point2D res;
-	if(hidTouchCount()>0){
-		hidTouchRead(&temp,0);
-		res.x=temp.px;
-		res.y=temp.py;
+point2D HI2::getTouchPos() {
+	return mousePosition;
+}
+
+void HI2::setRenderTarget(HI2::Texture* t, bool clear){
+	if(t == nullptr){
+		SDL_SetRenderTarget(renderer, nullptr);
+		SDL_SetRenderDrawColor(renderer,_bg.r,_bg.g,_bg.b,_bg.a);
 	}
-	return res;
+	else{
+		SDL_SetRenderTarget(renderer,rcast<SDL_Texture*>(t->_texture));
+		SDL_SetRenderDrawColor(renderer,0,0,0,0);
+	}
+
+	if(clear){
+		SDL_RenderClear(renderer);
+	}
 }
 
 #endif
