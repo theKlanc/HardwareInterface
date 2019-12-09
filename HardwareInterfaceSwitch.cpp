@@ -307,11 +307,11 @@ void HI2::Texture::clean() {
 
 // filesystem
 std::filesystem::path HI2::getDataPath(){
-	return std::filesystem::path("data/");
+	return std::filesystem::path("data");
 }
 
 std::filesystem::path HI2::getSavesPath(){
-	return std::filesystem::path("saves/");
+	return std::filesystem::path("saves");
 }
 
 // HardwareInfo
