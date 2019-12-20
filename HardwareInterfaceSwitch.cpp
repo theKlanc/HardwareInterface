@@ -336,18 +336,12 @@ HI2::PLATFORM HI2::getPlatform(){
 
 
 void HI2::consoleInit(){
-	::consoleInit(nullptr);
-	socketInitializeDefault();
-	nxlinkStdio();
 }
 void HI2::consoleInit(std::filesystem::path path){
-	::consoleInit(nullptr);
 }
 void HI2::consoleFini(){
-	::consoleExit(nullptr);
 }
 void HI2::consoleClear(){
-	::consoleClear();
 }
 void HI2::sleepThread(unsigned long ns){
 	::svcSleepThread(ns);
@@ -461,7 +455,7 @@ bool HI2::aptMainLoop(){
 	translateButtons(Held,::hidKeysHeld(CONTROLLER_P1_AUTO));
 	translateButtons(Up,::hidKeysUp(CONTROLLER_P1_AUTO));
 
-	consoleUpdate(nullptr);
+	//consoleUpdate(nullptr);
 	return ::appletMainLoop();
 }
 
