@@ -52,31 +52,33 @@ int w, h;
 
 // System
 void HI2::systemInit(){
-	socketInitializeDefault();
 	_log.open("/HI2.log");
 	_bg = Color(255, 0, 0, 255);
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_AUDIO) < 0) {
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0) {
 		_log << SDL_GetError()<<std::endl;
+		SDL_Quit();
 	}
-	TTF_Init();
-	IMG_Init(IMG_INIT_PNG | IMG_INIT_WEBP);
 	// create an SDL window (OpenGL ES2 always enabled)
 	// when SDL_FULLSCREEN flag is not set, viewport is automatically handled by SDL (use SDL_SetWindowSize to "change resolution")
 	// available switch SDL2 video modes :
 	// 1920 x 1080 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
 	// 1280 x 720 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
-	window = SDL_CreateWindow("sdl2_gles2", 0, 0, 1280,720, 0);
+
+	w = 1920;
+	h = 1080;
+	window = SDL_CreateWindow("lmao", 0, 0, 1920,1080, 0);
 	if (!window) {
 		_log << SDL_GetError()<<std::endl;
+		SDL_Quit();
 	}
-	w = 1280;
-	h = 720;
+
+	std::cout << SDL_GetError() << std::endl;
 	// create a renderer (OpenGL ES2)
-	renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+	renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (!renderer) {
 		_log << SDL_GetError()<<std::endl;
+		SDL_Quit();
 	}
-	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
 	// open CONTROLLER_PLAYER_1 and CONTROLLER_PLAYER_2
 	// when railed, both joycons are mapped to joystick #0,
@@ -90,10 +92,12 @@ void HI2::systemInit(){
 	//}
 	Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 4096);
+    //romfsInit();
 }
 void HI2::systemFini(){
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
+	//romfsExit();
 	Mix_CloseAudio();
 	Mix_Quit();
 	TTF_Quit();
@@ -106,6 +110,10 @@ void HI2::systemFini(){
 void HI2::startFrame(){
 	SDL_SetRenderDrawColor(renderer, _bg.r, _bg.g, _bg.b, _bg.a);
 	SDL_RenderClear(renderer);
+
+	SDL_SetRenderDrawColor(renderer, _bg.r, _bg.g, _bg.b, _bg.a);
+	SDL_Rect f = {0, 0, getScreenWidth(), getScreenHeight()};
+	SDL_RenderFillRect(renderer, &f);
 }
 
 void HI2::toggleFullscreen(){}
@@ -145,9 +153,9 @@ void HI2::drawTexture(Texture& texture, int posX, int posY, double scale, double
 	texture_rect.w *= scale;
 	texture_rect.h *= scale;
 
-
+	SDL_RenderCopy(renderer, rcast<SDL_Texture*>(texture._texture), NULL, &texture_rect);
 	// PI * rad = 180 * deg
-	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), nullptr, &texture_rect, (radians * 180) / M_PI, nullptr, SDL_FLIP_NONE);
+	//SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), nullptr, &texture_rect, (radians * 180) / M_PI, nullptr, SDL_FLIP_NONE);
 
 }//TODO
 
@@ -329,6 +337,8 @@ HI2::PLATFORM HI2::getPlatform(){
 
 void HI2::consoleInit(){
 	::consoleInit(nullptr);
+	socketInitializeDefault();
+	nxlinkStdio();
 }
 void HI2::consoleInit(std::filesystem::path path){
 	::consoleInit(nullptr);
@@ -347,12 +357,115 @@ std::bitset<HI2::BUTTON_SIZE> Down = 0;
 std::bitset<HI2::BUTTON_SIZE> Held = 0;
 std::bitset<HI2::BUTTON_SIZE> Up = 0;
 
+void translateButtons(std::bitset<HI2::BUTTON_SIZE>& b, const u64& h){
+	for(int i =0;i<64;i++){
+		if(h&BIT(i)){
+			switch(BIT(i)){
+
+			case(::KEY_A):{
+				break;
+			}
+			case(::KEY_B):{
+				break;
+			}
+			case(::KEY_X):{
+				break;
+			}
+			case(::KEY_Y):{
+				break;
+			}
+			case(::KEY_LSTICK):{
+				break;
+			}
+			case(::KEY_RSTICK):{
+				break;
+			}
+			case(::KEY_L):{
+				break;
+			}
+			case(::KEY_R):{
+				break;
+			}
+			case(::KEY_ZL):{
+				break;
+			}
+			case(::KEY_ZR):{
+				break;
+			}
+			case(::KEY_PLUS):{
+				b[HI2::BUTTON::KEY_ESCAPE] = true;
+				break;
+			}
+			case(::KEY_MINUS):{
+				break;
+			}
+			case(::KEY_DLEFT):{
+				break;
+			}
+			case(::KEY_DUP):{
+				break;
+			}
+			case(::KEY_DRIGHT):{
+				break;
+			}
+			case(::KEY_DDOWN):{
+				break;
+			}
+			case(::KEY_LSTICK_LEFT):{
+				break;
+			}
+			case(::KEY_LSTICK_UP):{
+				break;
+			}
+			case(::KEY_LSTICK_RIGHT):{
+				break;
+			}
+			case(::KEY_LSTICK_DOWN):{
+				break;
+			}
+			case(::KEY_RSTICK_LEFT):{
+				break;
+			}
+			case(::KEY_RSTICK_UP):{
+				break;
+			}
+			case(::KEY_RSTICK_RIGHT):{
+				break;
+			}
+			case(::KEY_RSTICK_DOWN):{
+				break;
+			}
+			case(::KEY_SL_LEFT):{
+				break;
+			}
+			case(::KEY_SR_LEFT):{
+				break;
+			}
+			case(::KEY_SL_RIGHT):{
+				break;
+			}
+			case(::KEY_SR_RIGHT):{
+				break;
+			}
+			case(::KEY_TOUCH):{
+				break;
+			}
+			}
+		}
+	}
+}
+
 bool HI2::aptMainLoop(){
 	::hidScanInput();
-	//READ BUTTONS
+	translateButtons(Down,::hidKeysDown(CONTROLLER_P1_AUTO));
+	translateButtons(Held,::hidKeysHeld(CONTROLLER_P1_AUTO));
+	translateButtons(Up,::hidKeysUp(CONTROLLER_P1_AUTO));
+
 	consoleUpdate(nullptr);
 	return ::appletMainLoop();
 }
+
+
 
 const std::bitset<HI2::BUTTON_SIZE>& HI2::getKeysDown() {
 	return Down;
