@@ -64,9 +64,9 @@ void HI2::systemInit(){
 	// 1920 x 1080 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
 	// 1280 x 720 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
 
-	w = 1920;
-	h = 1080;
-	window = SDL_CreateWindow("lmao", 0, 0, 1920,1080, 0);
+	w = 1280;
+	h = 720;
+	window = SDL_CreateWindow("lmao", 0, 0, w,h, 0);
 	if (!window) {
 		_log << SDL_GetError()<<std::endl;
 		SDL_Quit();
@@ -80,6 +80,7 @@ void HI2::systemInit(){
 		SDL_Quit();
 	}
 
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 	// open CONTROLLER_PLAYER_1 and CONTROLLER_PLAYER_2
 	// when railed, both joycons are mapped to joystick #0,
 	// else joycons are individually mapped to joystick #0, joystick #1, ...
@@ -353,104 +354,121 @@ std::bitset<HI2::BUTTON_SIZE> Up = 0;
 
 void translateButtons(std::bitset<HI2::BUTTON_SIZE>& b, const u64& h){
 	for(int i =0;i<64;i++){
-		if(h&BIT(i)){
-			switch(BIT(i)){
+		switch(BIT(i)){
 
-			case(::KEY_A):{
-				break;
-			}
-			case(::KEY_B):{
-				break;
-			}
-			case(::KEY_X):{
-				break;
-			}
-			case(::KEY_Y):{
-				break;
-			}
-			case(::KEY_LSTICK):{
-				break;
-			}
-			case(::KEY_RSTICK):{
-				break;
-			}
-			case(::KEY_L):{
-				break;
-			}
-			case(::KEY_R):{
-				break;
-			}
-			case(::KEY_ZL):{
-				break;
-			}
-			case(::KEY_ZR):{
-				break;
-			}
-			case(::KEY_PLUS):{
-				b[HI2::BUTTON::KEY_ESCAPE] = true;
-				break;
-			}
-			case(::KEY_MINUS):{
-				break;
-			}
-			case(::KEY_DLEFT):{
-				break;
-			}
-			case(::KEY_DUP):{
-				break;
-			}
-			case(::KEY_DRIGHT):{
-				break;
-			}
-			case(::KEY_DDOWN):{
-				break;
-			}
-			case(::KEY_LSTICK_LEFT):{
-				break;
-			}
-			case(::KEY_LSTICK_UP):{
-				break;
-			}
-			case(::KEY_LSTICK_RIGHT):{
-				break;
-			}
-			case(::KEY_LSTICK_DOWN):{
-				break;
-			}
-			case(::KEY_RSTICK_LEFT):{
-				break;
-			}
-			case(::KEY_RSTICK_UP):{
-				break;
-			}
-			case(::KEY_RSTICK_RIGHT):{
-				break;
-			}
-			case(::KEY_RSTICK_DOWN):{
-				break;
-			}
-			case(::KEY_SL_LEFT):{
-				break;
-			}
-			case(::KEY_SR_LEFT):{
-				break;
-			}
-			case(::KEY_SL_RIGHT):{
-				break;
-			}
-			case(::KEY_SR_RIGHT):{
-				break;
-			}
-			case(::KEY_TOUCH):{
-				break;
-			}
-			}
+		case(::KEY_A):{
+			b[HI2::BUTTON::KEY_ACCEPT] = h&::KEY_A;
+			break;
+		}
+		case(::KEY_B):{
+			break;
+		}
+		case(::KEY_X):{
+			break;
+		}
+		case(::KEY_Y):{
+			break;
+		}
+		case(::KEY_LSTICK):{
+			break;
+		}
+		case(::KEY_RSTICK):{
+			break;
+		}
+		case(::KEY_L):{
+			break;
+		}
+		case(::KEY_R):{
+			break;
+		}
+		case(::KEY_ZL):{
+			break;
+		}
+		case(::KEY_ZR):{
+			break;
+		}
+		case(::KEY_PLUS):{
+			b[HI2::BUTTON::KEY_ESCAPE] = h&::KEY_PLUS;
+			break;
+		}
+		case(::KEY_MINUS):{
+			break;
+		}
+		case(::KEY_DLEFT):{
+			b[HI2::BUTTON::BUTTON_LEFT] = h&::KEY_DLEFT;
+			break;
+		}
+		case(::KEY_DUP):{
+			b[HI2::BUTTON::BUTTON_UP] = h&::KEY_DUP;
+			break;
+		}
+		case(::KEY_DRIGHT):{
+			b[HI2::BUTTON::BUTTON_RIGHT] = h&::KEY_DRIGHT;
+			break;
+		}
+		case(::KEY_DDOWN):{
+			b[HI2::BUTTON::BUTTON_DOWN] = h&::KEY_DDOWN;
+			break;
+		}
+		case(::KEY_LSTICK_LEFT):{
+			b[HI2::BUTTON::BUTTON_LEFT] = h&::KEY_LSTICK_LEFT;
+			break;
+		}
+		case(::KEY_LSTICK_UP):{
+			b[HI2::BUTTON::BUTTON_UP] = h&::KEY_LSTICK_UP;
+			break;
+		}
+		case(::KEY_LSTICK_RIGHT):{
+			b[HI2::BUTTON::BUTTON_RIGHT] = h&::KEY_LSTICK_RIGHT;
+			break;
+		}
+		case(::KEY_LSTICK_DOWN):{
+			b[HI2::BUTTON::BUTTON_DOWN] = h&::KEY_LSTICK_DOWN;
+			break;
+		}
+		case(::KEY_RSTICK_LEFT):{
+			break;
+		}
+		case(::KEY_RSTICK_UP):{
+			break;
+		}
+		case(::KEY_RSTICK_RIGHT):{
+			break;
+		}
+		case(::KEY_RSTICK_DOWN):{
+			break;
+		}
+		case(::KEY_SL_LEFT):{
+			break;
+		}
+		case(::KEY_SR_LEFT):{
+			break;
+		}
+		case(::KEY_SL_RIGHT):{
+			break;
+		}
+		case(::KEY_SR_RIGHT):{
+			break;
+		}
+		case(::KEY_TOUCH):{
+			b[HI2::BUTTON::TOUCH] = h&::KEY_TOUCH;
+			break;
+		}
 		}
 	}
 }
 
 bool HI2::aptMainLoop(){
 	::hidScanInput();
+	if(hidTouchCount()>0){
+		touchPosition touch;
+		hidTouchRead(&touch,0);
+		mousePosition.x=touch.px;
+		mousePosition.y=touch.py;
+	}
+	else{
+		mousePosition={0,0};
+	}
 	translateButtons(Down,::hidKeysDown(CONTROLLER_P1_AUTO));
 	translateButtons(Held,::hidKeysHeld(CONTROLLER_P1_AUTO));
 	translateButtons(Up,::hidKeysUp(CONTROLLER_P1_AUTO));
