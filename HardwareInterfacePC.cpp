@@ -66,7 +66,7 @@ void HI2::systemInit() {
 		SDL_Log("SDL_Init: %s\n", SDL_GetError());
 	}
 	TTF_Init();
-	IMG_Init(IMG_INIT_PNG | IMG_INIT_WEBP);
+	IMG_Init(IMG_INIT_PNG);
 	// create an SDL window (OpenGL ES2 always enabled)
 	// when SDL_FULLSCREEN flag is not set, viewport is automatically handled by SDL (use SDL_SetWindowSize to "change resolution")
 	// available switch SDL2 video modes :
@@ -352,7 +352,7 @@ int HI2::getScreenWidth() {
 	return w;
 }
 
-HI2::PLATFORM HI2::getPlatform() {
+constexpr HI2::PLATFORM HI2::getPlatform() {
 	return HI2::PLATFORM_PC;
 }
 

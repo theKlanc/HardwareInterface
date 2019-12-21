@@ -302,7 +302,7 @@ namespace HI2 {
 	// HardwareInfo
 	int getScreenHeight();
 	int getScreenWidth();
-	PLATFORM getPlatform();
+	constexpr PLATFORM getPlatform();
 
 	// System
 	void systemInit();

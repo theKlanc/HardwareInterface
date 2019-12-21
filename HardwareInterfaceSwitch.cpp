@@ -52,17 +52,15 @@ int w, h;
 
 // System
 void HI2::systemInit(){
+	romfsInit();
 	_log.open("/HI2.log");
 	_bg = Color(255, 0, 0, 255);
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0) {
 		_log << SDL_GetError()<<std::endl;
 		SDL_Quit();
 	}
-	// create an SDL window (OpenGL ES2 always enabled)
-	// when SDL_FULLSCREEN flag is not set, viewport is automatically handled by SDL (use SDL_SetWindowSize to "change resolution")
-	// available switch SDL2 video modes :
-	// 1920 x 1080 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
-	// 1280 x 720 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
+	TTF_Init();
+	IMG_Init(IMG_INIT_PNG);
 
 	w = 1280;
 	h = 720;
@@ -81,31 +79,28 @@ void HI2::systemInit(){
 	}
 
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-	// open CONTROLLER_PLAYER_1 and CONTROLLER_PLAYER_2
-	// when railed, both joycons are mapped to joystick #0,
-	// else joycons are individually mapped to joystick #0, joystick #1, ...
-	// https://github.com/devkitPro/SDL/blob/switch-sdl2/src/joystick/switch/SDL_sysjoystick.c#L45
-	//for (int i = 0; i < 2; i++) {
-	//	if (SDL_JoystickOpen(i) == NULL) {
-	//		SDL_Log("SDL_JoystickOpen: %s\n", SDL_GetError());
-	//		SDL_Quit();
-	//	}
-	//}
 	Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 4096);
-    //romfsInit();
+
+	//AccountUid uid;
+    //u64 appId = 0x0100F33DC0DEBABE;
+    //accountInitialize(AccountServiceType_Application);
+    //accountGetPreselectedUser(&uid);
+    //accountExit();
+    //fsdevMountSaveData("save", appId, uid);
 }
 void HI2::systemFini(){
+	//fsdevCommitDevice("save");
+	//fsdevUnmountDevice("save");
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
-	//romfsExit();
 	Mix_CloseAudio();
 	Mix_Quit();
-	TTF_Quit();
 	IMG_Quit();
+	TTF_Quit();
 	SDL_Quit();
 	_log.close();
-	socketExit();
+	romfsExit();
 }
 
 void HI2::startFrame(){
@@ -316,11 +311,12 @@ void HI2::Texture::clean() {
 
 // filesystem
 std::filesystem::path HI2::getDataPath(){
-	return std::filesystem::path("data");
+	return std::filesystem::path("romfs:/");
 }
 
 std::filesystem::path HI2::getSavesPath(){
-	return std::filesystem::path("saves");
+	//return std::filesystem::path("save:/");
+	return std::filesystem::path("saves/");
 }
 
 // HardwareInfo
@@ -331,7 +327,7 @@ int HI2::getScreenWidth(){
 	return ::appletGetOperationMode()==AppletOperationMode_Docked?1920:1280;
 }
 
-HI2::PLATFORM HI2::getPlatform(){
+constexpr HI2::PLATFORM HI2::getPlatform(){
 	return HI2::PLATFORM_SWITCH;
 }
 
