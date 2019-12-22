@@ -346,4 +346,7 @@ namespace HI2 {
 
 	void setCursorPos(point2D pos);
 
+	void createDirectories(std::filesystem::path p);
+	void deleteDirectory(std::filesystem::path p);
+
 } // namespace HI2

@@ -568,4 +568,12 @@ void HI2::setRenderTarget(HI2::Texture* t, bool clear){
 	}
 }
 
+void HI2::createDirectories(std::filesystem::path p){
+	std::filesystem::create_directories(p);
+}
+
+void HI2::deleteDirectory(std::filesystem::path p){
+	std::filesystem::remove_all(p);
+}
+
 #endif

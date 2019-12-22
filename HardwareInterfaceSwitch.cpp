@@ -390,36 +390,20 @@ void translateButtons(std::bitset<HI2::BUTTON_SIZE>& b, const u64& h){
 		case(::KEY_MINUS):{
 			break;
 		}
-		case(::KEY_DLEFT):{
-			b[HI2::BUTTON::BUTTON_LEFT] = h&::KEY_DLEFT;
+		case(::KEY_LEFT):{
+			b[HI2::BUTTON::BUTTON_LEFT] = h&::KEY_LEFT;
 			break;
 		}
-		case(::KEY_DUP):{
-			b[HI2::BUTTON::BUTTON_UP] = h&::KEY_DUP;
+		case(::KEY_UP):{
+			b[HI2::BUTTON::BUTTON_UP] = h&::KEY_UP;
 			break;
 		}
-		case(::KEY_DRIGHT):{
-			b[HI2::BUTTON::BUTTON_RIGHT] = h&::KEY_DRIGHT;
+		case(::KEY_RIGHT):{
+			b[HI2::BUTTON::BUTTON_RIGHT] = h&::KEY_RIGHT;
 			break;
 		}
-		case(::KEY_DDOWN):{
-			b[HI2::BUTTON::BUTTON_DOWN] = h&::KEY_DDOWN;
-			break;
-		}
-		case(::KEY_LSTICK_LEFT):{
-			b[HI2::BUTTON::BUTTON_LEFT] = h&::KEY_LSTICK_LEFT;
-			break;
-		}
-		case(::KEY_LSTICK_UP):{
-			b[HI2::BUTTON::BUTTON_UP] = h&::KEY_LSTICK_UP;
-			break;
-		}
-		case(::KEY_LSTICK_RIGHT):{
-			b[HI2::BUTTON::BUTTON_RIGHT] = h&::KEY_LSTICK_RIGHT;
-			break;
-		}
-		case(::KEY_LSTICK_DOWN):{
-			b[HI2::BUTTON::BUTTON_DOWN] = h&::KEY_LSTICK_DOWN;
+		case(::KEY_DOWN):{
+			b[HI2::BUTTON::BUTTON_DOWN] = h&::KEY_DOWN;
 			break;
 		}
 		case(::KEY_RSTICK_LEFT):{
@@ -450,24 +434,32 @@ void translateButtons(std::bitset<HI2::BUTTON_SIZE>& b, const u64& h){
 			b[HI2::BUTTON::TOUCH] = h&::KEY_TOUCH;
 			break;
 		}
+		default:
+			break;
 		}
 	}
 }
-
+bool lastTouch = false;
 bool HI2::aptMainLoop(){
 	::hidScanInput();
+	translateButtons(Down,::hidKeysDown(CONTROLLER_P1_AUTO));
+	translateButtons(Held,::hidKeysHeld(CONTROLLER_P1_AUTO));
+	translateButtons(Up,::hidKeysUp(CONTROLLER_P1_AUTO));
+	Down[HI2::BUTTON::TOUCH] = hidTouchCount()>0 && !lastTouch;
+	Held[HI2::BUTTON::TOUCH] = hidTouchCount()>0;
+	Up[HI2::BUTTON::TOUCH] = hidTouchCount()==0 && lastTouch;
+
 	if(hidTouchCount()>0){
 		touchPosition touch;
 		hidTouchRead(&touch,0);
 		mousePosition.x=touch.px;
 		mousePosition.y=touch.py;
+		lastTouch=true;
 	}
 	else{
-		mousePosition={0,0};
+		lastTouch=false;
 	}
-	translateButtons(Down,::hidKeysDown(CONTROLLER_P1_AUTO));
-	translateButtons(Held,::hidKeysHeld(CONTROLLER_P1_AUTO));
-	translateButtons(Up,::hidKeysUp(CONTROLLER_P1_AUTO));
+
 
 	//consoleUpdate(nullptr);
 	return ::appletMainLoop();
@@ -506,6 +498,16 @@ void HI2::setRenderTarget(HI2::Texture* t, bool clear){
 	if(clear){
 		SDL_RenderClear(renderer);
 	}
+}
+
+void HI2::createDirectories(std::filesystem::path p){
+	for(auto& dir : p){
+		std::filesystem::create_directory(dir);
+	}
+}
+
+void HI2::deleteDirectory(std::filesystem::path p){
+	//std::filesystem::remove_all(p);
 }
 
 #endif
