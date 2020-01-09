@@ -155,7 +155,7 @@ void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c)
 	int texW = 0;
 	int texH = 0;
 	SDL_QueryTexture(texture, nullptr, nullptr, &texW, &texH);
-	SDL_Rect dstrect = { pos.x, pos.y, (double)texW / 10.0f * size, (double)texH / 10.0f * size };
+	SDL_Rect dstrect = { pos.x, pos.y, int((double)texW / 10.0f * size), int((double)texH / 10.0f * size) };
 
 	SDL_RenderCopyEx(renderer, texture, nullptr, &dstrect,0,nullptr,SDL_FLIP_NONE);
 
@@ -169,36 +169,67 @@ void HI2::setTextureColorMod(Texture& texture, Color color)
 }
 
 void HI2::drawTexture(Texture& texture, int posX, int posY, double scale, double radians) {
-	SDL_Rect texture_rect;
-	texture_rect.x = posX;  //the x coordinate
-	texture_rect.y = posY; // the y coordinate
-	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), nullptr, nullptr, &texture_rect.w, &texture_rect.h);
-	texture_rect.w *= scale;
-	texture_rect.h *= scale;
-
+	SDL_Rect destRect;
+	destRect.x = posX;  //the x coordinate
+	destRect.y = posY; // the y coordinate
+	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), nullptr, nullptr, &destRect.w, &destRect.h);
+	destRect.w *= scale;
+	destRect.h *= scale;
 
 	// PI * rad = 180 * deg
-	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), nullptr, &texture_rect, (radians * 180) / M_PI, nullptr, SDL_FLIP_NONE);
+	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), nullptr, &destRect, (radians * 180) / M_PI, nullptr, SDL_FLIP_NONE);
+}
+void HI2::drawTexture(Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale, double radians) {
+	SDL_Rect srcRect;
+	srcRect.x = startPos.x;
+	srcRect.y = startPos.y;
+	srcRect.w = size.x;
+	srcRect.h = size.y;
 
-}//TODO
+	SDL_Rect destRect;
+	destRect.x = posX;  //the x coordinate
+	destRect.y = posY; // the y coordinate
+	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), nullptr, nullptr, &destRect.w, &destRect.h);
+	destRect.w *= scale;
+	destRect.h *= scale;
+
+	// PI * rad = 180 * deg
+	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), &srcRect, &destRect, (radians * 180) / M_PI, nullptr, SDL_FLIP_NONE);
+}
 
 void HI2::drawTextureOverlap(Texture& texture, int posX, int posY, double scale, double radians) {
-	SDL_Rect texture_rect;
-	texture_rect.x = posX;  //the x coordinate
-	texture_rect.y = posY; // the y coordinate
-	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), nullptr, nullptr, &texture_rect.w, &texture_rect.h);
-	texture_rect.w *= scale;
-	texture_rect.h *= scale;
-	texture_rect.w += 1;
-	texture_rect.h += 1;
-
+	SDL_Rect destRect;
+	destRect.x = posX;  //the x coordinate
+	destRect.y = posY; // the y coordinate
+	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), nullptr, nullptr, &destRect.w, &destRect.h);
+	destRect.w *= scale;
+	destRect.h *= scale;
+	destRect.w += 1;
+	destRect.h += 1;
 
 	// PI * rad = 180 * deg
-	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), nullptr, &texture_rect, (radians * 180) / M_PI, nullptr, SDL_FLIP_NONE);
+	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), nullptr, &destRect, (radians * 180) / M_PI, nullptr, SDL_FLIP_NONE);
+}
 
-}//TODO
+void HI2::drawTextureOverlap(Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale, double radians) {
+	SDL_Rect srcRect;
+	srcRect.x = startPos.x;
+	srcRect.y = startPos.y;
+	srcRect.w = size.x;
+	srcRect.h = size.y;
 
-void HI2::drawTexturePart(Texture& texture, point2D texturePartStart, int sizeX, int sizeY, point2D displayPos) {}//TODO
+	SDL_Rect destRect;
+	destRect.x = posX;  //the x coordinate
+	destRect.y = posY; // the y coordinate
+	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), nullptr, nullptr, &destRect.w, &destRect.h);
+	destRect.w *= scale;
+	destRect.h *= scale;
+	destRect.w += 1;
+	destRect.h += 1;
+
+	// PI * rad = 180 * deg
+	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), &srcRect, &destRect, (radians * 180) / M_PI, nullptr, SDL_FLIP_NONE);
+}
 
 HI2::Texture HI2::mergeTextures(Texture& originTexture, Texture& destinationTexture, point2D position) {
 	return destinationTexture;//STUB
@@ -285,47 +316,10 @@ HI2::Texture::Texture(std::filesystem::path path) {
 	}
 }
 
-HI2::Texture::Texture(std::vector<std::filesystem::path> paths, double step)
-{
-	_path = paths[0];
-	_sPerFrame = step;
-	_currentFrame = 0;
-	for (auto path : paths)
-	{
-		if (path.extension() == ".bmp") {
-			SDL_Surface* temp = SDL_LoadBMP(path.string().c_str());
-			_texture = SDL_CreateTextureFromSurface(renderer, temp);
-			SDL_FreeSurface(temp);
-		}
-		else {
-			_texture = IMG_LoadTexture(renderer, path.string().c_str());
-		}
-		_animationTextures.push_back(_texture);
-	}
-	_texture = _animationTextures[0];
-}
-
 HI2::Texture::Texture(point2D size)
 {
 	_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,size.x,size.y);
 	SDL_SetTextureBlendMode(rcast<SDL_Texture*>(_texture), SDL_BLENDMODE_BLEND);
-}
-
-void HI2::Texture::step(double s)
-{
-	if (!_animationTextures.empty()) {
-		_currentS += s;
-		while (_currentS > _sPerFrame)
-		{
-			_currentS -= _sPerFrame;
-			_currentFrame++;
-			if (_currentFrame >= _animationTextures.size())
-			{
-				_currentFrame = 0;
-			}
-		}
-		_texture = _animationTextures[_currentFrame];
-	}
 }
 
 void HI2::Texture::clean() {
@@ -574,6 +568,12 @@ void HI2::createDirectories(std::filesystem::path p){
 
 void HI2::deleteDirectory(std::filesystem::path p){
 	std::filesystem::remove_all(p);
+}
+
+point2D HI2::getTextureSize(Texture& texture){
+	point2D result;
+	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), nullptr, nullptr, &result.x, &result.y);
+	return result;
 }
 
 #endif

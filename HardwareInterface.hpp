@@ -151,17 +151,10 @@ namespace HI2 {
 	public:
 		Texture();
 		Texture(std::filesystem::path path);
-		Texture(std::vector<std::filesystem::path> paths, double step = 0.2);
 		Texture(point2D size);
-		void step(double s);
 		void clean();
 
 	private:
-		std::vector<void*> _animationTextures;
-		double _currentS = 0;
-		double _sPerFrame = 0.2;
-		unsigned short _currentFrame = 0;
-
 		void* _texture = nullptr;
 		std::filesystem::path _path;
 
@@ -169,13 +162,16 @@ namespace HI2 {
 			double scale, double rotation);
 		friend void drawTextureOverlap(Texture& texture, int posX, int posY,
 			double scale, double rotation);
-		friend void drawTexturePart(Texture& texture, point2D texturePartStart,
-			int sizeX, int sizeY, point2D displayPos);
+		friend void drawTexture(Texture& texture, int posX, int posY, point2D size, point2D startPos,
+			double scale, double rotation);
+		friend void drawTextureOverlap(Texture& texture, int posX, int posY, point2D size, point2D startPos,
+			double scale, double rotation);
 		friend Texture mergeTextures(Texture& originTexture,
 			Texture& destinationTexture,
 			point2D position);
 		friend void setTextureColorMod(Texture& texture, Color color);
 		friend void setRenderTarget(Texture* t, bool b);
+		friend point2D getTextureSize(Texture& texture);
 	};
 
 	enum PLATFORM {
@@ -334,8 +330,8 @@ namespace HI2 {
 	void setTextureColorMod(Texture& texture, Color color);
 	void drawTexture(Texture& texture, int posX, int posY, double scale = 1, double radians = 0);
 	void drawTextureOverlap(Texture& texture, int posX, int posY, double scale = 1, double radians = 0);
-	void drawTexturePart(Texture& texture, point2D texturePartStart, int sizeX,
-		int sizeY, point2D displayPos);
+	void drawTexture(Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale = 1, double radians = 0);
+	void drawTextureOverlap(Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale = 1, double radians = 0);
 	Texture mergeTextures(Texture& originTexture, Texture& destinationTexture,
 		point2D position);
 	void drawRectangle(point2D pos, int width, int height, Color color); // draw a filled rectangle
@@ -343,6 +339,7 @@ namespace HI2 {
 	void drawPixel(point2D pos, Color color);
 	void setRenderTarget(Texture* t = nullptr, bool clear = false);
 	void endFrame();
+	point2D getTextureSize(Texture& texture);
 
 	void setCursorPos(point2D pos);
 
