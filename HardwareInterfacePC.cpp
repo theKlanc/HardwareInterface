@@ -156,9 +156,7 @@ void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c)
 	int texH = 0;
 	SDL_QueryTexture(texture, nullptr, nullptr, &texW, &texH);
 	SDL_Rect dstrect = { pos.x, pos.y, int((double)texW / 10.0f * size), int((double)texH / 10.0f * size) };
-
 	SDL_RenderCopyEx(renderer, texture, nullptr, &dstrect,0,nullptr,SDL_FLIP_NONE);
-
 	textTextures.push(texture);
 	SDL_FreeSurface(surface);
 }
@@ -189,9 +187,8 @@ void HI2::drawTexture(Texture& texture, int posX, int posY, point2D size, point2
 	SDL_Rect destRect;
 	destRect.x = posX;  //the x coordinate
 	destRect.y = posY; // the y coordinate
-	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), nullptr, nullptr, &destRect.w, &destRect.h);
-	destRect.w *= scale;
-	destRect.h *= scale;
+	destRect.w = size.x*scale;
+	destRect.h = size.y*scale;
 
 	// PI * rad = 180 * deg
 	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), &srcRect, &destRect, (radians * 180) / M_PI, nullptr, SDL_FLIP_NONE);
@@ -221,9 +218,8 @@ void HI2::drawTextureOverlap(Texture& texture, int posX, int posY, point2D size,
 	SDL_Rect destRect;
 	destRect.x = posX;  //the x coordinate
 	destRect.y = posY; // the y coordinate
-	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), nullptr, nullptr, &destRect.w, &destRect.h);
-	destRect.w *= scale;
-	destRect.h *= scale;
+	destRect.w = size.x*scale;
+	destRect.h = size.y*scale;
 	destRect.w += 1;
 	destRect.h += 1;
 
