@@ -1,4 +1,5 @@
 #include <stack>
+#include <array>
 #if defined __LINUX__ || defined WIN32 || defined WIN64
 #define _USE_MATH_DEFINES
 #include <chrono>
@@ -50,7 +51,8 @@ int w, h;
 int oldW, oldH;
 point2D mousePosition;
 
-std::stack<SDL_Texture*> textTextures;
+std::array<std::stack<SDL_Texture*>,3> textTextures;
+int textureStackIndex=0;
 
 void HI2::logWrite(std::string s) {
 	_log << s << std::endl;
@@ -157,7 +159,7 @@ void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c)
 	SDL_QueryTexture(texture, nullptr, nullptr, &texW, &texH);
 	SDL_Rect dstrect = { pos.x, pos.y, int((double)texW / 10.0f * size), int((double)texH / 10.0f * size) };
 	SDL_RenderCopyEx(renderer, texture, nullptr, &dstrect, 0, nullptr, SDL_FLIP_NONE);
-	textTextures.push(texture);
+	textTextures[textureStackIndex].push(texture);
 	SDL_FreeSurface(surface);
 }
 
@@ -247,10 +249,12 @@ void HI2::drawPixel(point2D pos, Color color) {
 
 void HI2::endFrame() {
 	SDL_RenderPresent(renderer);
-	while (!textTextures.empty())
+
+	textureStackIndex=(textureStackIndex+1)%textTextures.size();
+	while (!textTextures[textureStackIndex].empty())
 	{
-		SDL_DestroyTexture(textTextures.top());
-		textTextures.pop();
+		SDL_DestroyTexture(textTextures[textureStackIndex].top());
+		textTextures[textureStackIndex].pop();
 	}
 }
 
