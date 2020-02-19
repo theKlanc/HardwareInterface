@@ -30,12 +30,12 @@ HI2::Color HI2::Color::Blue{ 0,0,255,255 };
 HI2::Color HI2::Color::Yellow{ 255,255,0,255 };
 HI2::Color HI2::Color::Orange{ 255,127,0,255 };
 HI2::Color HI2::Color::Pink{ 255,0,255,255 };
-HI2::Color HI2::Color::DarkestGrey{60,60,60,255};
-HI2::Color HI2::Color::DarkGrey{100,100,100,255};
-HI2::Color HI2::Color::Grey{150,150,150,255};
-HI2::Color HI2::Color::LightGrey{200,200,200,255};
-HI2::Color HI2::Color::LightestGrey{220,220,220,255};
-HI2::Color HI2::Color::Transparent{255,255,255,0};
+HI2::Color HI2::Color::DarkestGrey{ 60,60,60,255 };
+HI2::Color HI2::Color::DarkGrey{ 100,100,100,255 };
+HI2::Color HI2::Color::Grey{ 150,150,150,255 };
+HI2::Color HI2::Color::LightGrey{ 200,200,200,255 };
+HI2::Color HI2::Color::LightestGrey{ 220,220,220,255 };
+HI2::Color HI2::Color::Transparent{ 255,255,255,0 };
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -121,23 +121,23 @@ void HI2::startFrame() {
 void HI2::toggleFullscreen()
 {
 	fullscreen = !fullscreen;
-	if(fullscreen)
+	if (fullscreen)
 	{
 		SDL_Rect rect;
-		oldW=w;
-		oldH=h;
+		oldW = w;
+		oldH = h;
 		int displayIndex = SDL_GetWindowDisplayIndex(window);
 		SDL_GetDisplayBounds(displayIndex, &rect);
-		w=rect.w;
-		h=rect.h;
+		w = rect.w;
+		h = rect.h;
 	}
 	else
 	{
-		w=oldW;
-		h=oldH;
+		w = oldW;
+		h = oldH;
 	}
-	
-	SDL_SetWindowSize(window,w,h);
+
+	SDL_SetWindowSize(window, w, h);
 	SDL_SetWindowFullscreen(window, fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
 }
 
@@ -149,14 +149,14 @@ void HI2::playSound(HI2::Audio& audio, float volume) {
 
 void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c) {
 	SDL_Color color = { static_cast<Uint8>(c.r),static_cast<Uint8>(c.g),static_cast<Uint8>(c.b) };
-	SDL_Surface* surface = TTF_RenderText_Solid(rcast<TTF_Font*>(font._font), text.c_str(), color);
+	SDL_Surface* surface = TTF_RenderText_Blended(rcast<TTF_Font*>(font._font), text.c_str(), color);
 	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
 
 	int texW = 0;
 	int texH = 0;
 	SDL_QueryTexture(texture, nullptr, nullptr, &texW, &texH);
 	SDL_Rect dstrect = { pos.x, pos.y, int((double)texW / 10.0f * size), int((double)texH / 10.0f * size) };
-	SDL_RenderCopyEx(renderer, texture, nullptr, &dstrect,0,nullptr,SDL_FLIP_NONE);
+	SDL_RenderCopyEx(renderer, texture, nullptr, &dstrect, 0, nullptr, SDL_FLIP_NONE);
 	textTextures.push(texture);
 	SDL_FreeSurface(surface);
 }
@@ -187,8 +187,8 @@ void HI2::drawTexture(Texture& texture, int posX, int posY, point2D size, point2
 	SDL_Rect destRect;
 	destRect.x = posX;  //the x coordinate
 	destRect.y = posY; // the y coordinate
-	destRect.w = size.x*scale;
-	destRect.h = size.y*scale;
+	destRect.w = size.x * scale;
+	destRect.h = size.y * scale;
 
 	// PI * rad = 180 * deg
 	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture), &srcRect, &destRect, (radians * 180) / M_PI, nullptr, SDL_FLIP_NONE);
@@ -218,8 +218,8 @@ void HI2::drawTextureOverlap(Texture& texture, int posX, int posY, point2D size,
 	SDL_Rect destRect;
 	destRect.x = posX;  //the x coordinate
 	destRect.y = posY; // the y coordinate
-	destRect.w = size.x*scale;
-	destRect.h = size.y*scale;
+	destRect.w = size.x * scale;
+	destRect.h = size.y * scale;
 	destRect.w += 1;
 	destRect.h += 1;
 
@@ -236,7 +236,7 @@ void HI2::drawRectangle(point2D pos, int width, int height, Color color) {
 	SDL_Rect r = { pos.x, pos.y, width, height };
 	SDL_RenderFillRect(renderer, &r);
 }
-void HI2::drawEmptyRectangle(point2D pos, int width, int height, Color color){
+void HI2::drawEmptyRectangle(point2D pos, int width, int height, Color color) {
 	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 	SDL_Rect r = { pos.x, pos.y, width, height };
 	SDL_RenderDrawRect(renderer, &r);
@@ -247,7 +247,7 @@ void HI2::drawPixel(point2D pos, Color color) {
 
 void HI2::endFrame() {
 	SDL_RenderPresent(renderer);
-	while(!textTextures.empty())
+	while (!textTextures.empty())
 	{
 		SDL_DestroyTexture(textTextures.top());
 		textTextures.pop();
@@ -256,7 +256,7 @@ void HI2::endFrame() {
 
 void HI2::setCursorPos(point2D pos)
 {
-	SDL_WarpMouseInWindow( window,pos.x,pos.y);
+	SDL_WarpMouseInWindow(window, pos.x, pos.y);
 }
 
 
@@ -314,7 +314,7 @@ HI2::Texture::Texture(std::filesystem::path path) {
 
 HI2::Texture::Texture(point2D size)
 {
-	_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,size.x,size.y);
+	_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, size.x, size.y);
 	SDL_SetTextureBlendMode(rcast<SDL_Texture*>(_texture), SDL_BLENDMODE_BLEND);
 }
 
@@ -358,8 +358,6 @@ HI2::BUTTON translate(SDL_Keycode s) {
 	switch (s) {
 	case SDLK_END:
 		return HI2::BUTTON::BUTTON_PLUS;
-	case SDLK_PLUS:
-		return HI2::BUTTON::BUTTON_ZR;
 	case SDLK_MINUS:
 		return HI2::BUTTON::KEY_DASH;
 	case SDLK_DOWN:
@@ -429,7 +427,9 @@ HI2::BUTTON translate(SDL_Keycode s) {
 	case SDLK_F11:
 		return HI2::BUTTON::KEY_F11;
 	case SDL_BUTTON_LEFT:
-		return HI2::BUTTON::TOUCH;
+		return HI2::BUTTON::KEY_LEFTCLICK;
+	case SDL_BUTTON_RIGHT:
+		return HI2::BUTTON::KEY_RIGHTCLICK;
 	case SDLK_RETURN:
 		return HI2::BUTTON::KEY_ACCEPT;
 	case SDLK_ESCAPE:
@@ -461,9 +461,11 @@ HI2::BUTTON translate(SDL_Keycode s) {
 		return HI2::BUTTON::KEY_8;
 	case SDLK_9:
 		return HI2::BUTTON::KEY_9;
+	case SDLK_PLUS:
+		return HI2::BUTTON::KEY_PLUS;
 
 	default:
-		return (HI2::BUTTON)(HI2::BUTTON_SIZE-1);
+		return (HI2::BUTTON)(HI2::BUTTON_SIZE - 1);
 	}//TODO acabar aixo
 
 }
@@ -485,11 +487,11 @@ bool HI2::aptMainLoop() {
 		}
 		case SDL_KEYDOWN:
 			Held[translate(event.key.keysym.sym)] = true;
-			Down[translate(event.key.keysym.sym)]=!event.key.repeat;
+			Down[translate(event.key.keysym.sym)] = !event.key.repeat;
 			break;
 
 		case SDL_KEYUP:
-			if(event.key.state != SDL_PRESSED)
+			if (event.key.state != SDL_PRESSED)
 				Up[translate(event.key.keysym.sym)] = true;
 			Held[translate(event.key.keysym.sym)] = false;
 			break;
@@ -499,8 +501,8 @@ bool HI2::aptMainLoop() {
 			}
 			break;
 		case SDL_MOUSEBUTTONDOWN:
-			Held[translate(event.button.button)]=true;
-			Down[translate(event.button.button)]=true;
+			Held[translate(event.button.button)] = true;
+			Down[translate(event.button.button)] = true;
 			break;
 		case SDL_MOUSEBUTTONUP:
 			Up[translate(event.button.button)] = true;
@@ -511,7 +513,7 @@ bool HI2::aptMainLoop() {
 			mousePosition.y = event.motion.y;
 			break;
 		case SDL_MOUSEWHEEL:
-			Down[event.wheel.y>0?HI2::BUTTON::KEY_MOUSEWHEEL_UP:HI2::BUTTON::KEY_MOUSEWHEEL_DOWN] = true;
+			Down[event.wheel.y > 0 ? HI2::BUTTON::KEY_MOUSEWHEEL_UP : HI2::BUTTON::KEY_MOUSEWHEEL_DOWN] = true;
 			break;
 		default:
 			break;
@@ -543,30 +545,30 @@ point2D HI2::getTouchPos() {
 	return mousePosition;
 }
 
-void HI2::setRenderTarget(HI2::Texture* t, bool clear){
-	if(t == nullptr){
+void HI2::setRenderTarget(HI2::Texture* t, bool clear) {
+	if (t == nullptr) {
 		SDL_SetRenderTarget(renderer, nullptr);
-		SDL_SetRenderDrawColor(renderer,_bg.r,_bg.g,_bg.b,_bg.a);
+		SDL_SetRenderDrawColor(renderer, _bg.r, _bg.g, _bg.b, _bg.a);
 	}
-	else{
-		SDL_SetRenderTarget(renderer,rcast<SDL_Texture*>(t->_texture));
-		SDL_SetRenderDrawColor(renderer,0,0,0,0);
+	else {
+		SDL_SetRenderTarget(renderer, rcast<SDL_Texture*>(t->_texture));
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	}
 
-	if(clear){
+	if (clear) {
 		SDL_RenderClear(renderer);
 	}
 }
 
-void HI2::createDirectories(std::filesystem::path p){
+void HI2::createDirectories(std::filesystem::path p) {
 	std::filesystem::create_directories(p);
 }
 
-void HI2::deleteDirectory(std::filesystem::path p){
+void HI2::deleteDirectory(std::filesystem::path p) {
 	std::filesystem::remove_all(p);
 }
 
-point2D HI2::getTextureSize(Texture& texture){
+point2D HI2::getTextureSize(Texture& texture) {
 	point2D result;
 	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture), nullptr, nullptr, &result.x, &result.y);
 	return result;

@@ -211,8 +211,7 @@ namespace HI2 {
 		BUTTON_SL_RIGHT,		///< SL on Right Joy-Con
 		BUTTON_SR_RIGHT,		///< SR on Right Joy-Con
 
-		// Pseudo-key for at least one finger on the touch screen
-		TOUCH,
+		
 
 		//PC extra keys
 		KEY_Q,
@@ -260,11 +259,16 @@ namespace HI2 {
 		KEY_9,
 
 		KEY_DASH,
+		KEY_PLUS,
 
 		KEY_MOUSEWHEEL_UP,
 		KEY_MOUSEWHEEL_DOWN,
+		KEY_LEFTCLICK,
+		KEY_RIGHTCLICK,
 
-
+		// Pseudo-key for at least one finger on the touch screen
+		TOUCH = KEY_LEFTCLICK,
+		
 		// Buttons by orientation (for single Joy-Con), also works with
 		// Joy-Con pairs, Pro Controller
 		BUTTON_JOYCON_RIGHT = BUTTON_A,
