@@ -12,23 +12,23 @@ struct point2D {
 	int x = 0;
 	int y = 0;
 
-	point2D operator+(const point2D& right)const{
-		return {x+right.x,y+right.y};
+	point2D operator+(const point2D& right)const {
+		return { x + right.x,y + right.y };
 	}
-	point2D operator-(const point2D& right)const{
-		return {x-right.x,y-right.y};
+	point2D operator-(const point2D& right)const {
+		return { x - right.x,y - right.y };
 	}
-	point2D operator*(const point2D& right)const{
-		return {x*right.x,y*right.y};
+	point2D operator*(const point2D& right)const {
+		return { x * right.x,y * right.y };
 	}
-	point2D operator/(const point2D& right)const{
-		return {x/right.x,y/right.y};
+	point2D operator/(const point2D& right)const {
+		return { x / right.x,y / right.y };
 	}
-	point2D operator*(const int& right)const{
-		return {x*right,y*right};
+	point2D operator*(const int& right)const {
+		return { x * right,y * right };
 	}
-	point2D operator/(const int& right)const{
-		return {x/right,y/right};
+	point2D operator/(const int& right)const {
+		return { x / right,y / right };
 	}
 };
 struct point2Dd {
@@ -58,11 +58,19 @@ struct point3Di {
 	bool operator!=(const point3Di& right) const {
 		return !(*this == right);
 	}
-	point3Di operator*(const int& i) const{
-		return {x*i,y*i,z*i};
+	point3Di operator*(const int& i) const {
+		return { x * i,y * i,z * i };
 	}
-	point3Di operator/(const int& i) const{
-		return {x/i,y/i,z/i};
+	point3Di operator/(const int& i) const {
+		return { x / i,y / i,z / i };
+	}
+	point3Di operator+(const point3Di& b) const
+	{
+		return { x + b.x,y + b.y,z + b.z };
+	}
+	point3Di operator-(const point3Di& b) const
+	{
+		return { x - b.x,y - b.y,z - b.z };
 	}
 };
 struct point3Dl {
@@ -74,20 +82,20 @@ struct point3Dd {
 	double x = 0.0;
 	double y = 0.0;
 	double z = 0.0;
-	point3Dd(double x, double y, double z):x(x),y(y),z(z){}
-	point3Dd(const point3Di& p){
-		x=p.x;
-		y=p.y;
-		z=p.z;
+	point3Dd(double x, double y, double z) :x(x), y(y), z(z) {}
+	point3Dd(const point3Di& p) {
+		x = p.x;
+		y = p.y;
+		z = p.z;
 	}
-	point3Dd operator*(const double& i) const{
-		return {x*i,y*i,z*i};
+	point3Dd operator*(const double& i) const {
+		return { x * i,y * i,z * i };
 	}
-	point3Dd operator/(const double& i) const{
-		return {x/i,y/i,z/i};
+	point3Dd operator/(const double& i) const {
+		return { x / i,y / i,z / i };
 	}
-	operator point3Di() const{
-		return {(int)floor(x),(int)floor(y),(int)floor(z)};
+	operator point3Di() const {
+		return { (int)floor(x),(int)floor(y),(int)floor(z) };
 	}
 };
 
@@ -211,7 +219,7 @@ namespace HI2 {
 		BUTTON_SL_RIGHT,		///< SL on Right Joy-Con
 		BUTTON_SR_RIGHT,		///< SR on Right Joy-Con
 
-		
+
 
 		//PC extra keys
 		KEY_Q,
@@ -268,7 +276,7 @@ namespace HI2 {
 
 		// Pseudo-key for at least one finger on the touch screen
 		TOUCH = KEY_LEFTCLICK,
-		
+
 		// Buttons by orientation (for single Joy-Con), also works with
 		// Joy-Con pairs, Pro Controller
 		BUTTON_JOYCON_RIGHT = BUTTON_A,
