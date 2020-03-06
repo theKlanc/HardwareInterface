@@ -347,85 +347,87 @@ void translateButtons(std::bitset<HI2::BUTTON_SIZE>& b, const u64& h){
 		switch(BIT(i)){
 
 		case(::KEY_A):{
-			b[HI2::BUTTON::KEY_ACCEPT] = h&::KEY_A;
+			b[HI2::BUTTON::BUTTON_A] = h&::KEY_A;
 			break;
 		}
 		case(::KEY_B):{
+			b[HI2::BUTTON::BUTTON_B] = h&::KEY_B;
 			break;
 		}
 		case(::KEY_X):{
+			b[HI2::BUTTON::BUTTON_X] = h&::KEY_X;
 			break;
 		}
 		case(::KEY_Y):{
+			b[HI2::BUTTON::BUTTON_Y] = h&::KEY_Y;
 			break;
 		}
 		case(::KEY_LSTICK):{
+			b[HI2::BUTTON::BUTTON_LSTICK] = h&::KEY_LSTICK;
 			break;
 		}
 		case(::KEY_RSTICK):{
+			b[HI2::BUTTON::BUTTON_RSTICK] = h&::KEY_RSTICK;
 			break;
 		}
 		case(::KEY_L):{
+			b[HI2::BUTTON::BUTTON_L] = h&::KEY_L;
 			break;
 		}
 		case(::KEY_R):{
+			b[HI2::BUTTON::BUTTON_R] = h&::KEY_R;
 			break;
 		}
 		case(::KEY_ZL):{
+			b[HI2::BUTTON::BUTTON_ZL] = h&::KEY_ZL;
 			break;
 		}
 		case(::KEY_ZR):{
+			b[HI2::BUTTON::BUTTON_ZR] = h&::KEY_ZR;
 			break;
 		}
 		case(::KEY_PLUS):{
-			b[HI2::BUTTON::KEY_ESCAPE] = h&::KEY_PLUS;
+			b[HI2::BUTTON::BUTTON_PLUS] = h&::KEY_PLUS;
 			break;
 		}
 		case(::KEY_MINUS):{
+			b[HI2::BUTTON::BUTTON_MINUS] = h&::KEY_MINUS;
 			break;
 		}
-		case(::KEY_LEFT):{
-			b[HI2::BUTTON::BUTTON_LEFT] = h&::KEY_LEFT;
+		case(::KEY_DLEFT):{
+			b[HI2::BUTTON::BUTTON_DLEFT] = h&::KEY_DLEFT;
 			break;
 		}
-		case(::KEY_UP):{
-			b[HI2::BUTTON::BUTTON_UP] = h&::KEY_UP;
+		case(::KEY_DUP):{
+			b[HI2::BUTTON::BUTTON_DUP] = h&::KEY_DUP;
 			break;
 		}
-		case(::KEY_RIGHT):{
-			b[HI2::BUTTON::BUTTON_RIGHT] = h&::KEY_RIGHT;
+		case(::KEY_DRIGHT):{
+			b[HI2::BUTTON::BUTTON_DRIGHT] = h&::KEY_DRIGHT;
 			break;
 		}
-		case(::KEY_DOWN):{
-			b[HI2::BUTTON::BUTTON_DOWN] = h&::KEY_DOWN;
+		case(::KEY_DDOWN):{
+			b[HI2::BUTTON::BUTTON_DDOWN] = h&::KEY_DDOWN;
 			break;
 		}
-		case(::KEY_RSTICK_LEFT):{
+		case(::KEY_LSTICK_LEFT):{
+			b[HI2::BUTTON::BUTTON_LSTICK_LEFT] = h&::KEY_LSTICK_LEFT;
 			break;
 		}
-		case(::KEY_RSTICK_UP):{
+		case(::KEY_LSTICK_RIGHT):{
+			b[HI2::BUTTON::BUTTON_LSTICK_RIGHT] = h&::KEY_LSTICK_RIGHT;
 			break;
 		}
-		case(::KEY_RSTICK_RIGHT):{
+		case(::KEY_LSTICK_DOWN):{
+			b[HI2::BUTTON::BUTTON_LSTICK_DOWN] = h&::KEY_LSTICK_DOWN;
 			break;
 		}
-		case(::KEY_RSTICK_DOWN):{
-			break;
-		}
-		case(::KEY_SL_LEFT):{
-			break;
-		}
-		case(::KEY_SR_LEFT):{
-			break;
-		}
-		case(::KEY_SL_RIGHT):{
-			break;
-		}
-		case(::KEY_SR_RIGHT):{
+		case(::KEY_LSTICK_UP):{
+			b[HI2::BUTTON::BUTTON_LSTICK_UP] = h&::KEY_LSTICK_UP;
 			break;
 		}
 		case(::KEY_TOUCH):{
-			b[HI2::BUTTON::TOUCH] = h&::KEY_TOUCH;
+			b[HI2::BUTTON::TOUCHSCREEN] = h&::KEY_TOUCH;
 			break;
 		}
 		default:
@@ -439,9 +441,14 @@ bool HI2::aptMainLoop(){
 	translateButtons(Down,::hidKeysDown(CONTROLLER_P1_AUTO));
 	translateButtons(Held,::hidKeysHeld(CONTROLLER_P1_AUTO));
 	translateButtons(Up,::hidKeysUp(CONTROLLER_P1_AUTO));
-	Down[HI2::BUTTON::TOUCH] = hidTouchCount()>0 && !lastTouch;
-	Held[HI2::BUTTON::TOUCH] = hidTouchCount()>0;
-	Up[HI2::BUTTON::TOUCH] = hidTouchCount()==0 && lastTouch;
+	Down[HI2::BUTTON::TOUCHSCREEN] = hidTouchCount()>0 && !lastTouch;
+	Held[HI2::BUTTON::TOUCHSCREEN] = hidTouchCount()>0;
+	Up[HI2::BUTTON::TOUCHSCREEN] = hidTouchCount()==0 && lastTouch;
+
+
+	calculateAggregators(Down);
+	calculateAggregators(Held);
+	calculateAggregators(Up);
 
 	if(hidTouchCount()>0){
 		touchPosition touch;
@@ -501,7 +508,7 @@ void HI2::createDirectories(std::filesystem::path p){
 }
 
 void HI2::deleteDirectory(std::filesystem::path p){
-	//std::filesystem::remove_all(p);
+	std::filesystem::remove_all(p);
 }
 
 point2D HI2::getTextureSize(Texture& texture){

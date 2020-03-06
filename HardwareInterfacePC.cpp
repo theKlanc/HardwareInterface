@@ -360,22 +360,16 @@ void HI2::sleepThread(unsigned long ns) {
 
 HI2::BUTTON translate(SDL_Keycode s) {
 	switch (s) {
-	case SDLK_END:
-		return HI2::BUTTON::BUTTON_PLUS;
 	case SDLK_MINUS:
 		return HI2::BUTTON::KEY_DASH;
 	case SDLK_DOWN:
-		return HI2::BUTTON::BUTTON_DDOWN;
+		return HI2::BUTTON::KEY_DOWN;
 	case SDLK_UP:
-		return HI2::BUTTON::BUTTON_DUP;
+		return HI2::BUTTON::KEY_UP;
 	case SDLK_LEFT:
-		return HI2::BUTTON::BUTTON_DLEFT;
+		return HI2::BUTTON::KEY_LEFT;
 	case SDLK_RIGHT:
-		return HI2::BUTTON::BUTTON_DRIGHT;
-	case SDLK_INSERT:
-		return HI2::BUTTON::BUTTON_X;
-	case SDLK_DELETE:
-		return HI2::BUTTON::BUTTON_Y;
+		return HI2::BUTTON::KEY_RIGHT;
 	case SDLK_a:
 		return HI2::BUTTON::KEY_A;
 	case SDLK_b:
@@ -435,7 +429,7 @@ HI2::BUTTON translate(SDL_Keycode s) {
 	case SDL_BUTTON_RIGHT:
 		return HI2::BUTTON::KEY_RIGHTCLICK;
 	case SDLK_RETURN:
-		return HI2::BUTTON::KEY_ACCEPT;
+		return HI2::BUTTON::KEY_ENTER;
 	case SDLK_ESCAPE:
 		return HI2::BUTTON::KEY_ESCAPE;
 	case SDLK_BACKSPACE:
@@ -467,7 +461,6 @@ HI2::BUTTON translate(SDL_Keycode s) {
 		return HI2::BUTTON::KEY_9;
 	case SDLK_PLUS:
 		return HI2::BUTTON::KEY_PLUS;
-
 	default:
 		return (HI2::BUTTON)(HI2::BUTTON_SIZE - 1);
 	}//TODO acabar aixo
@@ -528,6 +521,11 @@ bool HI2::aptMainLoop() {
 	{
 		HI2::toggleFullscreen();
 	}
+
+	calculateAggregators(Down);
+	calculateAggregators(Up);
+	calculateAggregators(Held);
+
 	return true;
 }
 

@@ -262,6 +262,12 @@ namespace HI2 {
 		KEY_BACKSPACE,
 		KEY_SPACE,
 		KEY_SHIFT,
+		KEY_ENTER,
+
+		KEY_UP,
+		KEY_DOWN,
+		KEY_LEFT,
+		KEY_RIGHT,
 
 		KEY_0,
 		KEY_1,
@@ -282,26 +288,20 @@ namespace HI2 {
 		KEY_LEFTCLICK,
 		KEY_RIGHTCLICK,
 
+		TOUCHSCREEN,
 		// Pseudo-key for at least one finger on the touch screen
-		TOUCH = KEY_LEFTCLICK,
-
-		// Buttons by orientation (for single Joy-Con), also works with
-		// Joy-Con pairs, Pro Controller
-		BUTTON_JOYCON_RIGHT = BUTTON_A,
-		BUTTON_JOYCON_DOWN = BUTTON_B,
-		BUTTON_JOYCON_UP = BUTTON_X,
-		BUTTON_JOYCON_LEFT = BUTTON_Y,
+		TOUCH,
 
 		// Generic catch-all directions, also works for single Joy-Con
-		BUTTON_UP = BUTTON_DUP, // | BUTTON_LSTICK_UP | BUTTON_RSTICK_UP, ///< D-Pad Up or Sticks Up
-		BUTTON_DOWN = BUTTON_DDOWN,//| BUTTON_LSTICK_DOWN | BUTTON_RSTICK_DOWN, ///< D-Pad Down or Sticks Down
-		BUTTON_LEFT = BUTTON_DLEFT,//| BUTTON_LSTICK_LEFT | BUTTON_RSTICK_LEFT, ///< D-Pad Left or Sticks Left
-		BUTTON_RIGHT = BUTTON_DRIGHT, // | BUTTON_LSTICK_RIGHT | BUTTON_RSTICK_RIGHT,		 ///< D-Pad Right or Sticks Right
-		BUTTON_SL = BUTTON_SL_LEFT, // | BUTTON_SL_RIGHT, ///< SL on Left or Right Joy-Con
-		BUTTON_SR = BUTTON_SR_LEFT, // | BUTTON_SR_RIGHT, ///< SR on Left or Right Joy-Con
+		UP,// = BUTTON_DUP, // | BUTTON_LSTICK_UP | BUTTON_RSTICK_UP, ///< D-Pad Up or Sticks Up
+		DOWN,// = BUTTON_DDOWN,//| BUTTON_LSTICK_DOWN | BUTTON_RSTICK_DOWN, ///< D-Pad Down or Sticks Down
+		LEFT,// = BUTTON_DLEFT,//| BUTTON_LSTICK_LEFT | BUTTON_RSTICK_LEFT, ///< D-Pad Left or Sticks Left
+		RIGHT,// = BUTTON_DRIGHT, // | BUTTON_LSTICK_RIGHT | BUTTON_RSTICK_RIGHT,		 ///< D-Pad Right or Sticks Right
+		BUTTON_SL,// = BUTTON_SL_LEFT, // | BUTTON_SL_RIGHT, ///< SL on Left or Right Joy-Con
+		BUTTON_SR,// = BUTTON_SR_LEFT, // | BUTTON_SR_RIGHT, ///< SR on Left or Right Joy-Con
 
-		KEY_ACCEPT = BUTTON_A,
-		KEY_CANCEL = BUTTON_B,
+		ACCEPT,// = BUTTON_A,
+		CANCEL,// = BUTTON_B,
 	};
 	enum JOYSTICK {
 		JOY_LEFT,
@@ -365,5 +365,16 @@ namespace HI2 {
 
 	void createDirectories(std::filesystem::path p);
 	void deleteDirectory(std::filesystem::path p);
+
+	inline void calculateAggregators(std::bitset<HI2::BUTTON_SIZE>& buttons){
+		buttons[HI2::BUTTON::DOWN] = buttons[HI2::BUTTON::BUTTON_DDOWN] || buttons[HI2::BUTTON::KEY_S] || buttons[HI2::BUTTON::BUTTON_LSTICK_DOWN];
+		buttons[HI2::BUTTON::UP] = buttons[HI2::BUTTON::BUTTON_DUP] || buttons[HI2::BUTTON::KEY_W] || buttons[HI2::BUTTON::BUTTON_LSTICK_UP];
+		buttons[HI2::BUTTON::LEFT] = buttons[HI2::BUTTON::BUTTON_DLEFT] || buttons[HI2::BUTTON::KEY_A] || buttons[HI2::BUTTON::BUTTON_LSTICK_LEFT];
+		buttons[HI2::BUTTON::RIGHT] = buttons[HI2::BUTTON::BUTTON_DRIGHT] || buttons[HI2::BUTTON::KEY_D] || buttons[HI2::BUTTON::BUTTON_LSTICK_RIGHT];
+
+		buttons[HI2::BUTTON::ACCEPT] = buttons[HI2::BUTTON::BUTTON_A] || buttons[HI2::BUTTON::KEY_ENTER];
+		buttons[HI2::BUTTON::CANCEL] = buttons[HI2::BUTTON::BUTTON_PLUS] || buttons[HI2::BUTTON::KEY_ESCAPE];
+		buttons[HI2::BUTTON::TOUCH] = buttons[HI2::BUTTON::TOUCHSCREEN] || buttons[HI2::BUTTON::KEY_LEFTCLICK];
+	}
 
 } // namespace HI2
