@@ -113,6 +113,7 @@ namespace HI2 {
 	{
 		unsigned char r = 0, g = 0, b = 0, a = 0;
 		Color() {}
+		Color(unsigned int b);
 		Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a) :r(r), g(g), b(b), a(a) {}
 
 		static Color Black;

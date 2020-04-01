@@ -268,6 +268,14 @@ void HI2::setCursorPos(point2D pos)
 
 //~~CLASSES~~
 
+//COLOR
+HI2::Color::Color(unsigned int b){
+	a = (unsigned char)b;
+	b = (unsigned char)b >> 8;
+	g = (unsigned char)b >> 16;
+	r = (unsigned char)b >> 24;
+}
+
 //SOUND
 HI2::Audio::Audio() {}
 HI2::Audio::Audio(std::filesystem::path path, bool loop, float volume) {
