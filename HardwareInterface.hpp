@@ -419,6 +419,9 @@ namespace HI2 {
 		point2D position);
 	void drawRectangle(point2D pos, int width, int height, Color color); // draw a filled rectangle
 	void drawEmptyRectangle(point2D pos, int width, int height, Color color);
+	void drawLine(point2D start, point2D end, Color color);
+	void drawLines(const std::vector<point2D>& points, Color color);
+
 	void drawPixel(point2D pos, Color color);
 	void setRenderTarget(Texture* t = nullptr, bool clear = false);
 	void endFrame();

@@ -218,6 +218,19 @@ void HI2::drawEmptyRectangle(point2D pos, int width, int height, Color color){
 	SDL_Rect r = { pos.x, pos.y, width, height };
 	SDL_RenderDrawRect(renderer, &r);
 }
+void HI2::drawLine(point2D start, point2D end, Color color){
+	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+	SDL_RenderDrawLine(renderer,start.x,start.y,end.x,end.y);
+}
+void HI2::drawLines(const std::vector<point2D>& points, Color color){
+	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+	SDL_Point* pointArray = new SDL_Point[points.size()];
+	for(int i = 0; i < points.size(); ++i){
+		pointArray[i].x = points[i].x;
+		pointArray[i].y = points[i].y;
+	}
+	SDL_RenderDrawLines(renderer,pointArray,points.size());
+}
 
 void HI2::drawPixel(point2D pos, Color color){
 	HI2::drawRectangle(pos,1,1,color);
