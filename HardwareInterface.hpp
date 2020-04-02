@@ -8,7 +8,29 @@
 #define M_PI 3.14159265358979323846
 
 
-struct point2D {
+struct point2Dd {
+	double x = 0;
+	double y = 0;
+	point2Dd operator+(const point2Dd& right)const {
+		return { x + right.x,y + right.y };
+	}
+	point2Dd operator-(const point2Dd& right)const {
+		return { x - right.x,y - right.y };
+	}
+	point2Dd operator*(const point2Dd& right)const {
+		return { x * right.x,y * right.y };
+	}
+	point2Dd operator/(const point2Dd& right)const {
+		return { x / right.x,y / right.y };
+	}
+	point2Dd operator*(const double& right)const {
+		return { x * right,y * right };
+	}
+	point2Dd operator/(const double& right)const {
+		return { x / right,y / right };
+	}
+};
+struct point2D{
 	int x = 0;
 	int y = 0;
 
@@ -30,10 +52,49 @@ struct point2D {
 	point2D operator/(const int& right)const {
 		return { x / right,y / right };
 	}
+	operator point2Dd() const { return point2Dd{(double)x,(double)y}; }
 };
-struct point2Dd {
-	double x = 0;
-	double y = 0;
+template<class T>
+struct point2Dt{
+	T x = 0;
+	T y = 0;
+
+	point2Dt(){}
+	template <class D>
+	point2Dt(const point2Dt<D>& r){
+		x = (T)r.x;
+		y = (T)r.y;
+	}
+	point2Dt(const point2D& r){
+		x = (T)r.x;
+		y = (T)r.y;
+	}
+	template <class D>
+	point2Dt operator+(const point2Dt<D>& right)const {
+		point2Dt<T> result;
+		result.x = x + right.x;
+		result.y = y + right.y;
+		return result;
+	}
+	template <class D>
+	point2Dt operator-(const point2Dt<D>& right)const {
+		return { x - right.x,y - right.y };
+	}
+	template <class D>
+	point2Dt operator*(const point2Dt<D>& right)const {
+		return { x * right.x,y * right.y };
+	}
+	template <class D>
+	point2Dt operator/(const point2Dt<D>& right)const {
+		return { x / right.x,y / right.y };
+	}
+	point2Dt operator*(const T& right)const {
+		return { x * right,y * right };
+	}
+	point2Dt operator/(const T& right)const {
+		return { x / right,y / right };
+	}
+	operator point2D() const { return point2D{(int)x,(int)y}; }
 };
 struct point2Du {
 	unsigned int x = 0;
@@ -130,6 +191,7 @@ namespace HI2 {
 		static Color DarkGrey;
 		static Color DarkestGrey;
 		static Color Transparent;
+		static Color Brown;
 
 	};
 

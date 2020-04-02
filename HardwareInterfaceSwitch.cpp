@@ -31,6 +31,7 @@ HI2::Color HI2::Color::Grey{150,150,150,255};
 HI2::Color HI2::Color::LightGrey{200,200,200,255};
 HI2::Color HI2::Color::LightestGrey{220,220,220,255};
 HI2::Color HI2::Color::Transparent{255,255,255,0};
+HI2::Color HI2::Color::Brown{ 111,92,66,255 };
 
 SDL_Window* window;
 SDL_Renderer* renderer;
