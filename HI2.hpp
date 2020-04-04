@@ -250,6 +250,7 @@ namespace HI2 {
 			point2D position);
 		friend void setTextureColorMod(Texture& texture, Color color);
 		friend void setRenderTarget(Texture* t, bool b);
+		friend Texture getRenderTarget();
 		friend point2D getTextureSize(Texture& texture);
 	};
 
@@ -424,6 +425,8 @@ namespace HI2 {
 
 	void drawPixel(point2D pos, Color color);
 	void setRenderTarget(Texture* t = nullptr, bool clear = false);
+	Texture getRenderTarget();
+
 	void endFrame();
 	point2D getTextureSize(Texture& texture);
 

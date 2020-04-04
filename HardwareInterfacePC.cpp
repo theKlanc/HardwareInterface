@@ -9,7 +9,7 @@
 #include <future>
 #include <iostream>
 #include <fstream>
-#include "HardwareInterface.hpp"
+#include "HI2.hpp"
 #include <thread>
 #include <filesystem>
 
@@ -584,6 +584,12 @@ void HI2::setRenderTarget(HI2::Texture* t, bool clear) {
 	if (clear) {
 		SDL_RenderClear(renderer);
 	}
+}
+
+HI2::Texture HI2::getRenderTarget(){
+	Texture result;
+	result._texture = SDL_GetRenderTarget(renderer);
+	return result;
 }
 
 void HI2::createDirectories(std::filesystem::path p) {

@@ -523,6 +523,12 @@ void HI2::setRenderTarget(HI2::Texture* t, bool clear){
 	}
 }
 
+HI2::Texture HI2::getRenderTarget(){
+	Texture result;
+	result._texture = SDL_GetRenderTarget(renderer);
+	return result;
+}
+
 void HI2::createDirectories(std::filesystem::path p){
 	for(auto& dir : p){
 		std::filesystem::create_directory(dir);
