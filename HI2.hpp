@@ -5,6 +5,11 @@
 #include <fstream>
 #include <string>
 #include <bitset>
+
+#if defined __LINUX__ || defined WIN32 || defined WIN64 || defined __SWITCH__
+	#include <SDL2/SDL.h>
+#endif
+
 #define M_PI 3.14159265358979323846
 
 
@@ -231,10 +236,24 @@ namespace HI2 {
 		Texture();
 		Texture(std::filesystem::path path);
 		Texture(point2D size);
-		void clean();
+		void clean(){}
 
 	private:
-		void* _texture = nullptr;
+		class _internalWeakTextureRAIIWrapper{
+			public:
+			_internalWeakTextureRAIIWrapper(void* pointer);
+			virtual ~_internalWeakTextureRAIIWrapper();
+			SDL_Texture* get() const;
+			protected:
+			void* _texture = nullptr;
+		};
+		class _internalTextureRAIIWrapper : public _internalWeakTextureRAIIWrapper{
+		public:
+			_internalTextureRAIIWrapper(void* pointer): _internalWeakTextureRAIIWrapper(pointer){};
+			virtual ~_internalTextureRAIIWrapper() override;
+		};
+
+		std::shared_ptr<_internalWeakTextureRAIIWrapper> _texture;
 		std::filesystem::path _path;
 
 		friend void drawTexture(Texture& texture, int posX, int posY,
