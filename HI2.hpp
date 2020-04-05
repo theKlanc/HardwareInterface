@@ -6,12 +6,7 @@
 #include <string>
 #include <bitset>
 
-#if defined __LINUX__ || defined WIN32 || defined WIN64 || defined __SWITCH__
-	#include <SDL2/SDL.h>
-#endif
-
 #define M_PI 3.14159265358979323846
-
 
 struct point2Dd {
 	double x = 0;
@@ -243,7 +238,7 @@ namespace HI2 {
 			public:
 			_internalWeakTextureRAIIWrapper(void* pointer);
 			virtual ~_internalWeakTextureRAIIWrapper();
-			SDL_Texture* get() const;
+			void* get() const;
 			protected:
 			void* _texture = nullptr;
 		};

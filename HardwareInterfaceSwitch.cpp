@@ -545,4 +545,23 @@ point2D HI2::getTextureSize(Texture& texture){
 	return result;
 }
 
+HI2::Texture::_internalWeakTextureRAIIWrapper::_internalWeakTextureRAIIWrapper(void *pointer)
+{
+	_texture=pointer;
+}
+
+HI2::Texture::_internalTextureRAIIWrapper::~_internalTextureRAIIWrapper()
+{
+	SDL_DestroyTexture(rcast<SDL_Texture*>(_texture));
+}
+
+void* HI2::Texture::_internalWeakTextureRAIIWrapper::get() const
+{
+	return rcast<void*>(_texture);
+}
+
+
+
+HI2::Texture::_internalWeakTextureRAIIWrapper::~_internalWeakTextureRAIIWrapper(){}
+
 #endif
