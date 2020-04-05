@@ -198,37 +198,34 @@ void HI2::drawTexture(Texture& texture, int posX, int posY, point2D size, point2
 	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), &srcRect, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
 }
 
-void HI2::drawTextureOverlap(Texture& texture, int posX, int posY, double scale, double radians, HI2::FLIP flip) {
-	SDL_Rect destRect;
+void HI2::drawTextureOverlap(Texture& texture, float posX, float posY, double scale, double radians, HI2::FLIP flip) {
+	SDL_FRect destRect;
 	destRect.x = posX;  //the x coordinate
 	destRect.y = posY; // the y coordinate
-	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture.get()->get()), nullptr, nullptr, &destRect.w, &destRect.h);
-	destRect.w *= scale;
-	destRect.h *= scale;
-	destRect.w += 1;
-	destRect.h += 1;
+	int w, h;
+	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture.get()->get()), nullptr, nullptr, &w, &h);
+	destRect.w = w*scale;
+	destRect.h = h*scale;
 
 	// PI * rad = 180 * deg
-	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), nullptr, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
+	SDL_RenderCopyExF(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), nullptr, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
 }
 
-void HI2::drawTextureOverlap(Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale, double radians, HI2::FLIP flip) {
+void HI2::drawTextureOverlap(Texture& texture, float posX, float posY, point2D size, point2D startPos, double scale, double radians, HI2::FLIP flip) {
 	SDL_Rect srcRect;
 	srcRect.x = startPos.x;
 	srcRect.y = startPos.y;
 	srcRect.w = size.x;
 	srcRect.h = size.y;
 
-	SDL_Rect destRect;
+	SDL_FRect destRect;
 	destRect.x = posX;  //the x coordinate
 	destRect.y = posY; // the y coordinate
 	destRect.w = size.x * scale;
 	destRect.h = size.y * scale;
-	destRect.w += 1;
-	destRect.h += 1;
 
 	// PI * rad = 180 * deg
-	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), &srcRect, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
+	SDL_RenderCopyExF(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), &srcRect, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
 }
 
 HI2::Texture HI2::mergeTextures(Texture& originTexture, Texture& destinationTexture, point2D position) {
