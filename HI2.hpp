@@ -253,11 +253,15 @@ namespace HI2 {
 
 		friend void drawTexture(Texture& texture, int posX, int posY,
 			double scale, double rotation, FLIP flip);
-		friend void drawTextureOverlap(Texture& texture, float posX, float posY,
+		friend void drawTextureOverlap(Texture& texture, int posX, int posY,
+			double scale, double rotation, FLIP flip);
+		friend void drawTextureF(Texture& texture, float posX, float posY,
 			double scale, double rotation, FLIP flip);
 		friend void drawTexture(Texture& texture, int posX, int posY, point2D size, point2D startPos,
 			double scale, double rotation, FLIP flip);
-		friend void drawTextureOverlap(Texture& texture, float posX, float posY, point2D size, point2D startPos,
+		friend void drawTextureOverlap(Texture& texture, int posX, int posY, point2D size, point2D startPos,
+			double scale, double rotation, FLIP flip);
+		friend void drawTextureF(Texture& texture, float posX, float posY, point2D size, point2D startPos,
 			double scale, double rotation, FLIP flip);
 		friend Texture mergeTextures(Texture& originTexture,
 			Texture& destinationTexture,
@@ -427,9 +431,11 @@ namespace HI2 {
 		Color color);
 	void setTextureColorMod(Texture& texture, Color color);
 	void drawTexture(Texture& texture, int posX, int posY, double scale = 1, double radians = 0, HI2::FLIP flip = NONE);
-	void drawTextureOverlap(Texture& texture, float posX, float posY, double scale = 1, double radians = 0, HI2::FLIP flip = NONE);
+	void drawTextureOverlap(Texture& texture, int posX, int posY, double scale = 1, double radians = 0, HI2::FLIP flip = NONE);
+	void drawTextureF(Texture& texture, float posX, float posY, double scale = 1, double radians = 0, HI2::FLIP flip = NONE);
 	void drawTexture(Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale = 1, double radians = 0, HI2::FLIP flip = NONE);
-	void drawTextureOverlap(Texture& texture, float posX, float posY, point2D size, point2D startPos, double scale = 1, double radians = 0, HI2::FLIP flip = NONE);
+	void drawTextureOverlap(Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale = 1, double radians = 0, HI2::FLIP flip = NONE);
+	void drawTextureF(Texture& texture, float posX, float posY, point2D size, point2D startPos, double scale = 1, double radians = 0, HI2::FLIP flip = NONE);
 	Texture mergeTextures(Texture& originTexture, Texture& destinationTexture,
 		point2D position);
 	void drawRectangle(point2D pos, int width, int height, Color color); // draw a filled rectangle
