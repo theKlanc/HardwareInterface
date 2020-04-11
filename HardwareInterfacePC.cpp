@@ -170,7 +170,7 @@ void HI2::setTextureColorMod(Texture& texture, Color color)
 	SDL_SetTextureColorMod(rcast<SDL_Texture*>(texture._texture.get()->get()), color.r, color.g, color.b);
 }
 
-void HI2::drawTexture(Texture& texture, int posX, int posY, double scale, double radians, HI2::FLIP flip) {
+void HI2::drawTexture(const Texture& texture, int posX, int posY, double scale, double radians, HI2::FLIP flip) {
 	SDL_Rect destRect;
 	destRect.x = posX;  //the x coordinate
 	destRect.y = posY; // the y coordinate
@@ -181,7 +181,7 @@ void HI2::drawTexture(Texture& texture, int posX, int posY, double scale, double
 	// PI * rad = 180 * deg
 	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), nullptr, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
 }
-void HI2::drawTexture(Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale, double radians, HI2::FLIP flip) {
+void HI2::drawTexture(const Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale, double radians, HI2::FLIP flip) {
 	SDL_Rect srcRect;
 	srcRect.x = startPos.x;
 	srcRect.y = startPos.y;
@@ -198,7 +198,7 @@ void HI2::drawTexture(Texture& texture, int posX, int posY, point2D size, point2
 	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), &srcRect, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
 }
 
-void HI2::drawTextureOverlap(Texture& texture, int posX, int posY, double scale, double radians, HI2::FLIP flip) {
+void HI2::drawTextureOverlap(const Texture& texture, int posX, int posY, double scale, double radians, HI2::FLIP flip) {
 	SDL_Rect destRect;
 	destRect.x = posX;  //the x coordinate
 	destRect.y = posY; // the y coordinate
@@ -211,7 +211,7 @@ void HI2::drawTextureOverlap(Texture& texture, int posX, int posY, double scale,
 	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), nullptr, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
 }
 
-void HI2::drawTextureOverlap(Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale, double radians, HI2::FLIP flip) {
+void HI2::drawTextureOverlap(const Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale, double radians, HI2::FLIP flip) {
 	SDL_Rect srcRect;
 	srcRect.x = startPos.x;
 	srcRect.y = startPos.y;
@@ -229,7 +229,7 @@ void HI2::drawTextureOverlap(Texture& texture, int posX, int posY, point2D size,
 	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), &srcRect, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
 }
 
-void HI2::drawTextureF(Texture& texture, float posX, float posY, double scale, double radians, HI2::FLIP flip) {
+void HI2::drawTextureF(const Texture& texture, float posX, float posY, double scale, double radians, HI2::FLIP flip) {
 	SDL_FRect destRect;
 	destRect.x = posX;  //the x coordinate
 	destRect.y = posY; // the y coordinate
@@ -242,7 +242,7 @@ void HI2::drawTextureF(Texture& texture, float posX, float posY, double scale, d
 	SDL_RenderCopyExF(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), nullptr, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
 }
 
-void HI2::drawTextureF(Texture& texture, float posX, float posY, point2D size, point2D startPos, double scale, double radians, HI2::FLIP flip) {
+void HI2::drawTextureF(const Texture& texture, float posX, float posY, point2D size, point2D startPos, double scale, double radians, HI2::FLIP flip) {
 	SDL_Rect srcRect;
 	srcRect.x = startPos.x;
 	srcRect.y = startPos.y;
