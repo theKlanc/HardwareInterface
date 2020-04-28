@@ -156,6 +156,18 @@ struct point3Dd {
 	point3Dd operator/(const double& i) const {
 		return { x / i,y / i,z / i };
 	}
+	point3Dd rotate2D(double r){
+		double newX = cos(r)*x - sin(r)*y;
+		double y = sin(r)*x + cos(r)*y;
+		x=newX;
+		return *this;
+	}
+	//x2=cosβx1−sinβy1
+	//y2=sinβx1+cosβy1
+
+	bool operator==(const point3Dd &p) const{
+		return x==p.x && y==p.y && z==p.z;
+	}
 	operator point3Di() const {
 		return { (int)floor(x),(int)floor(y),(int)floor(z) };
 	}
