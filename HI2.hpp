@@ -156,6 +156,15 @@ struct point3Dd {
 	point3Dd operator/(const double& i) const {
 		return { x / i,y / i,z / i };
 	}
+	point3Dd operator+(const point3Dd& r) const {
+		return { x+r.x,y+r.y,z+r.z };
+	}
+	point3Dd operator+=(const point3Dd& r) {
+		x+=r.x;
+		y+=r.y;
+		z+=r.z;
+		return *this;
+	}
 	point3Dd rotate2D(double r){
 		double newX = cos(r)*x - sin(r)*y;
 		double y = sin(r)*x + cos(r)*y;
