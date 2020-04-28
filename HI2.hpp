@@ -143,6 +143,7 @@ struct point3Dd {
 	double x = 0.0;
 	double y = 0.0;
 	double z = 0.0;
+	point3Dd(){};
 	point3Dd(double x, double y, double z) :x(x), y(y), z(z) {}
 	point3Dd(const point3Di& p) {
 		x = p.x;
