@@ -274,6 +274,17 @@ void HI2::drawEmptyRectangle(point2D pos, int width, int height, Color color) {
 	SDL_Rect r = { pos.x, pos.y, width, height };
 	SDL_RenderDrawRect(renderer, &r);
 }
+void HI2::drawEmptyRectangle(point2D pos, int width, int height, int strokewidth, Color color) {
+	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+	SDL_Rect r = { pos.x, pos.y, width, height };
+	if(strokewidth == 1){
+		drawEmptyRectangle(pos,width,height,color);
+	}
+	else{
+		drawEmptyRectangle(pos,width,height,color);
+		drawEmptyRectangle({pos.x+1,pos.y+1},width-2,height-2,strokewidth-1,color);
+	}
+}
 void HI2::drawLine(point2D start, point2D end, Color color){
 	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 	SDL_RenderDrawLine(renderer,start.x,start.y,end.x,end.y);
@@ -506,6 +517,9 @@ HI2::BUTTON translate(SDL_Keycode s) {
 		return HI2::BUTTON::KEY_9;
 	case SDLK_PLUS:
 		return HI2::BUTTON::KEY_PLUS;
+	case SDLK_BACKQUOTE:
+	case 186:
+		return HI2::BUTTON::KEY_CONSOLE;
 	default:
 		return (HI2::BUTTON)(HI2::BUTTON_SIZE - 1);
 	}//TODO acabar aixo

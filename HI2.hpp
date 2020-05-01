@@ -367,6 +367,7 @@ namespace HI2 {
 		KEY_SPACE,
 		KEY_SHIFT,
 		KEY_ENTER,
+		KEY_CONSOLE,
 
 		KEY_UP,
 		KEY_DOWN,
@@ -462,6 +463,7 @@ namespace HI2 {
 		point2D position);
 	void drawRectangle(point2D pos, int width, int height, Color color); // draw a filled rectangle
 	void drawEmptyRectangle(point2D pos, int width, int height, Color color);
+	void drawEmptyRectangle(point2D pos, int width, int height, int strokewidth, Color color);
 	void drawLine(point2D start, point2D end, Color color);
 	void drawLines(const std::vector<point2D>& points, Color color);
 
