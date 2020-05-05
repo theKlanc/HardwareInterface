@@ -403,7 +403,7 @@ int HI2::getScreenWidth() {
 }
 
 constexpr HI2::PLATFORM HI2::getPlatform() {
-	return HI2::PLATFORM_PC;
+	return HI2::PLATFORM::PLATFORM_PC;
 }
 
 void HI2::consoleInit() {}

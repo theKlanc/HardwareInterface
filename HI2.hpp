@@ -185,7 +185,7 @@ struct point3Dd {
 namespace HI2 {
 	// New and more polished version of HI, breaks compat
 
-	enum FLIP
+	enum class FLIP
 	{
 		NONE = 0,
 		H = 1,
@@ -294,7 +294,7 @@ namespace HI2 {
 		friend point2D getTextureSize(Texture& texture);
 	};
 
-	enum PLATFORM {
+	enum class PLATFORM {
 		PLATFORM_PSVITA,
 		PLATFORM_NINTENDO3DS,
 		PLATFORM_PC,
@@ -408,9 +408,9 @@ namespace HI2 {
 		ACCEPT,// = BUTTON_A,
 		CANCEL,// = BUTTON_B,
 	};
-	enum JOYSTICK {
-		JOY_LEFT,
-		JOY_RIGHT,
+	enum class JOYSTICK {
+		LEFT,
+		RIGHT,
 	};
 
 	// logger
@@ -453,12 +453,12 @@ namespace HI2 {
 	void drawText(Font& font, std::string text, point2D pos, int size,
 		Color color);
 	void setTextureColorMod(Texture& texture, Color color);
-	void drawTexture(const Texture& texture, int posX, int posY, double scale = 1, double radians = 0, HI2::FLIP flip = NONE);
-	void drawTextureOverlap(const Texture& texture, int posX, int posY, double scale = 1, double radians = 0, HI2::FLIP flip = NONE);
-	void drawTextureF(const Texture& texture, float posX, float posY, double scale = 1, double radians = 0, HI2::FLIP flip = NONE);
-	void drawTexture(const Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale = 1, double radians = 0, HI2::FLIP flip = NONE);
-	void drawTextureOverlap(const Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale = 1, double radians = 0, HI2::FLIP flip = NONE);
-	void drawTextureF(const Texture& texture, float posX, float posY, point2D size, point2D startPos, double scale = 1, double radians = 0, HI2::FLIP flip = NONE);
+	void drawTexture(const Texture& texture, int posX, int posY, double scale = 1, double radians = 0, HI2::FLIP flip = HI2::FLIP::NONE);
+	void drawTextureOverlap(const Texture& texture, int posX, int posY, double scale = 1, double radians = 0, HI2::FLIP flip = HI2::FLIP::NONE);
+	void drawTextureF(const Texture& texture, float posX, float posY, double scale = 1, double radians = 0, HI2::FLIP flip = HI2::FLIP::NONE);
+	void drawTexture(const Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale = 1, double radians = 0, HI2::FLIP flip = HI2::FLIP::NONE);
+	void drawTextureOverlap(const Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale = 1, double radians = 0, HI2::FLIP flip = HI2::FLIP::NONE);
+	void drawTextureF(const Texture& texture, float posX, float posY, point2D size, point2D startPos, double scale = 1, double radians = 0, HI2::FLIP flip = HI2::FLIP::NONE);
 	Texture mergeTextures(Texture& originTexture, Texture& destinationTexture,
 		point2D position);
 	void drawRectangle(point2D pos, int width, int height, Color color); // draw a filled rectangle
