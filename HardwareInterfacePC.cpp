@@ -21,6 +21,11 @@
 #include <fstream>
 #include <functional>
 
+
+#ifdef __EMSCRIPTEN__
+#define SDL_RenderCopyExF SDL_RenderCopyEx
+#define SDL_FRect SDL_Rect
+#endif
 #define DEBUG_PRIORITY 0
 
 #define rcast reinterpret_cast
