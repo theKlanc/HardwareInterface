@@ -133,6 +133,12 @@ struct point3Di {
 	{
 		return { x - b.x,y - b.y,z - b.z };
 	}
+	double magnitude() const{
+		return distance({0,0,0});
+	}
+	double distance(const point3Di& r) const{
+		return sqrt(pow(r.x - x, 2) + pow(r.y - y, 2) + pow(r.z - z, 2));
+	}
 };
 struct point3Dl {
 	long x = 0;
