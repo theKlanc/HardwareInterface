@@ -5,6 +5,8 @@
 #include <fstream>
 #include <string>
 #include <bitset>
+#include <cstdlib>
+#include <algorithm>
 
 #define M_PI 3.14159265358979323846
 
@@ -132,6 +134,13 @@ struct point3Di {
 	point3Di operator-(const point3Di& b) const
 	{
 		return { x - b.x,y - b.y,z - b.z };
+	}
+
+	double maxmag() const{
+		return maxdist({0,0,0});
+	}
+	double maxdist(const point3Di& r) const{
+		return std::max({std::abs(x-r.x),std::abs(y-r.y),std::abs(z-r.z)});
 	}
 	double magnitude() const{
 		return distance({0,0,0});
