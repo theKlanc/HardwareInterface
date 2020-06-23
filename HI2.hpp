@@ -135,6 +135,24 @@ struct point3Di {
 	{
 		return { x - b.x,y - b.y,z - b.z };
 	}
+	bool operator<(const point3Di& b) const{
+		if(x < b.x)
+			return true;
+		else if(x>b.x)
+			return false;
+		else{
+			if(y < b.y)
+				return true;
+			else if(y>b.y)
+				return false;
+			else{
+				if(z < b.z)
+					return true;
+				else
+					return false;
+			}
+		}
+	}
 
 	double maxmag() const{
 		return maxdist({0,0,0});
@@ -315,7 +333,7 @@ namespace HI2 {
 		PLATFORM_PC,
 		PLATFORM_SWITCH,
 	};
-	constexpr int BUTTON_SIZE = 128;
+
 	enum BUTTON {
 		BUTTON_A,				///< A
 		BUTTON_B,				///< B
@@ -381,6 +399,7 @@ namespace HI2 {
 		KEY_BACKSPACE,
 		KEY_SPACE,
 		KEY_SHIFT,
+		KEY_CONTROL,
 		KEY_ENTER,
 		KEY_CONSOLE,
 
@@ -422,7 +441,12 @@ namespace HI2 {
 
 		ACCEPT,// = BUTTON_A,
 		CANCEL,// = BUTTON_B,
+
+
+
+		BUTTON_SIZE,
 	};
+
 	enum class JOYSTICK {
 		LEFT,
 		RIGHT,
@@ -493,6 +517,9 @@ namespace HI2 {
 
 	void createDirectories(std::filesystem::path p);
 	void deleteDirectory(std::filesystem::path p);
+
+	void setClipboard(std::string mucho_texto);
+	std::string getClipboard();
 
 	inline void calculateAggregators(std::bitset<HI2::BUTTON_SIZE>& buttons){
 		buttons[HI2::BUTTON::DOWN] = buttons[HI2::BUTTON::BUTTON_DDOWN] || buttons[HI2::BUTTON::KEY_S] || buttons[HI2::BUTTON::BUTTON_LSTICK_DOWN];

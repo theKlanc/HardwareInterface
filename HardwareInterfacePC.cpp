@@ -500,6 +500,9 @@ HI2::BUTTON translate(SDL_Keycode s) {
 	case SDLK_LSHIFT:
 	case SDLK_RSHIFT:
 		return HI2::BUTTON::KEY_SHIFT;
+	case SDLK_LCTRL:
+	case SDLK_RCTRL:
+		return HI2::BUTTON::KEY_CONTROL;
 	case SDLK_0:
 		return HI2::BUTTON::KEY_0;
 	case SDLK_1:
@@ -664,4 +667,16 @@ void* HI2::Texture::_internalWeakTextureRAIIWrapper::get() const
 
 
 HI2::Texture::_internalWeakTextureRAIIWrapper::~_internalWeakTextureRAIIWrapper(){}
+
+void HI2::setClipboard(std::string mucho_texto){
+	SDL_SetClipboardText(mucho_texto.c_str());
+}
+
+std::string HI2::getClipboard(){
+	if(!SDL_HasClipboardText())
+		return std::string();
+	std::string temp = SDL_GetClipboardText();
+	return temp;
+}
+
 #endif
