@@ -302,6 +302,7 @@ void HI2::drawLines(const std::vector<point2D>& points, Color color){
 		pointArray[i].y = points[i].y;
 	}
 	SDL_RenderDrawLines(renderer,pointArray,points.size());
+	delete[] pointArray;
 }
 void HI2::drawPixel(point2D pos, Color color) {
 	HI2::drawRectangle(pos, 1, 1, color);
