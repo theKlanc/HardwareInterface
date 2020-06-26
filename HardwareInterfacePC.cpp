@@ -91,6 +91,7 @@ void HI2::systemInit() {
 	}
 
 	// create a renderer (OpenGL ES2)
+	SDL_SetHintWithPriority(SDL_HINT_RENDER_BATCHING,"1",SDL_HINT_OVERRIDE);
 	renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
 	if (!renderer) {
 		SDL_Log("SDL_CreateRenderer: %s\n", SDL_GetError());
