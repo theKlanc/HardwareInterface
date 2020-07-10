@@ -31,6 +31,9 @@ struct point2Dd {
 	point2Dd operator/(const double& right)const {
 		return { x / right,y / right };
 	}
+	static point2Dd fromDirection(double angle, double length){
+		return {cos(angle)*length,sin(angle)*length};
+	}
 };
 struct point2D{
 	int x = 0;
