@@ -32,7 +32,7 @@ struct point2Dd {
 		return { x / right,y / right };
 	}
 	static point2Dd fromDirection(double angle, double length){
-		return {cos(angle)*length,sin(angle)*length};
+		return {cos(angle)*length,-sin(angle)*length};
 	}
 };
 struct point2D{
