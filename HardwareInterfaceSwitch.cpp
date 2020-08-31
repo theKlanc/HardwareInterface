@@ -194,7 +194,7 @@ void HI2::drawTextureOverlap(const Texture& texture, int posX, int posY, point2D
 	destRect.y = posY; // the y coordinate
 	destRect.w = (size.x * scale)+1;
 	destRect.h = (size.y * scale)+1;
-	auto asdf = std::make_shared<SDL_Texture*>(rcast<SDL_Texture*>((void*)(nullptr)));
+	//auto asdf = std::make_shared<SDL_Texture*>(rcast<SDL_Texture*>((void*)(nullptr)));
 
 	// PI * rad = 180 * deg
 	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), &srcRect, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
@@ -225,7 +225,7 @@ void HI2::drawTextureF(const Texture& texture, float posX, float posY, point2D s
 	destRect.y = posY; // the y coordinate
 	destRect.w = size.x * scale;
 	destRect.h = size.y * scale;
-	auto asdf = std::make_shared<SDL_Texture*>(rcast<SDL_Texture*>((void*)(nullptr)));
+	//auto asdf = std::make_shared<SDL_Texture*>(rcast<SDL_Texture*>((void*)(nullptr)));
 
 	// PI * rad = 180 * deg
 	SDL_RenderCopyExF(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), &srcRect, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
