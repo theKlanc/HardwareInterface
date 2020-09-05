@@ -595,4 +595,14 @@ void* HI2::Texture::_internalWeakTextureRAIIWrapper::get() const
 
 HI2::Texture::_internalWeakTextureRAIIWrapper::~_internalWeakTextureRAIIWrapper(){}
 
+void HI2::setClipboard(std::string mucho_texto){
+	SDL_SetClipboardText(mucho_texto.c_str());
+}
+
+std::string HI2::getClipboard(){
+	if(!SDL_HasClipboardText())
+		return std::string();
+	std::string temp = SDL_GetClipboardText();
+	return temp;
+}
 #endif
