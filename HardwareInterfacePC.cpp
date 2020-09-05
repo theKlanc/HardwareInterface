@@ -12,6 +12,7 @@
 #include "HI2.hpp"
 #include <thread>
 #include <filesystem>
+#include <GL/glew.h>
 
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -47,6 +48,7 @@ HI2::Color HI2::Color::Brown{ 111,92,66,255 };
 
 SDL_Window* window;
 SDL_Renderer* renderer;
+SDL_GLContext context;
 
 HI2::Color _bg;
 
@@ -84,14 +86,19 @@ void HI2::systemInit() {
 
 	w = 1280;
 	h = 720;
-	window = SDL_CreateWindow("sdl2_gles2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_RESIZABLE);
+	window = SDL_CreateWindow("sdl2_gles2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 	if (!window) {
 		SDL_Log("SDL_CreateWindow: %s\n", SDL_GetError());
 		//SDL_Quit();
 	}
 
+	context = SDL_GL_CreateContext(window);
+	//auto status = glewInit();
+	if(glewInit() != GLEW_OK)
+		throw("glew not ok");
+	std::cout << glGetString(GL_VERSION)<<std::endl;
 	// create a renderer (OpenGL ES2)
-	SDL_SetHintWithPriority(SDL_HINT_RENDER_BATCHING,"1",SDL_HINT_OVERRIDE);
+	//SDL_SetHintWithPriority(SDL_HINT_RENDER_BATCHING,"1",SDL_HINT_OVERRIDE);
 	renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
 	if (!renderer) {
 		SDL_Log("SDL_CreateRenderer: %s\n", SDL_GetError());
@@ -113,6 +120,7 @@ void HI2::systemInit() {
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 4096);
 }
 void HI2::systemFini() {
+	SDL_GL_DeleteContext(context);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	Mix_CloseAudio();
@@ -124,8 +132,9 @@ void HI2::systemFini() {
 }
 
 void HI2::startFrame() {
-	SDL_SetRenderDrawColor(renderer, _bg.r, _bg.g, _bg.b, _bg.a);
-	SDL_RenderClear(renderer);
+	//SDL_SetRenderDrawColor(renderer, _bg.r, _bg.g, _bg.b, _bg.a);
+	//SDL_RenderClear(renderer);
+	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void HI2::toggleFullscreen()
@@ -308,7 +317,11 @@ void HI2::drawPixel(point2D pos, Color color) {
 }
 
 void HI2::endFrame() {
-	SDL_RenderPresent(renderer);
+    //glClearColor((double)_bg.r/255, (double)_bg.g/255, (double)_bg.b/255, (double)_bg.a/255);
+    //glClear(GL_COLOR_BUFFER_BIT);
+	SDL_GL_SwapWindow(window);
+
+	//SDL_RenderPresent(renderer);
 
 	textureStackIndex=(textureStackIndex+1)%textTextures.size();
 	while (!textTextures[textureStackIndex].empty())
