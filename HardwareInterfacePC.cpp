@@ -12,6 +12,7 @@
 #include "HI2.hpp"
 #include <thread>
 #include <filesystem>
+#define GLEW_STATIC
 #include <GL/glew.h>
 
 #include <SDL.h>
