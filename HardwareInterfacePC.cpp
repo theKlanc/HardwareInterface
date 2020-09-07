@@ -94,10 +94,12 @@ void HI2::systemInit() {
 	}
 
 	context = SDL_GL_CreateContext(window);
+
 	//auto status = glewInit();
 	if(glewInit() != GLEW_OK)
 		throw("glew not ok");
 	std::cout << glGetString(GL_VERSION)<<std::endl;
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 	// create a renderer (OpenGL ES2)
 	//SDL_SetHintWithPriority(SDL_HINT_RENDER_BATCHING,"1",SDL_HINT_OVERRIDE);
 	renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
