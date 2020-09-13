@@ -92,23 +92,25 @@ void HI2::systemInit() {
 		SDL_Log("SDL_CreateWindow: %s\n", SDL_GetError());
 		//SDL_Quit();
 	}
-
+	SDL_GL_SetSwapInterval(1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+	SDL_GL_SetSwapInterval(1);
 	context = SDL_GL_CreateContext(window);
 
 	//auto status = glewInit();
 	if(glewInit() != GLEW_OK)
 		throw("glew not ok");
 	std::cout << glGetString(GL_VERSION)<<std::endl;
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-	SDL_GL_SetSwapInterval(1);
+
 	// create a renderer (OpenGL ES2)
 	//SDL_SetHintWithPriority(SDL_HINT_RENDER_BATCHING,"1",SDL_HINT_OVERRIDE);
-	renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC);
-	if (!renderer) {
-		SDL_Log("SDL_CreateRenderer: %s\n", SDL_GetError());
-		//SDL_Quit();
-	}
-	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	////renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC);
+	////if (!renderer) {
+	////	SDL_Log("SDL_CreateRenderer: %s\n", SDL_GetError());
+	////	//SDL_Quit();
+	////}
+	////SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
 	// open CONTROLLER_PLAYER_1 and CONTROLLER_PLAYER_2
 	// when railed, both joycons are mapped to joystick #0,
