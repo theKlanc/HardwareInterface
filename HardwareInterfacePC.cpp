@@ -23,6 +23,10 @@
 #include <fstream>
 #include <functional>
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_sdl.h"
+#include "imgui/imgui_impl_opengl3.h"
+
 
 #ifdef __EMSCRIPTEN__
 #define SDL_RenderCopyExF SDL_RenderCopyEx
@@ -124,8 +128,25 @@ void HI2::systemInit() {
 	//}
 	Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 4096);
+
+	 IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+
+    // Setup Platform/Renderer bindings
+    // window is the SDL_Window*
+    // contex is the SDL_GLContext
+    ImGui_ImplSDL2_InitForOpenGL(window, context);
+    ImGui_ImplOpenGL3_Init();
 }
 void HI2::systemFini() {
+	ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+
 	SDL_GL_DeleteContext(context);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
@@ -140,6 +161,9 @@ void HI2::systemFini() {
 void HI2::startFrame() {
 	//SDL_SetRenderDrawColor(renderer, _bg.r, _bg.g, _bg.b, _bg.a);
 	//SDL_RenderClear(renderer);
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL2_NewFrame(window);
+	ImGui::NewFrame();
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -325,6 +349,9 @@ void HI2::drawPixel(point2D pos, Color color) {
 void HI2::endFrame() {
     //glClearColor((double)_bg.r/255, (double)_bg.g/255, (double)_bg.b/255, (double)_bg.a/255);
     //glClear(GL_COLOR_BUFFER_BIT);
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 	SDL_GL_SwapWindow(window);
 
 	//SDL_RenderPresent(renderer);
@@ -563,6 +590,7 @@ bool HI2::aptMainLoop() {
 	Up.reset();
 	while (SDL_PollEvent(&event))
 	{
+		ImGui_ImplSDL2_ProcessEvent(&event);
 		switch (event.type) {
 		case SDL_QUIT:
 		{
