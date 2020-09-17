@@ -165,6 +165,7 @@ void HI2::startFrame() {
 	ImGui_ImplSDL2_NewFrame(window);
 	ImGui::NewFrame();
 	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void HI2::toggleFullscreen()
