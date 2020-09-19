@@ -572,6 +572,10 @@ HI2::BUTTON translate(SDL_Keycode s) {
 		return HI2::BUTTON::KEY_9;
 	case SDLK_PLUS:
 		return HI2::BUTTON::KEY_PLUS;
+	case SDLK_GREATER:
+		return HI2::BUTTON::KEY_PEIXMARTI_RIGHT;
+	case SDLK_LESS:
+		return HI2::BUTTON::KEY_PEIXMARTI_LEFT;
 	case SDLK_BACKQUOTE:
 	case 186:
 		return HI2::BUTTON::KEY_CONSOLE;
