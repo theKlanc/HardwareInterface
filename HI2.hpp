@@ -470,6 +470,9 @@ namespace HI2 {
 	int getScreenWidth();
 	constexpr PLATFORM getPlatform();
 
+	void releaseGLContext();
+	void attachGLContext();
+
 	// System
 	void systemInit();
 	void systemFini();

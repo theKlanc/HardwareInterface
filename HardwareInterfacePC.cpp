@@ -72,6 +72,13 @@ void HI2::logWrite(std::string s) {
 	_log << s << std::endl;
 }
 
+void HI2::releaseGLContext(){
+	SDL_GL_MakeCurrent(nullptr,nullptr);
+}
+void HI2::attachGLContext(){
+	SDL_GL_MakeCurrent(window,context);
+}
+
 // System
 void HI2::systemInit() {
 	fullscreen = false;
@@ -96,10 +103,10 @@ void HI2::systemInit() {
 		SDL_Log("SDL_CreateWindow: %s\n", SDL_GetError());
 		//SDL_Quit();
 	}
-	SDL_GL_SetSwapInterval(1);
+	//SDL_GL_SetSwapInterval(1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-	SDL_GL_SetSwapInterval(1);
+	//SDL_GL_SetSwapInterval(1);
 	context = SDL_GL_CreateContext(window);
 
 	//auto status = glewInit();
