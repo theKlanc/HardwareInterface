@@ -106,8 +106,10 @@ void HI2::systemInit() {
 	//SDL_GL_SetSwapInterval(1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-	//SDL_GL_SetSwapInterval(1);
+	SDL_GL_SetSwapInterval(0);
 	context = SDL_GL_CreateContext(window);
+
+	SDL_GL_SetSwapInterval(0);
 
 	//auto status = glewInit();
 	if(glewInit() != GLEW_OK)
