@@ -72,13 +72,6 @@ void HI2::logWrite(std::string s) {
 	_log << s << std::endl;
 }
 
-void HI2::releaseGLContext(){
-	SDL_GL_MakeCurrent(nullptr,nullptr);
-}
-void HI2::attachGLContext(){
-	SDL_GL_MakeCurrent(window,context);
-}
-
 // System
 void HI2::systemInit() {
 	fullscreen = false;

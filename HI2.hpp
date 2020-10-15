@@ -59,6 +59,7 @@ struct point2D{
 	}
 	operator point2Dd() const { return point2Dd{(double)x,(double)y}; }
 };
+
 template<class T>
 struct point2Dt{
 	T x = 0;
@@ -469,9 +470,6 @@ namespace HI2 {
 	int getScreenHeight();
 	int getScreenWidth();
 	constexpr PLATFORM getPlatform();
-
-	void releaseGLContext();
-	void attachGLContext();
 
 	// System
 	void systemInit();
