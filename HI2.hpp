@@ -487,6 +487,8 @@ namespace HI2 {
 	const std::bitset<BUTTON_SIZE>& getKeysHeld();
 	point2D getJoystickPos(JOYSTICK joystick);
 	point2D getTouchPos();
+	void setMouseRelative(bool rel);
+	point2D getRelativeMouseMovement();
 
 	// sound
 	void playSound(Audio& audio, float volume = -1);
