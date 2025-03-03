@@ -66,6 +66,7 @@ int w, h;
 int oldW, oldH;
 point2D mousePosition;
 point2D mouseMotion;
+bool mouseIsRelative = true;
 
 std::array<std::stack<SDL_Texture*>,3> textTextures;
 int textureStackIndex=0;
@@ -603,6 +604,9 @@ bool HI2::aptMainLoop() {
 	Up.reset();
 	while (SDL_PollEvent(&event))
 	{
+		if((SDL_GetWindowFlags(window) & SDL_WINDOW_INPUT_FOCUS) == 0){
+			continue;
+		}
 		if(SDL_GetRelativeMouseMode() == SDL_FALSE){
 			ImGui_ImplSDL2_ProcessEvent(&event);
 		}
@@ -638,8 +642,8 @@ bool HI2::aptMainLoop() {
 		case SDL_MOUSEMOTION:
 			mousePosition.x = event.motion.x;
 			mousePosition.y = event.motion.y;
-			mouseMotion.x += event.motion.x;
-			mouseMotion.y += event.motion.y;
+			mouseMotion.x += event.motion.xrel;
+			mouseMotion.y += event.motion.yrel;
 			break;
 		case SDL_MOUSEWHEEL:
 			Down[event.wheel.y > 0 ? HI2::BUTTON::KEY_MOUSEWHEEL_UP : HI2::BUTTON::KEY_MOUSEWHEEL_DOWN] = true;
@@ -681,7 +685,7 @@ point2D HI2::getTouchPos() {
 
 point2D HI2::getRelativeMouseMovement() {
  	point2D movement = mouseMotion;
- 	mouseMotion = point2D();
+ 	mouseMotion = point2D(0,0);
 	return movement;
 }
 
