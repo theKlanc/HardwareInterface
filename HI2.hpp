@@ -10,6 +10,8 @@
 
 #define M_PI 3.14159265358979323846
 
+struct HI2PCTextureAccess;
+
 struct point2Dd {
 	double x = 0;
 	double y = 0;
@@ -329,6 +331,7 @@ namespace HI2 {
 		friend void setRenderTarget(Texture* t, bool b);
 		friend Texture getRenderTarget();
 		friend point2D getTextureSize(Texture& texture);
+		friend struct ::HI2PCTextureAccess;
 	};
 
 	enum class PLATFORM {

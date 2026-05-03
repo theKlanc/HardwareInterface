@@ -9,6 +9,7 @@
 #include <future>
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include "HI2.hpp"
 #include <thread>
 #include <filesystem>
@@ -53,7 +54,6 @@ HI2::Color HI2::Color::Transparent{ 255,255,255,0 };
 HI2::Color HI2::Color::Brown{ 111,92,66,255 };
 
 SDL_Window* window;
-SDL_Renderer* renderer;
 SDL_GLContext context;
 
 HI2::Color _bg;
@@ -68,8 +68,211 @@ point2D mousePosition;
 point2D mouseMotion;
 bool mouseIsRelative = true;
 
-std::array<std::stack<SDL_Texture*>,3> textTextures;
-int textureStackIndex=0;
+struct GLTexture {
+	GLuint texture = 0;
+	GLuint fbo = 0;
+	int w = 0;
+	int h = 0;
+	bool renderTarget = false;
+	HI2::Color colorMod = HI2::Color::White;
+};
+
+GLuint uiProgram = 0;
+GLuint uiVao = 0;
+GLuint uiVbo = 0;
+GLuint whiteTexture = 0;
+GLTexture* currentRenderTarget = nullptr;
+
+GLuint compileUiShader(GLenum type, const char* source)
+{
+	GLuint shader = glCreateShader(type);
+	glShaderSource(shader, 1, &source, nullptr);
+	glCompileShader(shader);
+
+	GLint status = GL_FALSE;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+	if (status != GL_TRUE) {
+		char log[1024];
+		glGetShaderInfoLog(shader, sizeof(log), nullptr, log);
+		std::cout << "UI shader compile error: " << log << std::endl;
+	}
+	return shader;
+}
+
+void initUiRenderer()
+{
+	const char* vertexSource = R"(
+		#version 330 core
+		layout(location = 0) in vec2 a_Position;
+		layout(location = 1) in vec2 a_TexCoord;
+		out vec2 v_TexCoord;
+		uniform vec2 u_SurfaceSize;
+		void main()
+		{
+			vec2 zeroToOne = a_Position / u_SurfaceSize;
+			vec2 clip = zeroToOne * 2.0 - 1.0;
+			gl_Position = vec4(clip.x, -clip.y, 0.0, 1.0);
+			v_TexCoord = a_TexCoord;
+		}
+	)";
+
+	const char* fragmentSource = R"(
+		#version 330 core
+		in vec2 v_TexCoord;
+		out vec4 color;
+		uniform sampler2D u_Texture;
+		uniform vec4 u_Color;
+		uniform int u_UseTexture;
+		void main()
+		{
+			vec4 tex = u_UseTexture == 1 ? texture(u_Texture, v_TexCoord) : vec4(1.0);
+			color = tex * u_Color;
+		}
+	)";
+
+	GLuint vertexShader = compileUiShader(GL_VERTEX_SHADER, vertexSource);
+	GLuint fragmentShader = compileUiShader(GL_FRAGMENT_SHADER, fragmentSource);
+	uiProgram = glCreateProgram();
+	glAttachShader(uiProgram, vertexShader);
+	glAttachShader(uiProgram, fragmentShader);
+	glLinkProgram(uiProgram);
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
+	glGenVertexArrays(1, &uiVao);
+	glGenBuffers(1, &uiVbo);
+	glBindVertexArray(uiVao);
+	glBindBuffer(GL_ARRAY_BUFFER, uiVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 24, nullptr, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (const void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (const void*)(sizeof(float) * 2));
+	glBindVertexArray(0);
+
+	const unsigned char white[] = {255, 255, 255, 255};
+	glGenTextures(1, &whiteTexture);
+	glBindTexture(GL_TEXTURE_2D, whiteTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, white);
+}
+
+void finiUiRenderer()
+{
+	if (whiteTexture) glDeleteTextures(1, &whiteTexture);
+	if (uiVbo) glDeleteBuffers(1, &uiVbo);
+	if (uiVao) glDeleteVertexArrays(1, &uiVao);
+	if (uiProgram) glDeleteProgram(uiProgram);
+}
+
+struct HI2PCTextureAccess {
+	static GLTexture* get(const HI2::Texture& texture)
+	{
+		if (texture._texture == nullptr) {
+			return nullptr;
+		}
+		return rcast<GLTexture*>(texture._texture.get()->get());
+	}
+	static void set(HI2::Texture& texture, GLTexture* value, bool owning)
+	{
+		if (owning) {
+			texture._texture = std::make_shared<HI2::Texture::_internalTextureRAIIWrapper>(value);
+		}
+		else {
+			texture._texture = std::make_shared<HI2::Texture::_internalWeakTextureRAIIWrapper>(value);
+		}
+	}
+};
+
+GLTexture* glTexture(const HI2::Texture& texture)
+{
+	return HI2PCTextureAccess::get(texture);
+}
+
+void setUiState()
+{
+	glUseProgram(uiProgram);
+	glBindVertexArray(uiVao);
+	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(glGetUniformLocation(uiProgram, "u_Texture"), 0);
+	glUniform2f(glGetUniformLocation(uiProgram, "u_SurfaceSize"),
+		currentRenderTarget ? (float)currentRenderTarget->w : (float)w,
+		currentRenderTarget ? (float)currentRenderTarget->h : (float)h);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+void drawQuad(GLuint texture, float x, float y, float width, float height, float u0, float v0, float u1, float v1, HI2::Color color, double radians = 0.0)
+{
+	if (width <= 0 || height <= 0) {
+		return;
+	}
+
+	const float centerX = x + width * 0.5f;
+	const float centerY = y + height * 0.5f;
+	const float c = std::cos(radians);
+	const float s = std::sin(radians);
+	auto rotateX = [&](float px, float py) {
+		const float dx = px - centerX;
+		const float dy = py - centerY;
+		return centerX + dx * c - dy * s;
+	};
+	auto rotateY = [&](float px, float py) {
+		const float dx = px - centerX;
+		const float dy = py - centerY;
+		return centerY + dx * s + dy * c;
+	};
+
+	const float x0 = x;
+	const float y0 = y;
+	const float x1 = x + width;
+	const float y1 = y + height;
+	const float vertices[] = {
+		rotateX(x0, y0), rotateY(x0, y0), u0, v0,
+		rotateX(x1, y0), rotateY(x1, y0), u1, v0,
+		rotateX(x1, y1), rotateY(x1, y1), u1, v1,
+		rotateX(x0, y0), rotateY(x0, y0), u0, v0,
+		rotateX(x1, y1), rotateY(x1, y1), u1, v1,
+		rotateX(x0, y1), rotateY(x0, y1), u0, v1,
+	};
+
+	setUiState();
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glUniform4f(glGetUniformLocation(uiProgram, "u_Color"),
+		(double)color.r / 255.0, (double)color.g / 255.0, (double)color.b / 255.0, (double)color.a / 255.0);
+	glUniform1i(glGetUniformLocation(uiProgram, "u_UseTexture"), texture == whiteTexture ? 0 : 1);
+	glBindBuffer(GL_ARRAY_BUFFER, uiVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+GLuint textureFromSurface(SDL_Surface* surface, int& width, int& height)
+{
+	SDL_Surface* converted = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA32, 0);
+	if (converted == nullptr) {
+		return 0;
+	}
+
+	width = converted->w;
+	height = converted->h;
+	GLuint texture = 0;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, converted->pitch / converted->format->BytesPerPixel);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, converted->w, converted->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, converted->pixels);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	SDL_FreeSurface(converted);
+	return texture;
+}
 
 void HI2::logWrite(std::string s) {
 	_log << s << std::endl;
@@ -115,6 +318,7 @@ void HI2::systemInit() {
 	if(glewInit() != GLEW_OK)
 		throw("glew not ok");
 	std::cout << glGetString(GL_VERSION)<<std::endl;
+	initUiRenderer();
 
 	// create a renderer (OpenGL ES2)
 	//SDL_SetHintWithPriority(SDL_HINT_RENDER_BATCHING,"1",SDL_HINT_OVERRIDE);
@@ -156,8 +360,8 @@ void HI2::systemFini() {
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 
+	finiUiRenderer();
 	SDL_GL_DeleteContext(context);
-	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	Mix_CloseAudio();
 	Mix_Quit();
@@ -173,6 +377,10 @@ void HI2::startFrame() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame(window);
 	ImGui::NewFrame();
+	currentRenderTarget = nullptr;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, w, h);
+	glClearColor((double)_bg.r/255, (double)_bg.g/255, (double)_bg.b/255, (double)_bg.a/255);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glClear(GL_DEPTH_BUFFER_BIT);
 }
@@ -207,110 +415,74 @@ void HI2::playSound(HI2::Audio& audio, float volume) {
 }
 
 void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c) {
-	SDL_Color color = { static_cast<Uint8>(c.r),static_cast<Uint8>(c.g),static_cast<Uint8>(c.b) };
+	SDL_Color color = { static_cast<Uint8>(c.r),static_cast<Uint8>(c.g),static_cast<Uint8>(c.b),static_cast<Uint8>(c.a) };
 	SDL_Surface* surface = TTF_RenderText_Blended(rcast<TTF_Font*>(font._font), text.c_str(), color);
-	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+	if (surface == nullptr) {
+		return;
+	}
 
-	int texW = 0;
-	int texH = 0;
-	SDL_QueryTexture(texture, nullptr, nullptr, &texW, &texH);
-	SDL_Rect dstrect = { pos.x, pos.y, int((double)texW / 10.0f * size), int((double)texH / 10.0f * size) };
-	SDL_RenderCopyEx(renderer, texture, nullptr, &dstrect, 0, nullptr, SDL_FLIP_NONE);
-	textTextures[textureStackIndex].push(texture);
+	int texW = 0, texH = 0;
+	GLuint texture = textureFromSurface(surface, texW, texH);
 	SDL_FreeSurface(surface);
+	if (texture == 0) {
+		return;
+	}
+
+	drawQuad(texture, pos.x, pos.y, (double)texW / 10.0f * size, (double)texH / 10.0f * size, 0, 0, 1, 1, HI2::Color::White);
+	glDeleteTextures(1, &texture);
 }
 
 void HI2::setTextureColorMod(Texture& texture, Color color)
 {
-	SDL_SetTextureColorMod(rcast<SDL_Texture*>(texture._texture.get()->get()), color.r, color.g, color.b);
+	GLTexture* glTex = glTexture(texture);
+	if (glTex != nullptr) {
+		glTex->colorMod = HI2::Color(color.r, color.g, color.b, 255);
+	}
 }
 
 void HI2::drawTexture(const Texture& texture, int posX, int posY, double scale, double radians, HI2::FLIP flip) {
-	SDL_Rect destRect;
-	destRect.x = posX;  //the x coordinate
-	destRect.y = posY; // the y coordinate
-	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture.get()->get()), nullptr, nullptr, &destRect.w, &destRect.h);
-	destRect.w *= scale;
-	destRect.h *= scale;
-
-	// PI * rad = 180 * deg
-	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), nullptr, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
+	GLTexture* glTex = glTexture(texture);
+	if (glTex == nullptr) return;
+	drawTexture(texture, posX, posY, {glTex->w, glTex->h}, {0, 0}, scale, radians, flip);
 }
 void HI2::drawTexture(const Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale, double radians, HI2::FLIP flip) {
-	SDL_Rect srcRect;
-	srcRect.x = startPos.x;
-	srcRect.y = startPos.y;
-	srcRect.w = size.x;
-	srcRect.h = size.y;
+	GLTexture* glTex = glTexture(texture);
+	if (glTex == nullptr) return;
 
-	SDL_Rect destRect;
-	destRect.x = posX;  //the x coordinate
-	destRect.y = posY; // the y coordinate
-	destRect.w = size.x * scale;
-	destRect.h = size.y * scale;
+	float u0 = (float)startPos.x / (float)glTex->w;
+	float u1 = (float)(startPos.x + size.x) / (float)glTex->w;
+	float v0 = (float)startPos.y / (float)glTex->h;
+	float v1 = (float)(startPos.y + size.y) / (float)glTex->h;
+	if (glTex->renderTarget) {
+		v0 = 1.0f - (float)startPos.y / (float)glTex->h;
+		v1 = 1.0f - (float)(startPos.y + size.y) / (float)glTex->h;
+	}
+	if (flip == HI2::FLIP::H) {
+		std::swap(u0, u1);
+	}
+	else if (flip == HI2::FLIP::V) {
+		std::swap(v0, v1);
+	}
 
-	// PI * rad = 180 * deg
-	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), &srcRect, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
+	drawQuad(glTex->texture, posX, posY, size.x * scale, size.y * scale, u0, v0, u1, v1, glTex->colorMod, radians);
 }
 
 void HI2::drawTextureOverlap(const Texture& texture, int posX, int posY, double scale, double radians, HI2::FLIP flip) {
-	SDL_Rect destRect;
-	destRect.x = posX;  //the x coordinate
-	destRect.y = posY; // the y coordinate
-	int w, h;
-	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture.get()->get()), nullptr, nullptr, &w, &h);
-	destRect.w = (w*scale)+1;
-	destRect.h = (h*scale)+1;
-
-	// PI * rad = 180 * deg
-	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), nullptr, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
+	GLTexture* glTex = glTexture(texture);
+	if (glTex == nullptr) return;
+	drawTextureOverlap(texture, posX, posY, {glTex->w, glTex->h}, {0, 0}, scale, radians, flip);
 }
 
 void HI2::drawTextureOverlap(const Texture& texture, int posX, int posY, point2D size, point2D startPos, double scale, double radians, HI2::FLIP flip) {
-	SDL_Rect srcRect;
-	srcRect.x = startPos.x;
-	srcRect.y = startPos.y;
-	srcRect.w = size.x;
-	srcRect.h = size.y;
-
-	SDL_Rect destRect;
-	destRect.x = posX;  //the x coordinate
-	destRect.y = posY; // the y coordinate
-	destRect.w = (size.x * scale)+1;
-	destRect.h = (size.y * scale)+1;
-
-	// PI * rad = 180 * deg
-	SDL_RenderCopyEx(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), &srcRect, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
+	drawTexture(texture, posX, posY, size, startPos, scale, radians, flip);
 }
 
 void HI2::drawTextureF(const Texture& texture, float posX, float posY, double scale, double radians, HI2::FLIP flip) {
-	SDL_FRect destRect;
-	destRect.x = posX;  //the x coordinate
-	destRect.y = posY; // the y coordinate
-	int w, h;
-	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture.get()->get()), nullptr, nullptr, &w, &h);
-	destRect.w = w*scale;
-	destRect.h = h*scale;
-
-	// PI * rad = 180 * deg
-	SDL_RenderCopyExF(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), nullptr, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
+	drawTexture(texture, (int)posX, (int)posY, scale, radians, flip);
 }
 
 void HI2::drawTextureF(const Texture& texture, float posX, float posY, point2D size, point2D startPos, double scale, double radians, HI2::FLIP flip) {
-	SDL_Rect srcRect;
-	srcRect.x = startPos.x;
-	srcRect.y = startPos.y;
-	srcRect.w = size.x;
-	srcRect.h = size.y;
-
-	SDL_FRect destRect;
-	destRect.x = posX;  //the x coordinate
-	destRect.y = posY; // the y coordinate
-	destRect.w = size.x * scale;
-	destRect.h = size.y * scale;
-
-	// PI * rad = 180 * deg
-	SDL_RenderCopyExF(renderer, rcast<SDL_Texture*>(texture._texture.get()->get()), &srcRect, &destRect, (radians * 180) / M_PI, nullptr, (SDL_RendererFlip)flip);
+	drawTexture(texture, (int)posX, (int)posY, size, startPos, scale, radians, flip);
 }
 
 HI2::Texture HI2::mergeTextures(Texture& originTexture, Texture& destinationTexture, point2D position) {
@@ -318,18 +490,15 @@ HI2::Texture HI2::mergeTextures(Texture& originTexture, Texture& destinationText
 }
 
 void HI2::drawRectangle(point2D pos, int width, int height, Color color) {
-	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-	SDL_Rect r = { pos.x, pos.y, width, height };
-	SDL_RenderFillRect(renderer, &r);
+	drawQuad(whiteTexture, pos.x, pos.y, width, height, 0, 0, 1, 1, color);
 }
 void HI2::drawEmptyRectangle(point2D pos, int width, int height, Color color) {
-	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-	SDL_Rect r = { pos.x, pos.y, width, height };
-	SDL_RenderDrawRect(renderer, &r);
+	drawLine(pos, {pos.x + width, pos.y}, color);
+	drawLine({pos.x + width, pos.y}, {pos.x + width, pos.y + height}, color);
+	drawLine({pos.x + width, pos.y + height}, {pos.x, pos.y + height}, color);
+	drawLine({pos.x, pos.y + height}, pos, color);
 }
 void HI2::drawEmptyRectangle(point2D pos, int width, int height, int strokewidth, Color color) {
-	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-	SDL_Rect r = { pos.x, pos.y, width, height };
 	if(strokewidth == 1){
 		drawEmptyRectangle(pos,width,height,color);
 	}
@@ -339,18 +508,39 @@ void HI2::drawEmptyRectangle(point2D pos, int width, int height, int strokewidth
 	}
 }
 void HI2::drawLine(point2D start, point2D end, Color color){
-	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-	SDL_RenderDrawLine(renderer,start.x,start.y,end.x,end.y);
+	const float vertices[] = {
+		(float)start.x, (float)start.y, 0.0f, 0.0f,
+		(float)end.x, (float)end.y, 0.0f, 0.0f,
+	};
+	setUiState();
+	glBindTexture(GL_TEXTURE_2D, whiteTexture);
+	glUniform4f(glGetUniformLocation(uiProgram, "u_Color"),
+		(double)color.r / 255.0, (double)color.g / 255.0, (double)color.b / 255.0, (double)color.a / 255.0);
+	glUniform1i(glGetUniformLocation(uiProgram, "u_UseTexture"), 0);
+	glBindBuffer(GL_ARRAY_BUFFER, uiVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+	glDrawArrays(GL_LINES, 0, 2);
 }
 void HI2::drawLines(const std::vector<point2D>& points, Color color){
-	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-	SDL_Point* pointArray = new SDL_Point[points.size()];
-	for(int i = 0; i < points.size(); ++i){
-		pointArray[i].x = points[i].x;
-		pointArray[i].y = points[i].y;
+	if (points.empty()) {
+		return;
 	}
-	SDL_RenderDrawLines(renderer,pointArray,points.size());
-	delete[] pointArray;
+	std::vector<float> vertices;
+	vertices.reserve(points.size() * 4);
+	for (const point2D& point : points) {
+		vertices.push_back(point.x);
+		vertices.push_back(point.y);
+		vertices.push_back(0.0f);
+		vertices.push_back(0.0f);
+	}
+	setUiState();
+	glBindTexture(GL_TEXTURE_2D, whiteTexture);
+	glUniform4f(glGetUniformLocation(uiProgram, "u_Color"),
+		(double)color.r / 255.0, (double)color.g / 255.0, (double)color.b / 255.0, (double)color.a / 255.0);
+	glUniform1i(glGetUniformLocation(uiProgram, "u_UseTexture"), 0);
+	glBindBuffer(GL_ARRAY_BUFFER, uiVbo);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_DYNAMIC_DRAW);
+	glDrawArrays(GL_LINE_STRIP, 0, points.size());
 }
 void HI2::drawPixel(point2D pos, Color color) {
 	HI2::drawRectangle(pos, 1, 1, color);
@@ -366,12 +556,6 @@ void HI2::endFrame() {
 
 	//SDL_RenderPresent(renderer);
 
-	textureStackIndex=(textureStackIndex+1)%textTextures.size();
-	while (!textTextures[textureStackIndex].empty())
-	{
-		SDL_DestroyTexture(textTextures[textureStackIndex].top());
-		textTextures[textureStackIndex].pop();
-	}
 }
 
 void HI2::setCursorPos(point2D pos)
@@ -427,23 +611,43 @@ void HI2::Font::clean() {
 HI2::Texture::Texture() {}
 HI2::Texture::Texture(std::filesystem::path path) {
 	_path = path;
+	SDL_Surface* surface = nullptr;
 	if (path.extension() == ".bmp") {
-		SDL_Surface* temp = SDL_LoadBMP(path.string().c_str());
-		_texture = std::make_shared<_internalTextureRAIIWrapper>(SDL_CreateTextureFromSurface(renderer, temp));
-		SDL_FreeSurface(temp);
+		surface = SDL_LoadBMP(path.string().c_str());
 	}
 	else {
-		_texture = std::make_shared<_internalTextureRAIIWrapper>(IMG_LoadTexture(renderer, path.string().c_str()));
+		surface = IMG_Load(path.string().c_str());
 	}
-	if (_texture == nullptr) {
+	if (surface == nullptr) {
 		std::cout << "Error loading texture: " << SDL_GetError() << std::endl;
+		return;
 	}
+
+	GLTexture* glTex = new GLTexture();
+	glTex->texture = textureFromSurface(surface, glTex->w, glTex->h);
+	SDL_FreeSurface(surface);
+	HI2PCTextureAccess::set(*this, glTex, true);
 }
 
 HI2::Texture::Texture(point2D size)
 {
-	_texture = std::make_shared<_internalTextureRAIIWrapper>(SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, size.x, size.y));
-	SDL_SetTextureBlendMode(rcast<SDL_Texture*>(_texture.get()->get()), SDL_BLENDMODE_BLEND);
+	GLTexture* glTex = new GLTexture();
+	glTex->w = size.x;
+	glTex->h = size.y;
+	glTex->renderTarget = true;
+	glGenTextures(1, &glTex->texture);
+	glBindTexture(GL_TEXTURE_2D, glTex->texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+	glGenFramebuffers(1, &glTex->fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, glTex->fbo);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glTex->texture, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, currentRenderTarget ? currentRenderTarget->fbo : 0);
+	HI2PCTextureAccess::set(*this, glTex, true);
 }
 
 // filesystem
@@ -691,22 +895,26 @@ point2D HI2::getRelativeMouseMovement() {
 
 void HI2::setRenderTarget(HI2::Texture* t, bool clear) {
 	if (t == nullptr) {
-		SDL_SetRenderTarget(renderer, nullptr);
-		SDL_SetRenderDrawColor(renderer, _bg.r, _bg.g, _bg.b, _bg.a);
+		currentRenderTarget = nullptr;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, w, h);
+		glClearColor((double)_bg.r / 255.0, (double)_bg.g / 255.0, (double)_bg.b / 255.0, (double)_bg.a / 255.0);
 	}
 	else {
-		SDL_SetRenderTarget(renderer, rcast<SDL_Texture*>(t->_texture.get()->get()));
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+		currentRenderTarget = glTexture(*t);
+		glBindFramebuffer(GL_FRAMEBUFFER, currentRenderTarget ? currentRenderTarget->fbo : 0);
+		glViewport(0, 0, currentRenderTarget ? currentRenderTarget->w : w, currentRenderTarget ? currentRenderTarget->h : h);
+		glClearColor(0, 0, 0, 0);
 	}
 
 	if (clear) {
-		SDL_RenderClear(renderer);
+		glClear(GL_COLOR_BUFFER_BIT);
 	}
 }
 
 HI2::Texture HI2::getRenderTarget(){
 	Texture result;
-	result._texture = std::make_shared<Texture::_internalWeakTextureRAIIWrapper>(SDL_GetRenderTarget(renderer));
+	HI2PCTextureAccess::set(result, currentRenderTarget, false);
 	return result;
 }
 
@@ -720,7 +928,11 @@ void HI2::deleteDirectory(std::filesystem::path p) {
 
 point2D HI2::getTextureSize(Texture& texture) {
 	point2D result;
-	SDL_QueryTexture(rcast<SDL_Texture*>(texture._texture.get()->get()), nullptr, nullptr, &result.x, &result.y);
+	GLTexture* glTex = glTexture(texture);
+	if (glTex != nullptr) {
+		result.x = glTex->w;
+		result.y = glTex->h;
+	}
 	return result;
 }
 
@@ -731,7 +943,16 @@ HI2::Texture::_internalWeakTextureRAIIWrapper::_internalWeakTextureRAIIWrapper(v
 
 HI2::Texture::_internalTextureRAIIWrapper::~_internalTextureRAIIWrapper()
 {
-	SDL_DestroyTexture(rcast<SDL_Texture*>(_texture));
+	GLTexture* glTex = rcast<GLTexture*>(_texture);
+	if (glTex != nullptr) {
+		if (glTex->fbo) {
+			glDeleteFramebuffers(1, &glTex->fbo);
+		}
+		if (glTex->texture) {
+			glDeleteTextures(1, &glTex->texture);
+		}
+		delete glTex;
+	}
 }
 
 void* HI2::Texture::_internalWeakTextureRAIIWrapper::get() const
