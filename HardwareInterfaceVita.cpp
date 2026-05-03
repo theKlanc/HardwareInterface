@@ -177,8 +177,8 @@ void HI::createThread(void *entrypoint,
 void HI::updateTouch(point2D &touch) { // BORKEN
 	SceTouchData touch2;
 	sceTouchPeek(SCE_TOUCH_PORT_FRONT, &touch2, 1);
-	touch.x = ((HI::getScreenWidth() * touch2.report[0].x) / 1920);
-	touch.y = ((HI::getScreenHeight() * touch2.report[0].y) / 1080);
+	touch.x = ((HI::getScreenWidth() * touch2.report[0].x) / HI::getScreenWidth());
+	touch.y = ((HI::getScreenHeight() * touch2.report[0].y) / HI::getScreenHeight());
 }
 void HI::updateHID() {}
 

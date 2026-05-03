@@ -96,9 +96,9 @@ void HI2::systemInit() {
 	// 1920 x 1080 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
 	// 1280 x 720 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
 
-	w = 1280;
-	h = 720;
-	window = SDL_CreateWindow("sdl2_gles2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+	w = 3840;
+	h = 2160;
+	window = SDL_CreateWindow("sdl2_gles2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED);
 	if (!window) {
 		SDL_Log("SDL_CreateWindow: %s\n", SDL_GetError());
 		//SDL_Quit();
@@ -684,8 +684,8 @@ point2D HI2::getTouchPos() {
 }
 
 point2D HI2::getRelativeMouseMovement() {
- 	point2D movement = mouseMotion;
- 	mouseMotion = point2D(0,0);
+	point2D movement = SDL_GetRelativeMouseMode() ? mouseMotion : point2D(0, 0);
+	mouseMotion = point2D(0,0);
 	return movement;
 }
 
