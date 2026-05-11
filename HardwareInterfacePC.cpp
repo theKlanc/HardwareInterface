@@ -68,6 +68,21 @@ point2D mousePosition;
 point2D mouseMotion;
 bool mouseIsRelative = true;
 
+point2D getDesktopResolution()
+{
+	SDL_DisplayMode mode;
+	if (SDL_GetCurrentDisplayMode(0, &mode) == 0 && mode.w > 0 && mode.h > 0) {
+		return {mode.w, mode.h};
+	}
+
+	SDL_Rect bounds;
+	if (SDL_GetDisplayBounds(0, &bounds) == 0 && bounds.w > 0 && bounds.h > 0) {
+		return {bounds.w, bounds.h};
+	}
+
+	return {1280, 720};
+}
+
 struct GLTexture {
 	GLuint texture = 0;
 	GLuint fbo = 0;
@@ -299,12 +314,21 @@ void HI2::systemInit() {
 	// 1920 x 1080 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
 	// 1280 x 720 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
 
-	w = 3840;
-	h = 2160;
+	const point2D desktopResolution = getDesktopResolution();
+	w = desktopResolution.x;
+	h = desktopResolution.y;
+	oldW = w;
+	oldH = h;
+	fullscreen = true;
 	window = SDL_CreateWindow("sdl2_gles2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED);
 	if (!window) {
 		SDL_Log("SDL_CreateWindow: %s\n", SDL_GetError());
 		//SDL_Quit();
+	}
+	else {
+		SDL_GetWindowSize(window, &w, &h);
+		oldW = w;
+		oldH = h;
 	}
 	//SDL_GL_SetSwapInterval(1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
