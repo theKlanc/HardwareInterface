@@ -821,6 +821,12 @@ HI2::BUTTON translate(SDL_Keycode s) {
 	case SDLK_BACKQUOTE:
 	case 186:
 		return HI2::BUTTON::KEY_CONSOLE;
+	case SDLK_TAB:
+		return HI2::BUTTON::KEY_TAB;
+	case SDLK_HOME:
+		return HI2::BUTTON::KEY_HOME;
+	case SDLK_END:
+		return HI2::BUTTON::KEY_END;
 	default:
 		return (HI2::BUTTON)(HI2::BUTTON_SIZE - 1);
 	}//TODO acabar aixo
