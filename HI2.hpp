@@ -488,6 +488,11 @@ namespace HI2 {
 	const std::bitset<BUTTON_SIZE>& getKeysDown();
 	const std::bitset<BUTTON_SIZE>& getKeysUp();
 	const std::bitset<BUTTON_SIZE>& getKeysHeld();
+	// UTF-8 text typed during the last polled frame (from the OS/IME, so it honours
+	// keyboard layout, shift and dead keys). Empty when nothing was typed. Control
+	// keys (enter/backspace/arrows) are NOT reported here — read those from the
+	// button bitsets. Used for free text entry such as the in-game computer editor.
+	const std::string& getTextInput();
 	point2D getJoystickPos(JOYSTICK joystick);
 	point2D getTouchPos();
 	void setMouseRelative(bool rel);

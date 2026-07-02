@@ -344,6 +344,11 @@ void HI2::systemInit() {
 	std::cout << glGetString(GL_VERSION)<<std::endl;
 	initUiRenderer();
 
+	// Enable Unicode text input events (SDL_TEXTINPUT) so free-text UI such as the
+	// in-game computer editor gets layout-correct characters. Mouse-look and gameplay
+	// keybinds still come through the raw key events unaffected.
+	SDL_StartTextInput();
+
 	// create a renderer (OpenGL ES2)
 	//SDL_SetHintWithPriority(SDL_HINT_RENDER_BATCHING,"1",SDL_HINT_OVERRIDE);
 	////renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC);
@@ -825,11 +830,13 @@ HI2::BUTTON translate(SDL_Keycode s) {
 std::bitset<HI2::BUTTON_SIZE> Down = 0;
 std::bitset<HI2::BUTTON_SIZE> Held = 0;
 std::bitset<HI2::BUTTON_SIZE> Up = 0;
+std::string TextInput; // UTF-8 text typed this frame (SDL_TEXTINPUT)
 
 bool HI2::aptMainLoop() {
 	SDL_Event event;
 	Down.reset();
 	Up.reset();
+	TextInput.clear();
 	while (SDL_PollEvent(&event))
 	{
 		if((SDL_GetWindowFlags(window) & SDL_WINDOW_INPUT_FOCUS) == 0){
@@ -876,6 +883,10 @@ bool HI2::aptMainLoop() {
 		case SDL_MOUSEWHEEL:
 			Down[event.wheel.y > 0 ? HI2::BUTTON::KEY_MOUSEWHEEL_UP : HI2::BUTTON::KEY_MOUSEWHEEL_DOWN] = true;
 			break;
+		case SDL_TEXTINPUT:
+			// Layout/IME-resolved characters (letters, digits, punctuation, symbols).
+			TextInput += event.text.text;
+			break;
 		default:
 			break;
 		}
@@ -901,6 +912,9 @@ const std::bitset<HI2::BUTTON_SIZE>& HI2::getKeysUp() {
 }
 const std::bitset<HI2::BUTTON_SIZE>& HI2::getKeysHeld() {
 	return Held;
+}
+const std::string& HI2::getTextInput() {
+	return TextInput;
 }
 point2D HI2::getJoystickPos(HI2::JOYSTICK joystick) {
 	point2D res;

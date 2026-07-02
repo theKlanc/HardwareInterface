@@ -530,6 +530,12 @@ const std::bitset<HI2::BUTTON_SIZE>& HI2::getKeysUp() {
 const std::bitset<HI2::BUTTON_SIZE>& HI2::getKeysHeld() {
 	return Held;
 }
+const std::string& HI2::getTextInput() {
+	// TODO: route the Switch software keyboard (swkbd) here. For now free-text UI
+	// (the computer editor) receives no typed characters on Switch.
+	static const std::string empty;
+	return empty;
+}
 
 point2D HI2::getJoystickPos(HI2::JOYSTICK joystick){
 	return joystickPosition;
