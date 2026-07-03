@@ -320,6 +320,11 @@ void HI2::systemInit() {
 	oldW = w;
 	oldH = h;
 	fullscreen = true;
+	// Deferred rendering blits a DEPTH_COMPONENT24 G-buffer into the default
+	// framebuffer; GL depth blits require matching formats, so pin the size.
+	// Must be set before SDL_CreateWindow: the depth size is part of the pixel
+	// format chosen when the GL-capable window is created.
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	window = SDL_CreateWindow("sdl2_gles2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED);
 	if (!window) {
 		SDL_Log("SDL_CreateWindow: %s\n", SDL_GetError());
