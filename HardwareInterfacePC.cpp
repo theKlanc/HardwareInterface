@@ -19,15 +19,11 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_image.h>
-#include <SDL_mixer.h>
-#include <SDL_mouse.h>
 
 #include <fstream>
 #include <functional>
 
-#include "imgui/imgui.h"
-#include "imgui/backends/imgui_impl_sdl2.h"
-#include "imgui/backends/imgui_impl_opengl3.h"
+#include "platform/platform.hpp"
 
 
 #ifdef __EMSCRIPTEN__
@@ -37,36 +33,6 @@
 #define DEBUG_PRIORITY 0
 
 #define rcast reinterpret_cast
-
-SDL_Window* window;
-SDL_GLContext context;
-
-HI2::Color _bg;
-
-std::ofstream _log;
-
-bool fullscreen;
-
-int w, h;
-int oldW, oldH;
-point2D mousePosition;
-point2D mouseMotion;
-bool mouseIsRelative = true;
-
-point2D getDesktopResolution()
-{
-	SDL_DisplayMode mode;
-	if (SDL_GetCurrentDisplayMode(0, &mode) == 0 && mode.w > 0 && mode.h > 0) {
-		return {mode.w, mode.h};
-	}
-
-	SDL_Rect bounds;
-	if (SDL_GetDisplayBounds(0, &bounds) == 0 && bounds.w > 0 && bounds.h > 0) {
-		return {bounds.w, bounds.h};
-	}
-
-	return {1280, 720};
-}
 
 struct GLTexture {
 	GLuint texture = 0;
@@ -199,8 +165,8 @@ void setUiState()
 	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(glGetUniformLocation(uiProgram, "u_Texture"), 0);
 	glUniform2f(glGetUniformLocation(uiProgram, "u_SurfaceSize"),
-		currentRenderTarget ? (float)currentRenderTarget->w : (float)w,
-		currentRenderTarget ? (float)currentRenderTarget->h : (float)h);
+		currentRenderTarget ? (float)currentRenderTarget->w : (float)platform::screenSize().x,
+		currentRenderTarget ? (float)currentRenderTarget->h : (float)platform::screenSize().y);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
@@ -274,166 +240,18 @@ GLuint textureFromSurface(SDL_Surface* surface, int& width, int& height)
 	return texture;
 }
 
-void HI2::logWrite(std::string s) {
-	_log << s << std::endl;
-}
-
-void HI2::setMouseRelative(bool rel){
-	SDL_SetRelativeMouseMode(rel ? SDL_TRUE:SDL_FALSE);
-}
-
-// System
-void HI2::systemInit() {
-	fullscreen = false;
-	_log.open("/HI2.log");
-	_bg = Color(255, 0, 0, 255);
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_AUDIO) < 0) {
-		_log << SDL_GetError() << std::endl;
-		SDL_Log("SDL_Init: %s\n", SDL_GetError());
-	}
+// Needs the GL context: called after platform::init(), and finiDrawing() before
+// platform::shutdown().
+void HI2::initDrawing() {
 	TTF_Init();
 	IMG_Init(IMG_INIT_PNG);
-	// create an SDL window (OpenGL ES2 always enabled)
-	// when SDL_FULLSCREEN flag is not set, viewport is automatically handled by SDL (use SDL_SetWindowSize to "change resolution")
-	// available switch SDL2 video modes :
-	// 1920 x 1080 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
-	// 1280 x 720 @ 32 bpp (SDL_PIXELFORMAT_RGBA8888)
-
-	const point2D desktopResolution = getDesktopResolution();
-	w = desktopResolution.x;
-	h = desktopResolution.y;
-	oldW = w;
-	oldH = h;
-	fullscreen = true;
-	// Deferred rendering blits a DEPTH_COMPONENT24 G-buffer into the default
-	// framebuffer; GL depth blits require matching formats, so pin the size.
-	// Must be set before SDL_CreateWindow: the depth size is part of the pixel
-	// format chosen when the GL-capable window is created.
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	window = SDL_CreateWindow("sdl2_gles2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED);
-	if (!window) {
-		SDL_Log("SDL_CreateWindow: %s\n", SDL_GetError());
-		//SDL_Quit();
-	}
-	else {
-		SDL_GetWindowSize(window, &w, &h);
-		oldW = w;
-		oldH = h;
-	}
-	//SDL_GL_SetSwapInterval(1);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-	SDL_GL_SetSwapInterval(0);
-	context = SDL_GL_CreateContext(window);
-
-	SDL_GL_SetSwapInterval(0);
-
-	//auto status = glewInit();
-	if(glewInit() != GLEW_OK)
-		throw("glew not ok");
-	std::cout << glGetString(GL_VERSION)<<std::endl;
 	initUiRenderer();
-
-	// Enable Unicode text input events (SDL_TEXTINPUT) so free-text UI such as the
-	// in-game computer editor gets layout-correct characters. Mouse-look and gameplay
-	// keybinds still come through the raw key events unaffected.
-	SDL_StartTextInput();
-
-	// create a renderer (OpenGL ES2)
-	//SDL_SetHintWithPriority(SDL_HINT_RENDER_BATCHING,"1",SDL_HINT_OVERRIDE);
-	////renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC);
-	////if (!renderer) {
-	////	SDL_Log("SDL_CreateRenderer: %s\n", SDL_GetError());
-	////	//SDL_Quit();
-	////}
-	////SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-
-	// open CONTROLLER_PLAYER_1 and CONTROLLER_PLAYER_2
-	// when railed, both joycons are mapped to joystick #0,
-	// else joycons are individually mapped to joystick #0, joystick #1, ...
-	// https://github.com/devkitPro/SDL/blob/switch-sdl2/src/joystick/switch/SDL_sysjoystick.c#L45
-	//for (int i = 0; i < 2; i++) {
-	//	if (SDL_JoystickOpen(i) == NULL) {
-	//		SDL_Log("SDL_JoystickOpen: %s\n", SDL_GetError());
-	//		SDL_Quit();
-	//	}
-	//}
-	Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
-	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 4096);
-
-	 IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    // Docking only: multi-viewport would open extra OS windows, which a headless
-    // Xvfb session has no use for. The layout persists in imgui.ini (cwd).
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-
-    // Setup Platform/Renderer bindings
-    // window is the SDL_Window*
-    // contex is the SDL_GLContext
-    ImGui_ImplSDL2_InitForOpenGL(window, context);
-    ImGui_ImplOpenGL3_Init();
 }
-void HI2::systemFini() {
-	ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
-    ImGui::DestroyContext();
 
+void HI2::finiDrawing() {
 	finiUiRenderer();
-	SDL_GL_DeleteContext(context);
-	SDL_DestroyWindow(window);
-	Mix_CloseAudio();
-	Mix_Quit();
 	TTF_Quit();
 	IMG_Quit();
-	SDL_Quit();
-	_log.close();
-}
-
-void HI2::startFrame() {
-	//SDL_SetRenderDrawColor(renderer, _bg.r, _bg.g, _bg.b, _bg.a);
-	//SDL_RenderClear(renderer);
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplSDL2_NewFrame();
-	ImGui::NewFrame();
-	currentRenderTarget = nullptr;
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, w, h);
-	glClearColor((double)_bg.r/255, (double)_bg.g/255, (double)_bg.b/255, (double)_bg.a/255);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glClear(GL_DEPTH_BUFFER_BIT);
-}
-
-void HI2::toggleFullscreen()
-{
-	fullscreen = !fullscreen;
-	if (fullscreen)
-	{
-		SDL_Rect rect;
-		oldW = w;
-		oldH = h;
-		int displayIndex = SDL_GetWindowDisplayIndex(window);
-		SDL_GetDisplayBounds(displayIndex, &rect);
-		w = rect.w;
-		h = rect.h;
-	}
-	else
-	{
-		w = oldW;
-		h = oldH;
-	}
-
-	SDL_SetWindowSize(window, w, h);
-	SDL_SetWindowFullscreen(window, fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
-}
-
-void HI2::setBackgroundColor(Color color) { _bg = color; }
-
-void HI2::playSound(HI2::Audio& audio, float volume) {
-	Mix_PlayMusic(rcast<Mix_Music*>(audio._audio), audio._loop ? -1 : 0);
 }
 
 void HI2::drawText(Font& font, std::string text, point2D pos, int size, Color c) {
@@ -568,40 +386,7 @@ void HI2::drawPixel(point2D pos, Color color) {
 	HI2::drawRectangle(pos, 1, 1, color);
 }
 
-void HI2::endFrame() {
-    //glClearColor((double)_bg.r/255, (double)_bg.g/255, (double)_bg.b/255, (double)_bg.a/255);
-    //glClear(GL_COLOR_BUFFER_BIT);
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-	SDL_GL_SwapWindow(window);
-
-	//SDL_RenderPresent(renderer);
-
-}
-
-void HI2::setCursorPos(point2D pos)
-{
-	SDL_WarpMouseInWindow(window, pos.x, pos.y);
-}
-
-
 //~~CLASSES~~
-
-//SOUND
-HI2::Audio::Audio() {}
-HI2::Audio::Audio(std::filesystem::path path, bool loop, float volume) {
-	_path = path;
-	_loop = loop;
-	_volume = volume;
-	_audio = Mix_LoadMUS(path.string().c_str());
-}
-void HI2::Audio::clean() {
-	if (_audio != nullptr) {
-		Mix_FreeMusic(rcast<Mix_Music*>(_audio));
-	}
-	_audio = nullptr;
-}
 
 //FONT
 HI2::Font::Font() {
@@ -664,283 +449,19 @@ HI2::Texture::Texture(point2D size)
 	HI2PCTextureAccess::set(*this, glTex, true);
 }
 
-// filesystem
-// HardwareInfo
-int HI2::getScreenHeight() {
-	return h;
-}
-int HI2::getScreenWidth() {
-	return w;
-}
-
-
-void HI2::consoleInit() {}
-void HI2::consoleInit(std::filesystem::path path) {}
-void HI2::consoleFini() {}
-void HI2::consoleClear() {}
-void HI2::sleepThread(unsigned long ns) {
-	std::this_thread::sleep_for(std::chrono::nanoseconds(ns));
-}
-
-HI2::BUTTON translate(SDL_Keycode s) {
-	switch (s) {
-	case SDLK_MINUS:
-		return HI2::BUTTON::KEY_DASH;
-	case SDLK_DOWN:
-		return HI2::BUTTON::KEY_DOWN;
-	case SDLK_UP:
-		return HI2::BUTTON::KEY_UP;
-	case SDLK_LEFT:
-		return HI2::BUTTON::KEY_LEFT;
-	case SDLK_RIGHT:
-		return HI2::BUTTON::KEY_RIGHT;
-	case SDLK_a:
-		return HI2::BUTTON::KEY_A;
-	case SDLK_b:
-		return HI2::BUTTON::KEY_B;
-	case SDLK_c:
-		return HI2::BUTTON::KEY_C;
-	case SDLK_d:
-		return HI2::BUTTON::KEY_D;
-	case SDLK_e:
-		return HI2::BUTTON::KEY_E;
-	case SDLK_f:
-		return HI2::BUTTON::KEY_F;
-	case SDLK_g:
-		return HI2::BUTTON::KEY_G;
-	case SDLK_h:
-		return HI2::BUTTON::KEY_H;
-	case SDLK_i:
-		return HI2::BUTTON::KEY_I;
-	case SDLK_j:
-		return HI2::BUTTON::KEY_J;
-	case SDLK_k:
-		return HI2::BUTTON::KEY_K;
-	case SDLK_l:
-		return HI2::BUTTON::KEY_L;
-	case SDLK_m:
-		return HI2::BUTTON::KEY_M;
-	case SDLK_n:
-		return HI2::BUTTON::KEY_N;
-	case SDLK_o:
-		return HI2::BUTTON::KEY_O;
-	case SDLK_p:
-		return HI2::BUTTON::KEY_P;
-	case SDLK_q:
-		return HI2::BUTTON::KEY_Q;
-	case SDLK_r:
-		return HI2::BUTTON::KEY_R;
-	case SDLK_s:
-		return HI2::BUTTON::KEY_S;
-	case SDLK_t:
-		return HI2::BUTTON::KEY_T;
-	case SDLK_u:
-		return HI2::BUTTON::KEY_U;
-	case SDLK_v:
-		return HI2::BUTTON::KEY_V;
-	case SDLK_w:
-		return HI2::BUTTON::KEY_W;
-	case SDLK_x:
-		return HI2::BUTTON::KEY_X;
-	case SDLK_y:
-		return HI2::BUTTON::KEY_Y;
-	case SDLK_z:
-		return HI2::BUTTON::KEY_Z;
-	case SDLK_F11:
-		return HI2::BUTTON::KEY_F11;
-	case SDL_BUTTON_LEFT:
-		return HI2::BUTTON::KEY_LEFTCLICK;
-	case SDL_BUTTON_RIGHT:
-		return HI2::BUTTON::KEY_RIGHTCLICK;
-	case SDLK_RETURN:
-		return HI2::BUTTON::KEY_ENTER;
-	case SDLK_ESCAPE:
-		return HI2::BUTTON::KEY_ESCAPE;
-	case SDLK_BACKSPACE:
-		return HI2::BUTTON::KEY_BACKSPACE;
-	case SDLK_SPACE:
-		return HI2::BUTTON::KEY_SPACE;
-	case SDLK_LSHIFT:
-	case SDLK_RSHIFT:
-		return HI2::BUTTON::KEY_SHIFT;
-	case SDLK_LCTRL:
-	case SDLK_RCTRL:
-		return HI2::BUTTON::KEY_CONTROL;
-	case SDLK_0:
-		return HI2::BUTTON::KEY_0;
-	case SDLK_1:
-		return HI2::BUTTON::KEY_1;
-	case SDLK_2:
-		return HI2::BUTTON::KEY_2;
-	case SDLK_3:
-		return HI2::BUTTON::KEY_3;
-	case SDLK_4:
-		return HI2::BUTTON::KEY_4;
-	case SDLK_5:
-		return HI2::BUTTON::KEY_5;
-	case SDLK_6:
-		return HI2::BUTTON::KEY_6;
-	case SDLK_7:
-		return HI2::BUTTON::KEY_7;
-	case SDLK_8:
-		return HI2::BUTTON::KEY_8;
-	case SDLK_9:
-		return HI2::BUTTON::KEY_9;
-	case SDLK_PLUS:
-		return HI2::BUTTON::KEY_PLUS;
-	case SDLK_GREATER:
-		return HI2::BUTTON::KEY_PEIXMARTI_RIGHT;
-	case SDLK_LESS:
-		return HI2::BUTTON::KEY_PEIXMARTI_LEFT;
-	case SDLK_BACKQUOTE:
-	case 186:
-		return HI2::BUTTON::KEY_CONSOLE;
-	case SDLK_TAB:
-		return HI2::BUTTON::KEY_TAB;
-	case SDLK_HOME:
-		return HI2::BUTTON::KEY_HOME;
-	case SDLK_END:
-		return HI2::BUTTON::KEY_END;
-	default:
-		return (HI2::BUTTON)(HI2::BUTTON_SIZE - 1);
-	}//TODO acabar aixo
-
-}
-
-std::bitset<HI2::BUTTON_SIZE> Down = 0;
-std::bitset<HI2::BUTTON_SIZE> Held = 0;
-std::bitset<HI2::BUTTON_SIZE> Up = 0;
-std::string TextInput; // UTF-8 text typed this frame (SDL_TEXTINPUT)
-
-bool HI2::aptMainLoop() {
-	SDL_Event event;
-	Down.reset();
-	Up.reset();
-	TextInput.clear();
-	while (SDL_PollEvent(&event))
-	{
-		if((SDL_GetWindowFlags(window) & SDL_WINDOW_INPUT_FOCUS) == 0){
-			continue;
-		}
-		// ImGui only sees input while the mouse is free (debug UI). When it is, a
-		// focused text field or a hovered window owns the keyboard/mouse, so the game
-		// must not also act on it -- typing in a field would otherwise walk the player.
-		// The WantCapture flags are from last frame's NewFrame, which is what ImGui
-		// documents for event dispatch. Releases always get through, so a key held
-		// down when a field took focus does not stay held forever.
-		bool imguiWantsKeyboard = false;
-		bool imguiWantsMouse = false;
-		if(SDL_GetRelativeMouseMode() == SDL_FALSE){
-			ImGui_ImplSDL2_ProcessEvent(&event);
-			const ImGuiIO& io = ImGui::GetIO();
-			imguiWantsKeyboard = io.WantCaptureKeyboard || io.WantTextInput;
-			imguiWantsMouse = io.WantCaptureMouse;
-		}
-
-		switch (event.type) {
-		case SDL_QUIT:
-		{
-			return false;
-		}
-		case SDL_KEYDOWN:
-			if (imguiWantsKeyboard)
-				break;
-			Held[translate(event.key.keysym.sym)] = true;
-			Down[translate(event.key.keysym.sym)] = !event.key.repeat;
-			break;
-
-		case SDL_KEYUP:
-			if (event.key.state != SDL_PRESSED)
-				Up[translate(event.key.keysym.sym)] = true;
-			Held[translate(event.key.keysym.sym)] = false;
-			break;
-		case SDL_WINDOWEVENT:
-			if (event.window.event == SDL_WINDOWEVENT_RESIZED || event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-				SDL_GetWindowSize(window, &w, &h);
-			}
-			break;
-		case SDL_MOUSEBUTTONDOWN:
-			if (imguiWantsMouse)
-				break;
-			Held[translate(event.button.button)] = true;
-			Down[translate(event.button.button)] = true;
-			break;
-		case SDL_MOUSEBUTTONUP:
-			Up[translate(event.button.button)] = true;
-			Held[translate(event.button.button)] = false;
-			break;
-		case SDL_MOUSEMOTION:
-			mousePosition.x = event.motion.x;
-			mousePosition.y = event.motion.y;
-			mouseMotion.x += event.motion.xrel;
-			mouseMotion.y += event.motion.yrel;
-			break;
-		case SDL_MOUSEWHEEL:
-			if (imguiWantsMouse)
-				break;
-			Down[event.wheel.y > 0 ? HI2::BUTTON::KEY_MOUSEWHEEL_UP : HI2::BUTTON::KEY_MOUSEWHEEL_DOWN] = true;
-			break;
-		case SDL_TEXTINPUT:
-			// Layout/IME-resolved characters (letters, digits, punctuation, symbols).
-			if (imguiWantsKeyboard)
-				break;
-			TextInput += event.text.text;
-			break;
-		default:
-			break;
-		}
-	}
-	// Fullscreen
-	if (Down[HI2::BUTTON::KEY_F11])
-	{
-		HI2::toggleFullscreen();
-	}
-
-	calculateAggregators(Down);
-	calculateAggregators(Up);
-	calculateAggregators(Held);
-
-	return true;
-}
-
-const std::bitset<HI2::BUTTON_SIZE>& HI2::getKeysDown() {
-	return Down;
-}
-const std::bitset<HI2::BUTTON_SIZE>& HI2::getKeysUp() {
-	return Up;
-}
-const std::bitset<HI2::BUTTON_SIZE>& HI2::getKeysHeld() {
-	return Held;
-}
-const std::string& HI2::getTextInput() {
-	return TextInput;
-}
-point2D HI2::getJoystickPos(HI2::JOYSTICK joystick) {
-	point2D res;
-	return res;
-}
-
-point2D HI2::getTouchPos() {
-	return mousePosition;
-}
-
-point2D HI2::getRelativeMouseMovement() {
-	point2D movement = SDL_GetRelativeMouseMode() ? mouseMotion : point2D(0, 0);
-	mouseMotion = point2D(0,0);
-	return movement;
-}
-
 void HI2::setRenderTarget(HI2::Texture* t, bool clear) {
 	if (t == nullptr) {
 		currentRenderTarget = nullptr;
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, w, h);
-		glClearColor((double)_bg.r / 255.0, (double)_bg.g / 255.0, (double)_bg.b / 255.0, (double)_bg.a / 255.0);
+		const point2D screen = platform::screenSize();
+		const Color background = platform::backgroundColor();
+		glViewport(0, 0, screen.x, screen.y);
+		glClearColor((double)background.r / 255.0, (double)background.g / 255.0, (double)background.b / 255.0, (double)background.a / 255.0);
 	}
 	else {
 		currentRenderTarget = glTexture(*t);
 		glBindFramebuffer(GL_FRAMEBUFFER, currentRenderTarget ? currentRenderTarget->fbo : 0);
-		glViewport(0, 0, currentRenderTarget ? currentRenderTarget->w : w, currentRenderTarget ? currentRenderTarget->h : h);
+		glViewport(0, 0, currentRenderTarget ? currentRenderTarget->w : platform::screenSize().x, currentRenderTarget ? currentRenderTarget->h : platform::screenSize().y);
 		glClearColor(0, 0, 0, 0);
 	}
 
@@ -953,14 +474,6 @@ HI2::Texture HI2::getRenderTarget(){
 	Texture result;
 	HI2PCTextureAccess::set(result, currentRenderTarget, false);
 	return result;
-}
-
-void HI2::createDirectories(std::filesystem::path p) {
-	std::filesystem::create_directories(p);
-}
-
-void HI2::deleteDirectory(std::filesystem::path p) {
-	std::filesystem::remove_all(p);
 }
 
 point2D HI2::getTextureSize(Texture& texture) {
@@ -1000,16 +513,5 @@ void* HI2::Texture::_internalWeakTextureRAIIWrapper::get() const
 
 
 HI2::Texture::_internalWeakTextureRAIIWrapper::~_internalWeakTextureRAIIWrapper(){}
-
-void HI2::setClipboard(std::string mucho_texto){
-	SDL_SetClipboardText(mucho_texto.c_str());
-}
-
-std::string HI2::getClipboard(){
-	if(!SDL_HasClipboardText())
-		return std::string();
-	std::string temp = SDL_GetClipboardText();
-	return temp;
-}
 
 #endif
