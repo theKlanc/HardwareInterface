@@ -26,8 +26,8 @@
 #include <functional>
 
 #include "imgui/imgui.h"
-#include "imgui/imgui_impl_sdl.h"
-#include "imgui/imgui_impl_opengl3.h"
+#include "imgui/backends/imgui_impl_sdl2.h"
+#include "imgui/backends/imgui_impl_opengl3.h"
 
 
 #ifdef __EMSCRIPTEN__
@@ -378,7 +378,10 @@ void HI2::systemInit() {
 
 	 IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO& io = ImGui::GetIO();
+    // Docking only: multi-viewport would open extra OS windows, which a headless
+    // Xvfb session has no use for. The layout persists in imgui.ini (cwd).
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -409,7 +412,7 @@ void HI2::startFrame() {
 	//SDL_SetRenderDrawColor(renderer, _bg.r, _bg.g, _bg.b, _bg.a);
 	//SDL_RenderClear(renderer);
 	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplSDL2_NewFrame(window);
+	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
 	currentRenderTarget = nullptr;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -853,8 +856,19 @@ bool HI2::aptMainLoop() {
 		if((SDL_GetWindowFlags(window) & SDL_WINDOW_INPUT_FOCUS) == 0){
 			continue;
 		}
+		// ImGui only sees input while the mouse is free (debug UI). When it is, a
+		// focused text field or a hovered window owns the keyboard/mouse, so the game
+		// must not also act on it -- typing in a field would otherwise walk the player.
+		// The WantCapture flags are from last frame's NewFrame, which is what ImGui
+		// documents for event dispatch. Releases always get through, so a key held
+		// down when a field took focus does not stay held forever.
+		bool imguiWantsKeyboard = false;
+		bool imguiWantsMouse = false;
 		if(SDL_GetRelativeMouseMode() == SDL_FALSE){
 			ImGui_ImplSDL2_ProcessEvent(&event);
+			const ImGuiIO& io = ImGui::GetIO();
+			imguiWantsKeyboard = io.WantCaptureKeyboard || io.WantTextInput;
+			imguiWantsMouse = io.WantCaptureMouse;
 		}
 
 		switch (event.type) {
@@ -863,6 +877,8 @@ bool HI2::aptMainLoop() {
 			return false;
 		}
 		case SDL_KEYDOWN:
+			if (imguiWantsKeyboard)
+				break;
 			Held[translate(event.key.keysym.sym)] = true;
 			Down[translate(event.key.keysym.sym)] = !event.key.repeat;
 			break;
@@ -878,6 +894,8 @@ bool HI2::aptMainLoop() {
 			}
 			break;
 		case SDL_MOUSEBUTTONDOWN:
+			if (imguiWantsMouse)
+				break;
 			Held[translate(event.button.button)] = true;
 			Down[translate(event.button.button)] = true;
 			break;
@@ -892,10 +910,14 @@ bool HI2::aptMainLoop() {
 			mouseMotion.y += event.motion.yrel;
 			break;
 		case SDL_MOUSEWHEEL:
+			if (imguiWantsMouse)
+				break;
 			Down[event.wheel.y > 0 ? HI2::BUTTON::KEY_MOUSEWHEEL_UP : HI2::BUTTON::KEY_MOUSEWHEEL_DOWN] = true;
 			break;
 		case SDL_TEXTINPUT:
 			// Layout/IME-resolved characters (letters, digits, punctuation, symbols).
+			if (imguiWantsKeyboard)
+				break;
 			TextInput += event.text.text;
 			break;
 		default:
