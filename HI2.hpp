@@ -7,219 +7,9 @@
 #include <bitset>
 #include <cstdlib>
 #include <algorithm>
-
-#define M_PI 3.14159265358979323846
+#include "platform/types.hpp"
 
 struct HI2PCTextureAccess;
-
-struct point2Dd {
-	double x = 0;
-	double y = 0;
-	point2Dd operator+(const point2Dd& right)const {
-		return { x + right.x,y + right.y };
-	}
-	point2Dd operator-(const point2Dd& right)const {
-		return { x - right.x,y - right.y };
-	}
-	point2Dd operator*(const point2Dd& right)const {
-		return { x * right.x,y * right.y };
-	}
-	point2Dd operator/(const point2Dd& right)const {
-		return { x / right.x,y / right.y };
-	}
-	point2Dd operator*(const double& right)const {
-		return { x * right,y * right };
-	}
-	point2Dd operator/(const double& right)const {
-		return { x / right,y / right };
-	}
-	static point2Dd fromDirection(double angle, double length){
-		return {cos(angle)*length,-sin(angle)*length};
-	}
-};
-struct point2D{
-	int x = 0;
-	int y = 0;
-
-	point2D operator+(const point2D& right)const {
-		return { x + right.x,y + right.y };
-	}
-	point2D operator-(const point2D& right)const {
-		return { x - right.x,y - right.y };
-	}
-	point2D operator*(const point2D& right)const {
-		return { x * right.x,y * right.y };
-	}
-	point2D operator/(const point2D& right)const {
-		return { x / right.x,y / right.y };
-	}
-	point2D operator*(const int& right)const {
-		return { x * right,y * right };
-	}
-	point2D operator/(const int& right)const {
-		return { x / right,y / right };
-	}
-	operator point2Dd() const { return point2Dd{(double)x,(double)y}; }
-};
-
-template<class T>
-struct point2Dt{
-	T x = 0;
-	T y = 0;
-
-	point2Dt(){}
-	template <class D>
-	point2Dt(const point2Dt<D>& r){
-		x = (T)r.x;
-		y = (T)r.y;
-	}
-	point2Dt(const point2D& r){
-		x = (T)r.x;
-		y = (T)r.y;
-	}
-	template <class D>
-	point2Dt operator+(const point2Dt<D>& right)const {
-		point2Dt<T> result;
-		result.x = x + right.x;
-		result.y = y + right.y;
-		return result;
-	}
-	template <class D>
-	point2Dt operator-(const point2Dt<D>& right)const {
-		return { x - right.x,y - right.y };
-	}
-	template <class D>
-	point2Dt operator*(const point2Dt<D>& right)const {
-		return { x * right.x,y * right.y };
-	}
-	template <class D>
-	point2Dt operator/(const point2Dt<D>& right)const {
-		return { x / right.x,y / right.y };
-	}
-	point2Dt operator*(const T& right)const {
-		return { x * right,y * right };
-	}
-	point2Dt operator/(const T& right)const {
-		return { x / right,y / right };
-	}
-	operator point2D() const { return point2D{(int)x,(int)y}; }
-};
-struct point2Du {
-	unsigned int x = 0;
-	unsigned int y = 0;
-};
-struct point2Ds {
-	short x = 0;
-	short y = 0;
-};
-struct point2Dus {
-	unsigned short x = 0;
-	unsigned short y = 0;
-};
-struct point3Di {
-	int x = 0;
-	int y = 0;
-	int z = 0;
-
-	bool operator==(const point3Di& right) const {
-		return x == right.x && y == right.y && z == right.z;
-	}
-	bool operator!=(const point3Di& right) const {
-		return !(*this == right);
-	}
-	point3Di operator*(const int& i) const {
-		return { x * i,y * i,z * i };
-	}
-	point3Di operator/(const int& i) const {
-		return { x / i,y / i,z / i };
-	}
-	point3Di operator+(const point3Di& b) const
-	{
-		return { x + b.x,y + b.y,z + b.z };
-	}
-	point3Di operator-(const point3Di& b) const
-	{
-		return { x - b.x,y - b.y,z - b.z };
-	}
-	bool operator<(const point3Di& b) const{
-		if(x < b.x)
-			return true;
-		else if(x>b.x)
-			return false;
-		else{
-			if(y < b.y)
-				return true;
-			else if(y>b.y)
-				return false;
-			else{
-				if(z < b.z)
-					return true;
-				else
-					return false;
-			}
-		}
-	}
-
-	double maxmag() const{
-		return maxdist({0,0,0});
-	}
-	double maxdist(const point3Di& r) const{
-		return std::max({std::abs(x-r.x),std::abs(y-r.y),std::abs(z-r.z)});
-	}
-	double magnitude() const{
-		return distance({0,0,0});
-	}
-	double distance(const point3Di& r) const{
-		return sqrt(pow(r.x - x, 2) + pow(r.y - y, 2) + pow(r.z - z, 2));
-	}
-};
-struct point3Dl {
-	long x = 0;
-	long y = 0;
-	long z = 0;
-};
-struct point3Dd {
-	double x = 0.0;
-	double y = 0.0;
-	double z = 0.0;
-	point3Dd(){};
-	point3Dd(double x, double y, double z) :x(x), y(y), z(z) {}
-	point3Dd(const point3Di& p) {
-		x = p.x;
-		y = p.y;
-		z = p.z;
-	}
-	point3Dd operator*(const double& i) const {
-		return { x * i,y * i,z * i };
-	}
-	point3Dd operator/(const double& i) const {
-		return { x / i,y / i,z / i };
-	}
-	point3Dd operator+(const point3Dd& r) const {
-		return { x+r.x,y+r.y,z+r.z };
-	}
-	point3Dd operator+=(const point3Dd& r) {
-		x+=r.x;
-		y+=r.y;
-		z+=r.z;
-		return *this;
-	}
-	point3Dd rotate2D(double r){
-		double newX = cos(r)*x - sin(r)*y;
-		double y = sin(r)*x + cos(r)*y;
-		x=newX;
-		return *this;
-	}
-	//x2=cosβx1−sinβy1
-	//y2=sinβx1+cosβy1
-
-	bool operator==(const point3Dd &p) const{
-		return x==p.x && y==p.y && z==p.z;
-	}
-	operator point3Di() const {
-		return { (int)floor(x),(int)floor(y),(int)floor(z) };
-	}
-};
 
 namespace HI2 {
 	// New and more polished version of HI, breaks compat
@@ -231,30 +21,9 @@ namespace HI2 {
 		V = 2,
 	};
 	
-	struct Color
-	{
-		unsigned char r = 0, g = 0, b = 0, a = 0;
-		Color() {}
-		Color(unsigned int b);
-		Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a) :r(r), g(g), b(b), a(a) {}
-
-		static Color Black;
-		static Color White;
-		static Color Red;
-		static Color Green;
-		static Color Blue;
-		static Color Yellow;
-		static Color Orange;
-		static Color Pink;
-		static Color LightestGrey;
-		static Color LightGrey;
-		static Color Grey;
-		static Color DarkGrey;
-		static Color DarkestGrey;
-		static Color Transparent;
-		static Color Brown;
-
-	};
+	// The colour type moved to platform/types.hpp; this alias keeps HI2 itself compiling
+	// until the rest of it goes (plans/UI_PLATFORM_PLAN.md).
+	using Color = ::Color;
 
 
 	class Audio {
@@ -332,13 +101,6 @@ namespace HI2 {
 		friend Texture getRenderTarget();
 		friend point2D getTextureSize(Texture& texture);
 		friend struct ::HI2PCTextureAccess;
-	};
-
-	enum class PLATFORM {
-		PLATFORM_PSVITA,
-		PLATFORM_NINTENDO3DS,
-		PLATFORM_PC,
-		PLATFORM_SWITCH,
 	};
 
 	enum BUTTON {
@@ -468,14 +230,9 @@ namespace HI2 {
 	// logger
 	void logWrite(std::string s);
 
-	// filesystem
-	std::filesystem::path getDataPath();
-	std::filesystem::path getSavesPath();
-
 	// HardwareInfo
 	int getScreenHeight();
 	int getScreenWidth();
-	constexpr PLATFORM getPlatform();
 
 	// System
 	void systemInit();

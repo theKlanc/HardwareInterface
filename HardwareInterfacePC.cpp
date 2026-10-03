@@ -37,21 +37,6 @@
 #define DEBUG_PRIORITY 0
 
 #define rcast reinterpret_cast
-HI2::Color HI2::Color::Black{ 0,0,0,255 };
-HI2::Color HI2::Color::White{ 255,255,255,255 };
-HI2::Color HI2::Color::Red{ 255,0,0,255 };
-HI2::Color HI2::Color::Green{ 0,255,0,255 };
-HI2::Color HI2::Color::Blue{ 0,0,255,255 };
-HI2::Color HI2::Color::Yellow{ 255,255,0,255 };
-HI2::Color HI2::Color::Orange{ 255,127,0,255 };
-HI2::Color HI2::Color::Pink{ 255,0,255,255 };
-HI2::Color HI2::Color::DarkestGrey{ 60,60,60,255 };
-HI2::Color HI2::Color::DarkGrey{ 100,100,100,255 };
-HI2::Color HI2::Color::Grey{ 150,150,150,255 };
-HI2::Color HI2::Color::LightGrey{ 200,200,200,255 };
-HI2::Color HI2::Color::LightestGrey{ 220,220,220,255 };
-HI2::Color HI2::Color::Transparent{ 255,255,255,0 };
-HI2::Color HI2::Color::Brown{ 111,92,66,255 };
 
 SDL_Window* window;
 SDL_GLContext context;
@@ -603,14 +588,6 @@ void HI2::setCursorPos(point2D pos)
 
 //~~CLASSES~~
 
-//COLOR
-HI2::Color::Color(unsigned int b){
-	a = (unsigned char)b;
-	b = (unsigned char)b >> 8;
-	g = (unsigned char)b >> 16;
-	r = (unsigned char)b >> 24;
-}
-
 //SOUND
 HI2::Audio::Audio() {}
 HI2::Audio::Audio(std::filesystem::path path, bool loop, float volume) {
@@ -688,14 +665,6 @@ HI2::Texture::Texture(point2D size)
 }
 
 // filesystem
-std::filesystem::path HI2::getDataPath() {
-	return std::filesystem::path("data");
-}
-
-std::filesystem::path HI2::getSavesPath() {
-	return std::filesystem::path("saves");
-}
-
 // HardwareInfo
 int HI2::getScreenHeight() {
 	return h;
@@ -704,9 +673,6 @@ int HI2::getScreenWidth() {
 	return w;
 }
 
-constexpr HI2::PLATFORM HI2::getPlatform() {
-	return HI2::PLATFORM::PLATFORM_PC;
-}
 
 void HI2::consoleInit() {}
 void HI2::consoleInit(std::filesystem::path path) {}
